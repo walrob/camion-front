@@ -1,0 +1,45 @@
+{
+  "name": "ecommerce-front",
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "cross-env NODE_ENV=production nuxt build",
+    "dev": "cross-env NODE_ENV=development nuxt dev",
+    "start:prod": "cross-env NODE_ENV=production PORT=3002 node .output/server/index.mjs",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@nuxt/eslint-config": "^1.4.1",
+    "@pinia/nuxt": "^0.11.1",
+    "@types/node": "^25.0.7",
+    "cross-env": "^10.0.0",
+    "nuxt": "3.16.2",
+    "pinia": "^3.0.3"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/preferences": "^7.0.2",
+    "@iconify/vue": "^4.1.1",
+    "@mdi/font": "7.4.47",
+    "@nuxt/eslint": "^1.4.1",
+    "@nuxt/vite-builder": "3.16.2",
+    "@vueuse/core": "^13.5.0",
+    "apexcharts": "^5.6.0",
+    "axios": "^1.10.0",
+    "dotenv": "^17.2.1",
+    "maska": "^3.1.1",
+    "sass": "1.70.0",
+    "vue": "3.5.13",
+    "vue-advanced-cropper": "^2.8.9",
+    "vue-tabler-icons": "2.21.0",
+    "vue3-apexcharts": "^1.10.0",
+    "vue3-perfect-scrollbar": "1.6.1",
+    "vuetify": "^3.11.4"
+  },
+  "overrides": {
+    "nth-check": "2.1.1"
+  }
+}

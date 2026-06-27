@@ -1,0 +1,108 @@
+// ============================================================
+// Ecommerce Pages - Global Styles
+// ============================================================
+
+// Shared background for ecommerce pages
+.ecommerce-page,
+.productos-page,
+.cart-page {
+    background-color: #f7fbff;
+    min-height: 100vh;
+}
+
+// Section title pattern (underline accent)
+.section-title-accent {
+    position: relative;
+
+    &::after {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(
+            90deg,
+            rgb(var(--v-theme-primary)),
+            rgb(var(--v-theme-secondary))
+        );
+        border-radius: 2px;
+        margin-top: 6px;
+    }
+}
+
+// Product grid global enhancements
+.grid-products {
+    // Animate grid items on first load
+    > * {
+        animation: fadeInUp 0.3s ease both;
+
+        @for $i from 1 through 12 {
+            &:nth-child(#{$i}) {
+                animation-delay: #{$i * 0.04}s;
+            }
+        }
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Better skeleton loaders for products
+.v-skeleton-loader {
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+// Vuetify carousel dots style for banners
+.v-carousel__controls {
+    bottom: 12px !important;
+
+    .v-btn {
+        width: 8px !important;
+        height: 8px !important;
+        min-width: 8px !important;
+        border-radius: 50% !important;
+        opacity: 0.55;
+        transition: opacity 0.2s ease, transform 0.2s ease !important;
+
+        &.v-btn--active {
+            opacity: 1;
+            transform: scale(1.4);
+        }
+    }
+}
+
+// Empty state style
+.v-empty-state {
+    .v-empty-state__headline {
+        font-weight: 700;
+        color: rgb(var(--v-theme-textPrimary));
+    }
+}
+
+// Scrollable chip rows (categories)
+.category-scroll-row {
+    overflow-x: auto;
+    overflow-y: visible;
+    flex-wrap: nowrap !important;
+    padding-bottom: 8px;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--v-theme-primary), 0.25) transparent;
+
+    &::-webkit-scrollbar {
+        height: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(var(--v-theme-primary), 0.25);
+        border-radius: 2px;
+    }
+}

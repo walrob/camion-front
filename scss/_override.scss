@@ -1,0 +1,150 @@
+html {
+    .bg-success {
+        color: $white !important;
+    }
+
+    .bg-primary {
+        color: $white !important;
+    }
+
+    .bg-secondary {
+        color: $white !important;
+    }
+
+    .bg-warning {
+        color: $white !important;
+    }
+
+    .bg-error {
+        color: $white !important;
+    }
+
+    .bg-accent {
+        color: $white !important;
+    }
+}
+
+// .border,
+// .v-divider {
+//     border-color: rgba(var(--v-border-color), 1) !important;
+// }
+
+.lh-0 {
+    line-height: 0;
+}
+
+.lh-normal {
+    line-height: normal;
+}
+
+/*
+  smAndDown: boolean // < 960px
+  smAndUp: boolean // > 600px
+  mdAndDown: boolean // < 1280px
+  mdAndUp: boolean // > 960px
+  lgAndDown: boolean // < 1919px
+  lgAndUp: boolean // > 1280px
+  xlAndDown: boolean // < 2559px
+  xlAndUp: boolean // > 1920px
+*/
+.max-inputs-width {
+    max-width: 280px;
+
+    @media (max-width: 600px) {
+        max-width: 100%;
+    }
+}
+
+.grid-details-table-expand {
+    display: grid;
+    gap: 12px;
+}
+
+.grid-details-table-expand ul {
+    margin-left: 18px;
+}
+
+.v-file-upload--density-compact {
+    .v-file-upload-title {
+        font-size: 1rem !important;
+    }
+}
+
+.v-alert {
+    align-content: center;
+    border-radius: 0;
+}
+
+.v-row--dense>.v-col,
+.v-row--dense>[class*=v-col-] {
+    padding: 4px 12px !important;
+}
+
+.grid-table-mobile {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: stretch;
+}
+
+.grid-products {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    align-items: stretch;
+}
+
+@media (max-width: 1280px) {
+    .grid-products {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 960px) {
+    .grid-products {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    }
+}
+
+@media (max-width: 660px) {
+    .grid-products {
+        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 400px) {
+    .grid-products {
+        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+// Ecommerce global utility classes
+.ecommerce-surface {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+// Smooth page transitions
+.nuxt-page-enter-active,
+.nuxt-page-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.nuxt-page-enter-from,
+.nuxt-page-leave-to {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+// Vuetify overrides for ecommerce
+.v-pagination .v-btn {
+    font-weight: 600;
+}
+
+.v-btn-toggle {
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
