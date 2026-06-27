@@ -1,6 +1,10 @@
 import {
   LayoutDashboardIcon,
+  TruckIcon,
+  UsersIcon,
+  IdIcon,
 } from 'vue-tabler-icons'
+import { Role } from '~/types/enums'
 
 export interface menu {
   header?: string
@@ -20,8 +24,8 @@ export interface menu {
   plan?: string
 }
 
-// Menú del backoffice de flota. Cada fase agrega sus ítems (flota, choferes,
-// viajes, incidentes, alertas, mantenimiento, documentos, RRHH, indicadores).
+// Menú del backoffice de flota. Cada fase agrega sus ítems (viajes, incidentes,
+// alertas, mantenimiento, documentos, RRHH, indicadores).
 const sidebarItem: menu[] = [
   { header: 'Principal' },
   {
@@ -29,6 +33,26 @@ const sidebarItem: menu[] = [
     icon: LayoutDashboardIcon,
     to: '/',
     external: false,
+  },
+
+  { header: 'Operación' },
+  {
+    title: 'Flota',
+    icon: TruckIcon,
+    to: '/admin/flota',
+    roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.MAINTENANCE],
+  },
+  {
+    title: 'Choferes',
+    icon: UsersIcon,
+    to: '/admin/choferes',
+    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR],
+  },
+  {
+    title: 'RRHH',
+    icon: IdIcon,
+    to: '/admin/rrhh',
+    roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER],
   },
 ]
 

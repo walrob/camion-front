@@ -1,0 +1,245 @@
+import { defineStore } from "pinia";
+import { useGeneralStore } from "@/stores/general";
+import type { Truck, Trailer, Fleet } from "~/types/fleet";
+
+const emptyPagination = () => ({
+  totalItems: 0,
+  itemCount: 0,
+  itemsPerPage: 10,
+  totalPages: 0,
+  currentPage: 1,
+});
+
+export const useFleetStore = defineStore("fleet", {
+  state: () => ({
+    trucks: [] as Truck[],
+    trailers: [] as Trailer[],
+    fleets: [] as Fleet[],
+    fleetOptions: [] as Fleet[],
+
+    loadingTrucks: false,
+    loadingTrailers: false,
+    loadingFleets: false,
+
+    searchTrucks: "",
+    searchTrailers: "",
+    searchFleets: "",
+
+    filterTruckStatus: "" as string,
+    filterTruckFleetId: "" as string,
+    filterTrailerStatus: "" as string,
+
+    paginationTrucks: emptyPagination(),
+    paginationTrailers: emptyPagination(),
+    paginationFleets: emptyPagination(),
+  }),
+
+  actions: {
+    // ───────── Camiones ─────────
+    async getTrucks() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loadingTrucks = true;
+      return await $api
+        .get("trucks/", {
+          params: {
+            page: this.paginationTrucks.currentPage,
+            limit: this.paginationTrucks.itemsPerPage,
+            search: this.searchTrucks || undefined,
+            status: this.filterTruckStatus || undefined,
+            fleetId: this.filterTruckFleetId || undefined,
+          },
+        })
+        .then((resp) => {
+          this.trucks = resp.data.items;
+          this.paginationTrucks = resp.data.meta;
+        })
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loadingTrucks = false));
+    },
+
+    async createTruck(payload: Partial<Truck>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .post("trucks/", payload)
+        .then(async () => {
+          general.setSuccessSnackbar("Camión creado");
+          await this.getTrucks();
+          return true;
+        })
+        .catch((e) => {
+          general.setErrorSnackbar(e);
+          return false;
+        });
+    },
+
+    async updateTruck(id: string, payload: Partial<Truck>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .patch(`trucks/${id}/`, payload)
+        .then(async () => {
+          general.setSuccessSnackbar("Camión actualizado");
+          await this.getTrucks();
+          return true;
+        })
+        .catch((e) => {
+          general.setErrorSnackbar(e);
+          return false;
+        });
+    },
+
+    async deleteTruck(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .delete(`trucks/${id}/`)
+        .then(async () => {
+          general.setSuccessSnackbar("Camión eliminado");
+          await this.getTrucks();
+        })
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+
+    // ───────── Acoplados ─────────
+    async getTrailers() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loadingTrailers = true;
+      return await $api
+        .get("trailers/", {
+          params: {
+            page: this.paginationTrailers.currentPage,
+            limit: this.paginationTrailers.itemsPerPage,
+            search: this.searchTrailers || undefined,
+            status: this.filterTrailerStatus || undefined,
+          },
+        })
+        .then((resp) => {
+          this.trailers = resp.data.items;
+          this.paginationTrailers = resp.data.meta;
+        })
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loadingTrailers = false));
+    },
+
+    async createTrailer(payload: Partial<Trailer>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .post("trailers/", payload)
+        .then(async () => {
+          general.setSuccessSnackbar("Acoplado creado");
+          await this.getTrailers();
+          return true;
+        })
+        .catch((e) => {
+          general.setErrorSnackbar(e);
+          return false;
+        });
+    },
+
+    async updateTrailer(id: string, payload: Partial<Trailer>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .patch(`trailers/${id}/`, payload)
+        .then(async () => {
+          general.setSuccessSnackbar("Acoplado actualizado");
+          await this.getTrailers();
+          return true;
+        })
+        .catch((e) => {
+          general.setErrorSnackbar(e);
+          return false;
+        });
+    },
+
+    async deleteTrailer(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .delete(`trailers/${id}/`)
+        .then(async () => {
+          general.setSuccessSnackbar("Acoplado eliminado");
+          await this.getTrailers();
+        })
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+
+    // ───────── Flotas ─────────
+    async getFleets() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loadingFleets = true;
+      return await $api
+        .get("fleets/", {
+          params: {
+            page: this.paginationFleets.currentPage,
+            limit: this.paginationFleets.itemsPerPage,
+            search: this.searchFleets || undefined,
+          },
+        })
+        .then((resp) => {
+          this.fleets = resp.data.items;
+          this.paginationFleets = resp.data.meta;
+        })
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loadingFleets = false));
+    },
+
+    async getFleetOptions() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .get("fleets/all/")
+        .then((resp) => (this.fleetOptions = resp.data))
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+
+    async createFleet(payload: Partial<Fleet>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .post("fleets/", payload)
+        .then(async () => {
+          general.setSuccessSnackbar("Flota creada");
+          await this.getFleets();
+          return true;
+        })
+        .catch((e) => {
+          general.setErrorSnackbar(e);
+          return false;
+        });
+    },
+
+    async updateFleet(id: string, payload: Partial<Fleet>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .patch(`fleets/${id}/`, payload)
+        .then(async () => {
+          general.setSuccessSnackbar("Flota actualizada");
+          await this.getFleets();
+          return true;
+        })
+        .catch((e) => {
+          general.setErrorSnackbar(e);
+          return false;
+        });
+    },
+
+    async deleteFleet(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .delete(`fleets/${id}/`)
+        .then(async () => {
+          general.setSuccessSnackbar("Flota eliminada");
+          await this.getFleets();
+        })
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+  },
+});
