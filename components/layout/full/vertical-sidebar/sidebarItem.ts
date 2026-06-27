@@ -3,6 +3,8 @@ import {
   TruckIcon,
   UsersIcon,
   IdIcon,
+  RouteIcon,
+  ReceiptIcon,
 } from 'vue-tabler-icons'
 import { Role } from '~/types/enums'
 
@@ -36,6 +38,18 @@ const sidebarItem: menu[] = [
   },
 
   { header: 'Operación' },
+  {
+    title: 'Viajes',
+    icon: RouteIcon,
+    to: '/admin/viajes',
+    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.AUDITOR],
+  },
+  {
+    title: 'Liquidaciones',
+    icon: ReceiptIcon,
+    to: '/admin/liquidaciones',
+    roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
+  },
   {
     title: 'Flota',
     icon: TruckIcon,
