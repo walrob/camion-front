@@ -84,7 +84,17 @@ onMounted(reload);
           <span v-if="trip.cargoDescription"> · {{ trip.cargoDescription }}</span>
         </div>
 
-        <div class="d-flex ga-2 mt-3">
+        <div class="d-flex ga-2 mt-3 flex-wrap">
+          <v-btn
+            v-if="trip.status === 'assigned'"
+            color="indigo"
+            size="small"
+            variant="tonal"
+            prepend-icon="mdi-clipboard-check-outline"
+            :to="`/chofer/viaje/${id}/checklist`"
+          >
+            Checklist
+          </v-btn>
           <v-btn
             v-if="trip.status === 'assigned'"
             color="primary"
