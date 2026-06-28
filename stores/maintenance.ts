@@ -1,0 +1,104 @@
+import { defineStore } from "pinia";
+import { useGeneralStore } from "@/stores/general";
+import type { Truck } from "~/types/fleet";
+
+export const useMaintenanceStore = defineStore("maintenance", {
+  state: () => ({
+    plans: [] as any[],
+    upcoming: [] as any[],
+    orders: [] as any[],
+    truckOptions: [] as Truck[],
+    selectedTruckId: "" as string,
+    loading: false,
+  }),
+
+  actions: {
+    async getPlans() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loading = true;
+      return await $api
+        .get("maintenance/plans/")
+        .then((resp) => (this.plans = resp.data))
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loading = false));
+    },
+
+    async getUpcoming() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .get("maintenance/plans/upcoming/")
+        .then((resp) => (this.upcoming = resp.data))
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+
+    async getOrders(truckId: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loading = true;
+      return await $api
+        .get(`maintenance/trucks/${truckId}/orders/`)
+        .then((resp) => (this.orders = resp.data))
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loading = false));
+    },
+
+    async getTruckOptions() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .get("trucks/", { params: { limit: 100 } })
+        .then((resp) => (this.truckOptions = resp.data.items))
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+
+    async createPlan(payload: any) {
+      return this.mutate("post", "maintenance/plans/", payload, "Plan creado", () =>
+        this.getPlans(),
+      );
+    },
+    async updatePlan(id: string, payload: any) {
+      return this.mutate("patch", `maintenance/plans/${id}/`, payload, "Plan actualizado", () =>
+        this.getPlans(),
+      );
+    },
+    async deletePlan(id: string) {
+      return this.mutate("delete", `maintenance/plans/${id}/`, null, "Plan eliminado", () =>
+        this.getPlans(),
+      );
+    },
+
+    async createOrder(payload: any) {
+      return this.mutate("post", "maintenance/orders/", payload, "OT creada", () =>
+        this.getOrders(payload.truckId),
+      );
+    },
+    async updateOrder(id: string, truckId: string, payload: any) {
+      return this.mutate("patch", `maintenance/orders/${id}/`, payload, "OT actualizada", () =>
+        this.getOrders(truckId),
+      );
+    },
+
+    async mutate(
+      method: "post" | "patch" | "delete",
+      url: string,
+      payload: any,
+      msg: string,
+      refresh: () => Promise<any>,
+    ): Promise<boolean> {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        if (method === "delete") await $api.delete(url);
+        else await ($api as any)[method](url, payload);
+        general.setSuccessSnackbar(msg);
+        await refresh();
+        return true;
+      } catch (e) {
+        general.setErrorSnackbar(e);
+        return false;
+      }
+    },
+  },
+});
