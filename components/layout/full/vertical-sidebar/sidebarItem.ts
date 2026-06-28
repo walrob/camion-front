@@ -9,6 +9,7 @@ import {
   BellIcon,
   ToolIcon,
   FileTextIcon,
+  ChartBarIcon,
 } from 'vue-tabler-icons'
 import { Role } from '~/types/enums'
 
@@ -95,6 +96,12 @@ const sidebarItem: menu[] = [
     icon: IdIcon,
     to: '/admin/rrhh',
     roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER],
+  },
+  {
+    title: 'Indicadores',
+    icon: ChartBarIcon,
+    to: '/admin/indicadores',
+    roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
   },
 ]
 
