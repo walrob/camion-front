@@ -10,6 +10,7 @@ import {
   ToolIcon,
   FileTextIcon,
   ChartBarIcon,
+  MessageIcon,
 } from 'vue-tabler-icons'
 import { Role } from '~/types/enums'
 
@@ -60,6 +61,12 @@ const sidebarItem: menu[] = [
     icon: BellIcon,
     to: '/admin/alertas',
     roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.HR],
+  },
+  {
+    title: 'Mensajes',
+    icon: MessageIcon,
+    to: '/admin/mensajes',
+    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER],
   },
   {
     title: 'Liquidaciones',
