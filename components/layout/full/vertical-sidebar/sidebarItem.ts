@@ -5,6 +5,7 @@ import {
   IdIcon,
   RouteIcon,
   ReceiptIcon,
+  AlertTriangleIcon,
 } from 'vue-tabler-icons'
 import { Role } from '~/types/enums'
 
@@ -43,6 +44,12 @@ const sidebarItem: menu[] = [
     icon: RouteIcon,
     to: '/admin/viajes',
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.AUDITOR],
+  },
+  {
+    title: 'Incidentes',
+    icon: AlertTriangleIcon,
+    to: '/admin/incidentes',
+    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.MAINTENANCE],
   },
   {
     title: 'Liquidaciones',

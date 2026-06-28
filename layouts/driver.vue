@@ -17,7 +17,7 @@ const navItems = [
     value: "incidentes",
     title: "Incidentes",
     icon: "mdi-alert-outline",
-    to: "/chofer",
+    to: "/chofer/incidentes",
   },
   {
     value: "documentos",

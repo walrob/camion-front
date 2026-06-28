@@ -32,6 +32,7 @@
     "dotenv": "^17.2.1",
     "maska": "^3.1.1",
     "sass": "1.70.0",
+    "socket.io-client": "^4.8.3",
     "vue": "3.5.13",
     "vue-advanced-cropper": "^2.8.9",
     "vue-tabler-icons": "2.21.0",
