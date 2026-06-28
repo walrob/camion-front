@@ -23,7 +23,7 @@ const navItems = [
     value: "documentos",
     title: "Docs",
     icon: "mdi-file-document-outline",
-    to: "/chofer",
+    to: "/chofer/documentos",
   },
   {
     value: "mensajes",

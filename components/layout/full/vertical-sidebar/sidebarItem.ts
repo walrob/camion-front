@@ -8,6 +8,7 @@ import {
   AlertTriangleIcon,
   BellIcon,
   ToolIcon,
+  FileTextIcon,
 } from 'vue-tabler-icons'
 import { Role } from '~/types/enums'
 
@@ -82,6 +83,12 @@ const sidebarItem: menu[] = [
     icon: UsersIcon,
     to: '/admin/choferes',
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR],
+  },
+  {
+    title: 'Documentos',
+    icon: FileTextIcon,
+    to: '/admin/documentos',
+    roles: [Role.ADMIN, Role.MAINTENANCE, Role.DISPATCHER, Role.MANAGER],
   },
   {
     title: 'RRHH',
