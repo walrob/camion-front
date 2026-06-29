@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useDocumentStore } from "~/stores/document";
@@ -68,7 +69,7 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Centro Documental</h1>
+    <PageHeader title="Centro Documental" subtitle="Documentación de unidades, choferes y empresa" />
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="manager">Gestor</v-tab>
@@ -133,9 +134,9 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon="mdi-file-eye" size="small" variant="text" @click="store.openFile(item.id)" />
+            <v-btn icon="mdi-file-eye" aria-label="Ver archivo" size="small" variant="text" @click="store.openFile(item.id)" />
             <v-btn
-              icon="mdi-delete"
+              icon="mdi-delete" aria-label="Eliminar"
               size="small"
               variant="text"
               color="error"

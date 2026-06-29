@@ -19,16 +19,37 @@ const theme = useTheme();
 const { $api } = useNuxtApp();
 
 import { useAuthStore } from "~/stores/auth";
+import { Role } from "~/types/enums";
+import CommandPalette from "~/components/shared/CommandPalette.vue";
 const authStore = useAuthStore();
 const user = useAuth();
 
+// Accesos rápidos de alta desde el navbar (filtrados por rol). Llevan a la
+// sección, donde la acción primaria queda visible en el PageHeader.
+const quickCreate = [
+  { title: "Nuevo viaje", to: "/admin/viajes", icon: "mdi-map-marker-path", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER] },
+  { title: "Reportar incidente", to: "/admin/incidentes", icon: "mdi-alert-outline", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.MAINTENANCE] },
+  { title: "Nuevo camión", to: "/admin/flota", icon: "mdi-truck-outline", roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.MAINTENANCE] },
+  { title: "Nuevo chofer", to: "/admin/choferes", icon: "mdi-account-plus-outline", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR] },
+  { title: "Nuevo empleado", to: "/admin/rrhh", icon: "mdi-badge-account-outline", roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER] },
+  { title: "Generar liquidación", to: "/admin/liquidaciones", icon: "mdi-file-document-plus-outline", roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR] },
+];
+const quickCreateItems = computed(() =>
+  quickCreate.filter((x) => user?.role && x.roles.includes(user.role as Role)),
+);
+
+// El centro de alertas solo para roles operativos/gerenciales con acceso.
+const canSeeAlerts = computed(
+  () =>
+    !!user?.role &&
+    [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.HR].includes(user.role as Role),
+);
+
 const toggleTheme = async () => {
-  const newTheme = theme.global.current.value.dark
-    ? "PurpleTheme"
-    : "DarkTheme";
+  const newTheme = theme.global.current.value.dark ? "FleetLight" : "FleetDark";
   theme.change(newTheme);
   try {
-    const isDark = theme.global.name.value === "DarkTheme";
+    const isDark = theme.global.name.value === "FleetDark";
     await $api.post("auth/change-dark", {
       dark: isDark,
     });
@@ -108,22 +129,51 @@ const props = defineProps({
     :style="{ top: topMargin }"
   >
     <div class="d-flex align-center justify-space-between w-100">
-      <div>
+      <div class="d-flex align-center">
         <v-btn
           class="hidden-lg-and-up ms-md-3 ms-sm-5 ms-3 text-muted"
           icon
           variant="flat"
           size="small"
+          aria-label="Abrir menú"
           @click="sDrawer = !sDrawer"
         >
           <Menu2Icon size="20" stroke-width="1.5" />
         </v-btn>
+
+        <v-menu v-if="quickCreateItems.length">
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              color="primary"
+              variant="flat"
+              prepend-icon="mdi-plus"
+              append-icon="mdi-menu-down"
+              class="ms-3 ms-lg-4"
+            >
+              Crear
+            </v-btn>
+          </template>
+          <v-list density="compact" nav min-width="220">
+            <v-list-item
+              v-for="qc in quickCreateItems"
+              :key="qc.to"
+              :to="qc.to"
+              :prepend-icon="qc.icon"
+            >
+              <v-list-item-title>{{ qc.title }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
+        <CommandPalette />
       </div>
-      <div>
-        <!-- <v-btn
+      <div class="d-flex align-center">
+        <v-btn
           icon
           variant="text"
           class="custom-hover-primary mx-2 text-muted"
+          aria-label="Cambiar tema"
           @click="toggleTheme"
         >
           <SunIcon
@@ -132,9 +182,9 @@ const props = defineProps({
             size="22"
           />
           <MoonIcon v-else stroke-width="1.5" size="22" />
-        </v-btn> -->
-        <!-- Notification -->
-        <!-- <LayoutFullVerticalHeaderNotificationDD /> -->
+        </v-btn>
+        <!-- Centro de alertas en tiempo real -->
+        <LayoutFullVerticalHeaderNotificationDD v-if="canSeeAlerts" />
         <!-- User Profile -->
         <LayoutFullVerticalHeaderProfileDD />
       </div>

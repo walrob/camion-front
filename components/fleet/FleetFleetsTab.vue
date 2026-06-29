@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useFleetStore } from "~/stores/fleet";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import FleetFormDialog from "~/components/fleet/FleetFormDialog.vue";
@@ -8,7 +9,8 @@ import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Fleet } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
-const { fleets, loadingFleets, paginationFleets } = storeToRefs(fleetStore);
+const onSearch = useDebounceFn(() => fleetStore.getFleets(), 350);
+const { fleets, loadingFleets, errorFleets, paginationFleets } = storeToRefs(fleetStore);
 
 const dialog = ref(false);
 const selected = ref<Fleet | null>(null);
@@ -58,7 +60,7 @@ onMounted(() => fleetStore.getFleets());
         density="compact"
         hide-details
         style="max-width: 260px"
-        @update:model-value="fleetStore.getFleets()"
+        @update:model-value="onSearch"
       />
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">
@@ -70,7 +72,9 @@ onMounted(() => fleetStore.getFleets());
       :headers="headers"
       :items="fleets"
       :loading="loadingFleets"
+      :error="errorFleets"
       all-items
+      @retry="fleetStore.getFleets()"
     >
       <template #item.isActive="{ item }">
         <v-chip :color="item.isActive ? 'success' : 'grey'" size="small" label>
@@ -78,9 +82,9 @@ onMounted(() => fleetStore.getFleets());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEdit(item)" />
+        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete"
+          icon="mdi-delete" aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

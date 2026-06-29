@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useFleetStore } from "~/stores/fleet";
 import { truckStatusOptions, useFleetStatus } from "~/composables/useFleetStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -9,9 +10,12 @@ import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Truck } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
-const { trucks, loadingTrucks, paginationTrucks, fleetOptions } =
+const { trucks, loadingTrucks, errorTrucks, paginationTrucks, fleetOptions } =
   storeToRefs(fleetStore);
 const { truckStatus } = useFleetStatus();
+
+// Búsqueda con debounce: evita pegarle a la API en cada tecla.
+const onSearch = useDebounceFn(() => fleetStore.getTrucks(), 350);
 
 const dialog = ref(false);
 const selected = ref<Truck | null>(null);
@@ -67,7 +71,7 @@ onMounted(() => {
         density="compact"
         hide-details
         style="max-width: 260px"
-        @update:model-value="fleetStore.getTrucks()"
+        @update:model-value="onSearch"
       />
       <v-select
         v-model="fleetStore.filterTruckStatus"
@@ -105,7 +109,9 @@ onMounted(() => {
       :headers="headers"
       :items="trucks"
       :loading="loadingTrucks"
+      :error="errorTrucks"
       all-items
+      @retry="fleetStore.getTrucks()"
     >
       <template #item.status="{ item }">
         <v-chip :color="truckStatus(item.status).color" size="small" label>
@@ -113,9 +119,9 @@ onMounted(() => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEdit(item)" />
+        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete"
+          icon="mdi-delete" aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

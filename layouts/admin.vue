@@ -16,7 +16,7 @@ const { user } = storeToRefs(authStore);
 import { useTheme } from "vuetify";
 const theme = useTheme();
 const isDark = user.value?.isTemplateDark;
-const newTheme = isDark ? "DarkTheme" : "PurpleTheme";
+const newTheme = isDark ? "FleetDark" : "FleetLight";
 theme.change(newTheme);
 </script>
 

@@ -75,7 +75,7 @@ const onPhoto = async (e: Event) => {
         />
         <v-btn
           v-if="!disabled"
-          icon="mdi-camera"
+          icon="mdi-camera" aria-label="Tomar foto"
           variant="tonal"
           size="small"
           @click="($refs.fileInput as HTMLInputElement).click()"

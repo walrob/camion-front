@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { onMounted, computed, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
-import VueApexCharts from "vue3-apexcharts";
+import { useTheme } from "vuetify";
+// ApexCharts diferido: se carga en un chunk aparte solo al renderizar el gráfico.
+const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
+import PageHeader from "~/components/shared/PageHeader.vue";
+import KpiCard from "~/components/dashboard/KpiCard.vue";
+import EmptyState from "~/components/shared/EmptyState.vue";
 import { useDashboardStore } from "~/stores/dashboard";
 import { truckStatusOptions } from "~/composables/useFleetStatus";
 import { incidentSeverityOptions } from "~/composables/useIncidentStatus";
@@ -14,18 +19,17 @@ useHead({ title: "Dashboard" });
 const dashboardStore = useDashboardStore();
 const { overview, loading } = storeToRefs(dashboardStore);
 
-const TRUCK_HEX: Record<string, string> = {
-  available: "#4CAF50",
-  on_trip: "#1E88E5",
-  stopped: "#FB8C00",
-  workshop: "#00ACC1",
-  out_of_service: "#E53935",
-};
-const ALERT_HEX: Record<string, string> = {
-  red: "#F44336",
-  orange: "#FF9800",
-  yellow: "#FFC107",
-  green: "#4CAF50",
+// Colores de gráficos derivados del tema (unifica con la identidad de marca).
+const theme = useTheme();
+const COLOR_FALLBACK: Record<string, string> = { grey: "#94A3B8", amber: "#F59E0B" };
+const hex = (name: string) =>
+  (theme.current.value.colors as Record<string, string>)[name] || COLOR_FALLBACK[name] || name;
+
+const donutBase = {
+  legend: { position: "bottom" as const },
+  chart: { type: "donut" as const, fontFamily: "inherit" },
+  stroke: { width: 0 },
+  dataLabels: { enabled: false },
 };
 
 const totalTrucks = computed(() =>
@@ -37,33 +41,58 @@ const truckChart = computed(() => {
   const present = truckStatusOptions.filter((o) => (data[o.value] ?? 0) > 0);
   return {
     series: present.map((o) => data[o.value]),
-    options: {
-      labels: present.map((o) => o.label),
-      colors: present.map((o) => TRUCK_HEX[o.value]),
-      legend: { position: "bottom" },
-      chart: { type: "donut" },
-    },
+    options: { ...donutBase, labels: present.map((o) => o.label), colors: present.map((o) => hex(o.color)) },
   };
 });
 
+const ALERT_LEVELS = [
+  { key: "red", label: "Crítica", color: "error" },
+  { key: "orange", label: "Alta", color: "warning" },
+  { key: "yellow", label: "Media", color: "amber" },
+  { key: "green", label: "Aviso", color: "success" },
+];
+
 const alertChart = computed(() => {
   const data = overview.value?.alerts?.byLevel ?? {};
-  const levels = ["red", "orange", "yellow", "green"].filter((l) => (data[l] ?? 0) > 0);
+  const present = ALERT_LEVELS.filter((l) => (data[l.key] ?? 0) > 0);
   return {
-    series: levels.map((l) => data[l]),
-    options: {
-      labels: levels.map((l) => l.toUpperCase()),
-      colors: levels.map((l) => ALERT_HEX[l]),
-      legend: { position: "bottom" },
-      chart: { type: "donut" },
-    },
+    series: present.map((l) => data[l.key]),
+    options: { ...donutBase, labels: present.map((l) => l.label), colors: present.map((l) => hex(l.color)) },
   };
 });
 
 const money = (n?: number) => `$ ${Number(n ?? 0).toLocaleString("es-AR")}`;
-
 const sevCount = (v: string) => overview.value?.incidents?.bySeverity?.[v] ?? 0;
 
+// KPIs con drill-down a la sección correspondiente.
+const kpis = computed(() => {
+  const o = overview.value;
+  if (!o) return [];
+  return [
+    { label: "Camiones", value: totalTrucks.value, icon: "mdi-truck-outline", tone: "primary", to: "/admin/flota" },
+    { label: "Incidentes abiertos", value: o.incidents.open, icon: "mdi-alert-circle-outline", tone: "error", to: "/admin/incidentes" },
+    { label: "Alertas activas", value: o.alerts.active, icon: "mdi-bell-ring-outline", tone: "warning", to: "/admin/alertas" },
+    { label: "Viajes demorados", value: o.delayedTrips, icon: "mdi-clock-alert-outline", tone: "info", to: "/admin/viajes" },
+    { label: "Gasto del día", value: money(o.todayExpenses), icon: "mdi-cash-multiple", tone: "success", to: "/admin/liquidaciones" },
+    { label: "Mant. próximos", value: o.upcomingMaintenance, icon: "mdi-wrench-clock", tone: "secondary", to: "/admin/mantenimiento" },
+    { label: "Choferes con novedades", value: o.driversWithNews, icon: "mdi-account-alert-outline", tone: "accent", to: "/admin/choferes" },
+  ];
+});
+
+// Feed accionable "Requiere atención": solo lo que tiene pendientes.
+const attention = computed(() => {
+  const o = overview.value;
+  if (!o) return [];
+  return [
+    { label: "incidentes abiertos", count: o.incidents.open, icon: "mdi-alert-circle", tone: "error", to: "/admin/incidentes" },
+    { label: "alertas activas sin resolver", count: o.alerts.active, icon: "mdi-bell-ring", tone: "warning", to: "/admin/alertas" },
+    { label: "mantenimientos próximos", count: o.upcomingMaintenance, icon: "mdi-wrench", tone: "info", to: "/admin/mantenimiento" },
+    { label: "viajes demorados", count: o.delayedTrips, icon: "mdi-clock-alert", tone: "warning", to: "/admin/viajes" },
+    { label: "choferes con novedades", count: o.driversWithNews, icon: "mdi-account-alert", tone: "accent", to: "/admin/choferes" },
+  ].filter((i) => i.count > 0);
+});
+
+// Refresco en vivo del panel ante nuevas alertas/incidentes.
 const alertSocket = useAlertSocket(() => dashboardStore.getOverview());
 const incidentSocket = useIncidentSocket(() => dashboardStore.getOverview());
 
@@ -80,7 +109,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Panel gerencial</h1>
+    <PageHeader title="Panel gerencial" subtitle="Estado operativo de la flota en tiempo real" />
 
     <div v-if="loading && !overview" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
@@ -89,54 +118,48 @@ onBeforeUnmount(() => {
     <template v-else-if="overview">
       <!-- KPIs -->
       <v-row dense class="mb-2">
-        <v-col cols="6" md="3">
-          <v-card color="primary" variant="tonal" class="pa-3">
-            <div class="text-caption">Camiones</div>
-            <div class="text-h5 font-weight-bold">{{ totalTrucks }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="6" md="3">
-          <v-card color="error" variant="tonal" class="pa-3">
-            <div class="text-caption">Incidentes abiertos</div>
-            <div class="text-h5 font-weight-bold">{{ overview.incidents.open }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="6" md="3">
-          <v-card color="success" variant="tonal" class="pa-3">
-            <div class="text-caption">Gastos del día</div>
-            <div class="text-h6 font-weight-bold">{{ money(overview.todayExpenses) }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="6" md="3">
-          <v-card color="warning" variant="tonal" class="pa-3">
-            <div class="text-caption">Alertas activas</div>
-            <div class="text-h5 font-weight-bold">{{ overview.alerts.active }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="6" md="3">
-          <v-card color="info" variant="tonal" class="pa-3">
-            <div class="text-caption">Viajes demorados</div>
-            <div class="text-h5 font-weight-bold">{{ overview.delayedTrips }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="6" md="3">
-          <v-card color="secondary" variant="tonal" class="pa-3">
-            <div class="text-caption">Mant. próximos</div>
-            <div class="text-h5 font-weight-bold">{{ overview.upcomingMaintenance }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="6" md="3">
-          <v-card variant="tonal" class="pa-3">
-            <div class="text-caption">Choferes con novedades</div>
-            <div class="text-h5 font-weight-bold">{{ overview.driversWithNews }}</div>
-          </v-card>
+        <v-col v-for="k in kpis" :key="k.label" cols="6" md="3">
+          <KpiCard
+            :label="k.label"
+            :value="k.value"
+            :icon="k.icon"
+            :tone="k.tone"
+            :to="k.to"
+          />
         </v-col>
       </v-row>
 
-      <!-- Gráficos -->
       <v-row dense>
+        <!-- Requiere atención -->
         <v-col cols="12" md="4">
-          <v-card variant="outlined" class="pa-3">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
+            <div class="text-subtitle-2 font-weight-bold mb-3">Requiere atención</div>
+            <v-list v-if="attention.length" density="compact" class="py-0">
+              <v-list-item v-for="a in attention" :key="a.label" :to="a.to" class="px-0">
+                <template #prepend>
+                  <v-avatar :color="a.tone" variant="tonal" size="34" rounded="lg" class="mr-3">
+                    <v-icon :color="a.tone" size="18">{{ a.icon }}</v-icon>
+                  </v-avatar>
+                </template>
+                <v-list-item-title class="text-body-2">
+                  <span class="font-weight-bold">{{ a.count }}</span> {{ a.label }}
+                </v-list-item-title>
+                <template #append>
+                  <v-icon size="16" color="medium-emphasis">mdi-chevron-right</v-icon>
+                </template>
+              </v-list-item>
+            </v-list>
+            <EmptyState
+              v-else
+              icon="mdi-check-circle-outline"
+              text="Todo en orden, sin pendientes."
+            />
+          </v-card>
+        </v-col>
+
+        <!-- Flota por estado -->
+        <v-col cols="12" md="4">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
             <div class="text-subtitle-2 font-weight-bold mb-2">Flota por estado</div>
             <ClientOnly>
               <VueApexCharts
@@ -151,8 +174,9 @@ onBeforeUnmount(() => {
           </v-card>
         </v-col>
 
+        <!-- Alertas por nivel -->
         <v-col cols="12" md="4">
-          <v-card variant="outlined" class="pa-3">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
             <div class="text-subtitle-2 font-weight-bold mb-2">Alertas por nivel</div>
             <ClientOnly>
               <VueApexCharts
@@ -166,9 +190,12 @@ onBeforeUnmount(() => {
             </ClientOnly>
           </v-card>
         </v-col>
+      </v-row>
 
+      <!-- Incidentes por severidad -->
+      <v-row dense>
         <v-col cols="12" md="4">
-          <v-card variant="outlined" class="pa-3">
+          <v-card border flat rounded="lg" class="pa-4">
             <div class="text-subtitle-2 font-weight-bold mb-2">Incidentes por severidad</div>
             <div class="d-flex flex-column ga-2 mt-2">
               <div

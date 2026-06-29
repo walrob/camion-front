@@ -5,10 +5,9 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import PerfectScrollbar from "vue3-perfect-scrollbar";
 import VueTablerIcons from "vue-tabler-icons";
-import VueApexCharts from "vue3-apexcharts";
 import "@/scss/style.scss";
-import { PurpleTheme } from "@/theme/LightTheme";
-import { DarkTheme } from "@/theme/DarkTheme";
+import { FleetLight } from "@/theme/LightTheme";
+import { FleetDark } from "@/theme/DarkTheme";
 import { VFileUpload } from "vuetify/labs/VFileUpload";
 import { VColorInput } from "vuetify/labs/VColorInput";
 
@@ -26,15 +25,54 @@ export default defineNuxtPlugin((nuxtApp) => {
       messages: { es },
     },
     theme: {
-      defaultTheme: "PurpleTheme",
+      defaultTheme: "FleetLight",
       themes: {
-        PurpleTheme,
-        DarkTheme,
+        FleetLight,
+        FleetDark,
       },
+    },
+    // Defaults globales: consistencia visual en toda la app sin repetir props.
+    // Cualquier prop explícita en un componente sobreescribe estos valores.
+    defaults: {
+      VBtn: { rounded: "lg" },
+      VCard: { rounded: "lg" },
+      VTextField: {
+        variant: "outlined",
+        density: "comfortable",
+        color: "primary",
+        hideDetails: "auto",
+      },
+      VTextarea: {
+        variant: "outlined",
+        density: "comfortable",
+        color: "primary",
+        hideDetails: "auto",
+      },
+      VSelect: {
+        variant: "outlined",
+        density: "comfortable",
+        color: "primary",
+        hideDetails: "auto",
+      },
+      VAutocomplete: {
+        variant: "outlined",
+        density: "comfortable",
+        color: "primary",
+        hideDetails: "auto",
+      },
+      VCombobox: {
+        variant: "outlined",
+        density: "comfortable",
+        color: "primary",
+        hideDetails: "auto",
+      },
+      VChip: { rounded: "md" },
+      VDataTable: { density: "comfortable" },
     },
   });
   nuxtApp.vueApp.use(vuetify);
   nuxtApp.vueApp.use(PerfectScrollbar);
   nuxtApp.vueApp.use(VueTablerIcons);
-  nuxtApp.vueApp.use(VueApexCharts);
+  // ApexCharts NO se registra global: se importa localmente solo en las páginas
+  // que lo usan (dashboard, indicadores) para no cargar la librería en todo el bundle.
 });

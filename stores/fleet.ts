@@ -21,6 +21,10 @@ export const useFleetStore = defineStore("fleet", {
     loadingTrailers: false,
     loadingFleets: false,
 
+    errorTrucks: false,
+    errorTrailers: false,
+    errorFleets: false,
+
     searchTrucks: "",
     searchTrailers: "",
     searchFleets: "",
@@ -40,6 +44,7 @@ export const useFleetStore = defineStore("fleet", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loadingTrucks = true;
+      this.errorTrucks = false;
       return await $api
         .get("trucks/", {
           params: {
@@ -54,40 +59,30 @@ export const useFleetStore = defineStore("fleet", {
           this.trucks = resp.data.items;
           this.paginationTrucks = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.errorTrucks = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loadingTrucks = false));
     },
 
+    // Propagan el error (no lo tragan) para que el formulario pueda mapear
+    // validaciones 422 a los campos vía useFormErrors. El snackbar lo muestra
+    // el form en su catch.
     async createTruck(payload: Partial<Truck>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .post("trucks/", payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Camión creado");
-          await this.getTrucks();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.post("trucks/", payload);
+      general.setSuccessSnackbar("Camión creado");
+      await this.getTrucks();
     },
 
     async updateTruck(id: string, payload: Partial<Truck>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .patch(`trucks/${id}/`, payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Camión actualizado");
-          await this.getTrucks();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.patch(`trucks/${id}/`, payload);
+      general.setSuccessSnackbar("Camión actualizado");
+      await this.getTrucks();
     },
 
     async deleteTruck(id: string) {
@@ -107,6 +102,7 @@ export const useFleetStore = defineStore("fleet", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loadingTrailers = true;
+      this.errorTrailers = false;
       return await $api
         .get("trailers/", {
           params: {
@@ -120,7 +116,10 @@ export const useFleetStore = defineStore("fleet", {
           this.trailers = resp.data.items;
           this.paginationTrailers = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.errorTrailers = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loadingTrailers = false));
     },
 
@@ -173,6 +172,7 @@ export const useFleetStore = defineStore("fleet", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loadingFleets = true;
+      this.errorFleets = false;
       return await $api
         .get("fleets/", {
           params: {
@@ -185,7 +185,10 @@ export const useFleetStore = defineStore("fleet", {
           this.fleets = resp.data.items;
           this.paginationFleets = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.errorFleets = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loadingFleets = false));
     },
 

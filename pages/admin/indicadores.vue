@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
-import VueApexCharts from "vue3-apexcharts";
 import { useIndicatorStore } from "~/stores/indicator";
+
+// ApexCharts diferido: se carga en un chunk aparte solo al renderizar el gráfico.
+const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 definePageMeta({
   layout: "admin",
@@ -64,13 +67,13 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h5 font-weight-bold">Indicadores</h1>
-      <v-spacer />
-      <v-btn color="success" prepend-icon="mdi-file-excel" @click="store.exportXlsx()">
-        Exportar Excel
-      </v-btn>
-    </div>
+    <PageHeader title="Indicadores" subtitle="KPIs operativos con filtros y exportación">
+      <template #actions>
+        <v-btn color="success" prepend-icon="mdi-file-excel" @click="store.exportXlsx()">
+          Exportar Excel
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <!-- Filtros -->
     <v-card variant="outlined" class="pa-3 mb-4">

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useHrStore } from "~/stores/hr";
 import {
   positionOptions,
@@ -23,6 +25,7 @@ const router = useRouter();
 const hrStore = useHrStore();
 const { employees, loading, pagination } = storeToRefs(hrStore);
 const { position, employmentStatus } = useHrStatus();
+const onSearch = useDebounceFn(() => hrStore.getEmployees(), 350);
 
 const dialog = ref(false);
 const selected = ref<Employee | null>(null);
@@ -62,7 +65,11 @@ onMounted(() => hrStore.getEmployees());
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Recursos Humanos</h1>
+    <PageHeader title="Recursos Humanos" subtitle="Legajos, permisos y vencimientos del personal">
+      <template #actions>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo empleado</v-btn>
+      </template>
+    </PageHeader>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-3">
       <VoiceTextField
@@ -72,7 +79,7 @@ onMounted(() => hrStore.getEmployees());
         density="compact"
         hide-details
         style="max-width: 260px"
-        @update:model-value="hrStore.getEmployees()"
+        @update:model-value="onSearch"
       />
       <v-select
         v-model="hrStore.filterPosition"
@@ -100,10 +107,6 @@ onMounted(() => hrStore.getEmployees());
         style="max-width: 200px"
         @update:model-value="hrStore.getEmployees()"
       />
-      <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">
-        Nuevo empleado
-      </v-btn>
     </div>
 
     <ResponsiveTable :headers="headers" :items="employees" :loading="loading" all-items>
@@ -118,9 +121,9 @@ onMounted(() => hrStore.getEmployees());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-eye" size="small" variant="text" @click="goDetail(item)" />
+        <v-btn icon="mdi-eye" aria-label="Ver" size="small" variant="text" @click="goDetail(item)" />
         <v-btn
-          icon="mdi-delete"
+          icon="mdi-delete" aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

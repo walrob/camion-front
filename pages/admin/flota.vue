@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 import FleetTrucksTab from "~/components/fleet/FleetTrucksTab.vue";
 import FleetTrailersTab from "~/components/fleet/FleetTrailersTab.vue";
 import FleetFleetsTab from "~/components/fleet/FleetFleetsTab.vue";
@@ -16,7 +17,7 @@ const tab = ref("trucks");
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Flota</h1>
+    <PageHeader title="Flota" subtitle="Camiones, acoplados y flotas" />
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="trucks">Camiones</v-tab>

@@ -53,7 +53,7 @@ onMounted(async () => {
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" variant="text" :to="`/chofer/viaje/${id}`" />
+      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" :to="`/chofer/viaje/${id}`" />
       <h1 class="text-h6 font-weight-bold">Checklist pre-viaje</h1>
     </div>
 

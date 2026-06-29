@@ -87,7 +87,7 @@ onBeforeUnmount(() => socket.disconnect());
         class="flex-grow-1"
         @keyup.enter="send"
       />
-      <v-btn icon="mdi-send" color="primary" @click="send" />
+      <v-btn icon="mdi-send" aria-label="Enviar" color="primary" @click="send" />
     </div>
   </div>
 </template>

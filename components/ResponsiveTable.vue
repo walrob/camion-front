@@ -1,26 +1,58 @@
 <template>
   <div>
+    <!-- ⚠️ Estado de error con reintento (prioritario si no hay datos) -->
+    <ErrorState
+      v-if="error && !items.length && !loading"
+      :text="errorText"
+      @retry="$emit('retry')"
+    />
+
     <!-- 💻 DESKTOP -->
-    <v-data-table
-      v-if="smAndUp"
-      :headers="headers"
-      :items="items"
-      :loading="loading"
-      :fixed-header="fixedHeader"
-      :no-data-text="noDataText"
-      :disable-pagination="allItems"
-      :hide-default-footer="allItems"
-      v-bind="$attrs"
-    >
-      <!-- 🔁 Forward de todos los slots (permite item.*, bottom, etc.) -->
-      <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
-        <slot :name="slotName" v-bind="slotProps" />
-      </template>
-    </v-data-table>
+    <template v-else-if="smAndUp">
+      <!-- Skeleton mientras carga la primera vez -->
+      <v-skeleton-loader
+        v-if="loading && !items.length"
+        type="table-thead, table-row@6"
+      />
+
+      <v-data-table
+        v-else
+        :headers="headers"
+        :items="items"
+        :loading="loading"
+        :fixed-header="fixedHeader"
+        :no-data-text="noDataText"
+        :disable-pagination="allItems"
+        :hide-default-footer="allItems"
+        v-bind="$attrs"
+      >
+        <!-- 🔁 Forward de todos los slots (permite item.*, bottom, etc.) -->
+        <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
+          <slot :name="slotName" v-bind="slotProps ?? {}" />
+        </template>
+
+        <!-- Estado vacío accionable -->
+        <template #no-data>
+          <slot name="empty">
+            <EmptyState :icon="emptyIcon" :text="noDataText" />
+          </slot>
+        </template>
+      </v-data-table>
+    </template>
 
     <!-- 📱 MOBILE -->
     <div v-else>
-      <template v-if="items && items.length">
+      <!-- Skeleton de tarjetas -->
+      <template v-if="loading && !items.length">
+        <v-skeleton-loader
+          v-for="n in 4"
+          :key="n"
+          type="article"
+          class="mb-3"
+        />
+      </template>
+
+      <template v-else-if="items && items.length">
         <v-card
           v-for="(item, index) in items"
           :key="item.id || index"
@@ -47,9 +79,10 @@
         </v-card>
       </template>
 
-      <div v-else class="text-center align-center text-body-1 mt-5">
-        {{ noDataText }}
-      </div>
+      <!-- Estado vacío accionable (mobile) -->
+      <slot v-else name="empty">
+        <EmptyState :icon="emptyIcon" :text="noDataText" />
+      </slot>
 
       <slot name="bottom" />
     </div>
@@ -58,7 +91,11 @@
 
 <script setup lang="ts">
 import { useDisplay } from "vuetify";
+import EmptyState from "~/components/shared/EmptyState.vue";
+import ErrorState from "~/components/shared/ErrorState.vue";
 const { smAndUp } = useDisplay();
+
+defineEmits(["retry"]);
 
 interface Header {
   title: string;
@@ -72,7 +109,10 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   fixedHeader: { type: Boolean, default: true },
   noDataText: { type: String, default: "No hay datos registrados" },
+  emptyIcon: { type: String, default: "mdi-inbox-outline" },
   allItems: { type: Boolean, default: false },
+  error: { type: Boolean, default: false },
+  errorText: { type: String, default: "Ocurrió un error al obtener los datos." },
 });
 
 const resolveValue = (obj: any, path: string) => {

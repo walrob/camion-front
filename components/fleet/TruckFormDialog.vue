@@ -3,6 +3,10 @@ import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { truckStatusOptions } from "~/composables/useFleetStatus";
 import { useFleetStore } from "~/stores/fleet";
+import { useGeneralStore } from "~/stores/general";
+import { useFormErrors } from "~/composables/useFormErrors";
+import FormDialog from "~/components/shared/FormDialog.vue";
+import FormSection from "~/components/shared/FormSection.vue";
 import type { Truck, Fleet } from "~/types/fleet";
 
 const props = defineProps<{
@@ -15,6 +19,8 @@ const emit = defineEmits(["update:modelValue", "saved"]);
 
 const r = useValidations();
 const fleetStore = useFleetStore();
+const general = useGeneralStore();
+const formErrors = useFormErrors();
 
 const formRef = ref();
 const valid = ref(true);
@@ -41,7 +47,10 @@ const form = ref<Partial<Truck>>(emptyForm());
 watch(
   () => props.modelValue,
   (open) => {
-    if (open) form.value = props.truck ? { ...props.truck } : emptyForm();
+    if (open) {
+      form.value = props.truck ? { ...props.truck } : emptyForm();
+      formErrors.clear();
+    }
   },
 );
 
@@ -60,128 +69,123 @@ const submit = async () => {
     else payload[k] = Number(payload[k]);
   });
 
-  const ok = isEdit.value
-    ? await fleetStore.updateTruck(props.truck!.id, payload)
-    : await fleetStore.createTruck(payload);
-
-  saving.value = false;
-  if (ok) {
+  try {
+    if (isEdit.value) await fleetStore.updateTruck(props.truck!.id, payload);
+    else await fleetStore.createTruck(payload);
     emit("saved");
     close();
+  } catch (e) {
+    formErrors.setFromError(e);
+    general.setErrorSnackbar(e);
+  } finally {
+    saving.value = false;
   }
 };
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="640" @update:model-value="close">
-    <v-card>
-      <v-card-title class="text-h6 font-weight-bold">
-        {{ isEdit ? "Editar camión" : "Nuevo camión" }}
-      </v-card-title>
+  <FormDialog
+    :model-value="modelValue"
+    :title="isEdit ? 'Editar camión' : 'Nuevo camión'"
+    :loading="saving"
+    @update:model-value="emit('update:modelValue', $event)"
+    @cancel="close"
+    @save="submit"
+  >
+    <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
+      <FormSection title="Identificación">
+        <v-row dense>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.plate"
+              :error-messages="formErrors.messages('plate')"
+              label="Patente *"
+              :rules="[r.isRequired]"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.internalNumber"
+              :error-messages="formErrors.messages('internalNumber')"
+              label="N° interno"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.brand"
+              :error-messages="formErrors.messages('brand')"
+              label="Marca"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.model"
+              :error-messages="formErrors.messages('model')"
+              label="Modelo"
+            />
+          </v-col>
+        </v-row>
+      </FormSection>
 
-      <v-card-text>
-        <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-          <v-row dense>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.plate"
-                label="Patente *"
-                variant="outlined"
-                density="compact"
-                :rules="[r.isRequired]"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.internalNumber"
-                label="N° interno"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.brand"
-                label="Marca"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.model"
-                label="Modelo"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="6" sm="3">
-              <v-text-field
-                v-model="form.year"
-                label="Año"
-                type="number"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="6" sm="3">
-              <v-text-field
-                v-model="form.type"
-                label="Tipo"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="6" sm="3">
-              <v-text-field
-                v-model="form.loadCapacityKg"
-                label="Capacidad (kg)"
-                type="number"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="6" sm="3">
-              <v-text-field
-                v-model="form.currentOdometerKm"
-                label="Odómetro (km)"
-                type="number"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="form.status"
-                label="Estado"
-                :items="truckStatusOptions"
-                item-title="label"
-                item-value="value"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="form.fleetId"
-                label="Flota"
-                :items="fleetOptions"
-                item-title="name"
-                item-value="id"
-                clearable
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
+      <FormSection title="Especificaciones">
+        <v-row dense>
+          <v-col cols="6" sm="3">
+            <v-text-field
+              v-model="form.year"
+              :error-messages="formErrors.messages('year')"
+              label="Año"
+              type="number"
+            />
+          </v-col>
+          <v-col cols="6" sm="3">
+            <v-text-field
+              v-model="form.type"
+              :error-messages="formErrors.messages('type')"
+              label="Tipo"
+            />
+          </v-col>
+          <v-col cols="6" sm="3">
+            <v-text-field
+              v-model="form.loadCapacityKg"
+              :error-messages="formErrors.messages('loadCapacityKg')"
+              label="Capacidad (kg)"
+              type="number"
+            />
+          </v-col>
+          <v-col cols="6" sm="3">
+            <v-text-field
+              v-model="form.currentOdometerKm"
+              :error-messages="formErrors.messages('currentOdometerKm')"
+              label="Odómetro (km)"
+              type="number"
+            />
+          </v-col>
+        </v-row>
+      </FormSection>
 
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" :loading="saving" @click="submit">Guardar</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      <FormSection title="Asignación y estado">
+        <v-row dense>
+          <v-col cols="12" sm="6">
+            <v-select
+              v-model="form.status"
+              label="Estado"
+              :items="truckStatusOptions"
+              item-title="label"
+              item-value="value"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-select
+              v-model="form.fleetId"
+              label="Flota"
+              :items="fleetOptions"
+              item-title="name"
+              item-value="id"
+              clearable
+            />
+          </v-col>
+        </v-row>
+      </FormSection>
+    </v-form>
+  </FormDialog>
 </template>

@@ -52,7 +52,7 @@ onMounted(async () => {
           </v-chip>
           <v-btn
             v-if="d.fileKey"
-            icon="mdi-file-eye"
+            icon="mdi-file-eye" aria-label="Ver archivo"
             size="small"
             variant="text"
             @click="store.openFile(d.id)"

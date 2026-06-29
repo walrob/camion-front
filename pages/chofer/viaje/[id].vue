@@ -64,7 +64,7 @@ onMounted(reload);
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" variant="text" to="/chofer" />
+      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/chofer" />
       <h1 class="text-h6 font-weight-bold">{{ trip?.code || "Viaje" }}</h1>
       <v-spacer />
       <v-chip v-if="trip" :color="tripStatus(trip.status).color" size="small" label>
@@ -164,7 +164,7 @@ onMounted(reload);
           </div>
           <v-btn
             v-if="canEdit"
-            icon="mdi-delete"
+            icon="mdi-delete" aria-label="Eliminar"
             size="x-small"
             variant="text"
             color="error"
@@ -177,7 +177,7 @@ onMounted(reload);
     <!-- FAB para agregar gasto -->
     <v-btn
       v-if="canEdit"
-      icon="mdi-plus"
+      icon="mdi-plus" aria-label="Agregar"
       color="primary"
       size="large"
       position="fixed"

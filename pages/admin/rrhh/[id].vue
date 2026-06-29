@@ -91,7 +91,7 @@ onMounted(() => hrStore.getEmployee(id));
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-4">
-      <v-btn icon="mdi-arrow-left" variant="text" to="/admin/rrhh" />
+      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/admin/rrhh" />
       <h1 class="text-h5 font-weight-bold">{{ fullName || "Legajo" }}</h1>
       <v-spacer />
       <v-btn
@@ -187,9 +187,9 @@ onMounted(() => hrStore.getEmployee(id));
               </v-chip>
             </template>
             <template #item.actions="{ item }">
-              <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEditCert(item)" />
+              <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEditCert(item)" />
               <v-btn
-                icon="mdi-delete"
+                icon="mdi-delete" aria-label="Eliminar"
                 size="small"
                 variant="text"
                 color="error"

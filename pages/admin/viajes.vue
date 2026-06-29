@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useTripStore } from "~/stores/trip";
 import { tripStatusOptions, useTripStatus } from "~/composables/useTripStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -18,6 +20,7 @@ useHead({ title: "Viajes" });
 const tripStore = useTripStore();
 const { trips, loading, pagination } = storeToRefs(tripStore);
 const { tripStatus } = useTripStatus();
+const onSearch = useDebounceFn(() => tripStore.getTrips(), 350);
 
 const dialog = ref(false);
 const selected = ref<Trip | null>(null);
@@ -66,7 +69,11 @@ onMounted(() => tripStore.getTrips());
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Viajes</h1>
+    <PageHeader title="Viajes" subtitle="Planificación y asignación de viajes">
+      <template #actions>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo viaje</v-btn>
+      </template>
+    </PageHeader>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-3">
       <VoiceTextField
@@ -76,7 +83,7 @@ onMounted(() => tripStore.getTrips());
         density="compact"
         hide-details
         style="max-width: 260px"
-        @update:model-value="tripStore.getTrips()"
+        @update:model-value="onSearch"
       />
       <v-select
         v-model="tripStore.filterStatus"
@@ -91,8 +98,6 @@ onMounted(() => tripStore.getTrips());
         style="max-width: 200px"
         @update:model-value="tripStore.getTrips()"
       />
-      <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo viaje</v-btn>
     </div>
 
     <ResponsiveTable :headers="headers" :items="trips" :loading="loading" all-items>
@@ -107,7 +112,7 @@ onMounted(() => tripStore.getTrips());
       <template #item.actions="{ item }">
         <v-btn
           v-if="item.status === 'assigned'"
-          icon="mdi-pencil"
+          icon="mdi-pencil" aria-label="Editar"
           size="small"
           variant="text"
           @click="openEdit(item)"
@@ -121,7 +126,7 @@ onMounted(() => tripStore.getTrips());
           @click="askCancel(item)"
         />
         <v-btn
-          icon="mdi-delete"
+          icon="mdi-delete" aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useSettlementStore } from "~/stores/settlement";
@@ -71,13 +72,13 @@ onMounted(() => settlementStore.getSettlements());
 
 <template>
   <div>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h5 font-weight-bold">Liquidaciones</h1>
-      <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-file-document-plus" @click="openGenerate">
-        Generar liquidación
-      </v-btn>
-    </div>
+    <PageHeader title="Liquidaciones" subtitle="Rendiciones y cierres por viaje o período">
+      <template #actions>
+        <v-btn color="primary" prepend-icon="mdi-file-document-plus" @click="openGenerate">
+          Generar liquidación
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-3">
       <v-select
@@ -108,7 +109,7 @@ onMounted(() => settlementStore.getSettlements());
       </template>
       <template #item.actions="{ item }">
         <v-btn
-          icon="mdi-file-pdf-box"
+          icon="mdi-file-pdf-box" aria-label="Ver PDF"
           size="small"
           variant="text"
           color="error"

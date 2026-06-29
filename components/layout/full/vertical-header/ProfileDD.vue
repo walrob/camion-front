@@ -23,7 +23,7 @@ const logout = async () => {
   <v-menu>
     <!-- ACTIVATOR -->
     <template #activator="{ props: menuProps }">
-      <v-btn v-bind="menuProps" variant="text" class="d-flex align-center">
+      <v-btn v-bind="menuProps" variant="text" class="d-flex align-center" aria-label="Cuenta">
         <template v-if="user">
           <v-avatar size="35">
             <v-img v-if="user?.avatar" :src="returnUrlImg(user.avatar)" />

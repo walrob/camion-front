@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
 import { useIncidentStore } from "~/stores/incident";
@@ -48,7 +49,7 @@ onBeforeUnmount(() => socket.disconnect());
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Centro de Incidentes</h1>
+    <PageHeader title="Centro de Incidentes" subtitle="Seguimiento y resolución de incidentes de la flota" />
 
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <v-select

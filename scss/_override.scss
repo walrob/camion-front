@@ -133,11 +133,22 @@ html {
     transform: translateY(8px);
 }
 
-// Vuetify overrides for ecommerce
+// Vuetify overrides
 .v-pagination .v-btn {
     font-weight: 600;
 }
 
 .v-btn-toggle {
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+// Accesibilidad: foco visible para navegación por teclado (no afecta al mouse).
+.v-btn:focus-visible,
+.v-list-item:focus-visible,
+.v-tab:focus-visible,
+.v-field:focus-within,
+a:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid rgb(var(--v-theme-primary));
+    outline-offset: 2px;
 }

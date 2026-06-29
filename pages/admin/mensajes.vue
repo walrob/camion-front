@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted, onBeforeUnmount, computed, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import { useMessageStore } from "~/stores/message";
@@ -86,7 +87,7 @@ onBeforeUnmount(() => socket.disconnect());
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Mensajes</h1>
+    <PageHeader title="Mensajes" subtitle="Comunicación con los choferes en ruta" />
 
     <v-row>
       <!-- Conversaciones -->
@@ -153,7 +154,7 @@ onBeforeUnmount(() => socket.disconnect());
               class="flex-grow-1"
               @keyup.enter="send"
             />
-            <v-btn icon="mdi-send" color="primary" @click="send" />
+            <v-btn icon="mdi-send" aria-label="Enviar" color="primary" @click="send" />
           </div>
         </v-card>
       </v-col>

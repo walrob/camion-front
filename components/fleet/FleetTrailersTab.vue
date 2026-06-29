@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useFleetStore } from "~/stores/fleet";
 import {
   trailerStatusOptions,
@@ -12,7 +13,8 @@ import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Trailer } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
-const { trailers, loadingTrailers, paginationTrailers } =
+const onSearch = useDebounceFn(() => fleetStore.getTrailers(), 350);
+const { trailers, loadingTrailers, errorTrailers, paginationTrailers } =
   storeToRefs(fleetStore);
 const { trailerStatus } = useFleetStatus();
 
@@ -65,7 +67,7 @@ onMounted(() => fleetStore.getTrailers());
         density="compact"
         hide-details
         style="max-width: 260px"
-        @update:model-value="fleetStore.getTrailers()"
+        @update:model-value="onSearch"
       />
       <v-select
         v-model="fleetStore.filterTrailerStatus"
@@ -90,7 +92,9 @@ onMounted(() => fleetStore.getTrailers());
       :headers="headers"
       :items="trailers"
       :loading="loadingTrailers"
+      :error="errorTrailers"
       all-items
+      @retry="fleetStore.getTrailers()"
     >
       <template #item.status="{ item }">
         <v-chip :color="trailerStatus(item.status).color" size="small" label>
@@ -98,9 +102,9 @@ onMounted(() => fleetStore.getTrailers());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEdit(item)" />
+        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete"
+          icon="mdi-delete" aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Snackbar } from '~/types/enums'
+import { extractErrorMessage } from '~/composables/useApiError'
 
 export const useGeneralStore = defineStore('general', {
   state: () => ({
@@ -21,10 +22,9 @@ export const useGeneralStore = defineStore('general', {
     },
 
     setErrorSnackbar(error?: any) {
-      const message = error?.response?.data?.message || 'Error inesperado'
       this.setSnackbar({
         color: 'error',
-        message,
+        message: extractErrorMessage(error),
       })
     },
 

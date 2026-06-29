@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useDriverStore } from "~/stores/driver";
 import { driverStatusOptions, useFleetStatus } from "~/composables/useFleetStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -18,6 +20,7 @@ useHead({ title: "Choferes" });
 const driverStore = useDriverStore();
 const { drivers, loading, pagination } = storeToRefs(driverStore);
 const { driverStatus } = useFleetStatus();
+const onSearch = useDebounceFn(() => driverStore.getDrivers(), 350);
 
 const dialog = ref(false);
 const selected = ref<Driver | null>(null);
@@ -68,7 +71,11 @@ onMounted(() => driverStore.getDrivers());
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Choferes</h1>
+    <PageHeader title="Choferes" subtitle="Perfiles operativos y asignación de conductores">
+      <template #actions>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo chofer</v-btn>
+      </template>
+    </PageHeader>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-3">
       <VoiceTextField
@@ -78,7 +85,7 @@ onMounted(() => driverStore.getDrivers());
         density="compact"
         hide-details
         style="max-width: 260px"
-        @update:model-value="driverStore.getDrivers()"
+        @update:model-value="onSearch"
       />
       <v-select
         v-model="driverStore.filterStatus"
@@ -93,10 +100,6 @@ onMounted(() => driverStore.getDrivers());
         style="max-width: 200px"
         @update:model-value="driverStore.getDrivers()"
       />
-      <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">
-        Nuevo chofer
-      </v-btn>
     </div>
 
     <ResponsiveTable :headers="headers" :items="drivers" :loading="loading" all-items>
@@ -111,9 +114,9 @@ onMounted(() => driverStore.getDrivers());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEdit(item)" />
+        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete"
+          icon="mdi-delete" aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

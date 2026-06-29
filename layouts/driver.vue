@@ -15,28 +15,16 @@ const { canInstall, isOnline, promptInstall } = usePwa();
 import { useOfflineQueue } from "~/composables/useOfflineQueue";
 const { pendingCount } = useOfflineQueue();
 
-// Navegación inferior de la app del chofer. Botones grandes, una mano.
+const route = useRoute();
+// El FAB de "Reportar incidente" se oculta cuando ya estás reportando uno.
+const showReportFab = computed(() => route.path !== "/chofer/incidente/nuevo");
+
+// Navegación inferior del chofer: una mano, objetivos táctiles grandes (≥48px).
 const navItems = [
-  { value: "inicio", title: "Inicio", icon: "mdi-home-outline", to: "/chofer" },
-  { value: "viaje", title: "Viaje", icon: "mdi-truck-outline", to: "/chofer" },
-  {
-    value: "incidentes",
-    title: "Incidentes",
-    icon: "mdi-alert-outline",
-    to: "/chofer/incidentes",
-  },
-  {
-    value: "documentos",
-    title: "Docs",
-    icon: "mdi-file-document-outline",
-    to: "/chofer/documentos",
-  },
-  {
-    value: "mensajes",
-    title: "Mensajes",
-    icon: "mdi-message-outline",
-    to: "/chofer/mensajes",
-  },
+  { value: "inicio", title: "Inicio", icon: "mdi-home-variant-outline", to: "/chofer" },
+  { value: "incidentes", title: "Incidentes", icon: "mdi-alert-outline", to: "/chofer/incidentes" },
+  { value: "documentos", title: "Docs", icon: "mdi-file-document-outline", to: "/chofer/documentos" },
+  { value: "mensajes", title: "Mensajes", icon: "mdi-message-outline", to: "/chofer/mensajes" },
 ];
 </script>
 
@@ -64,7 +52,21 @@ const navItems = [
         </v-container>
       </v-main>
 
-      <!-- Barra de navegación inferior (placeholders; cada fase enlaza su pantalla) -->
+      <!-- Acción rápida en ruta: reportar incidente (la más usada por el chofer) -->
+      <v-btn
+        v-if="showReportFab"
+        color="error"
+        size="large"
+        elevation="6"
+        rounded="pill"
+        prepend-icon="mdi-alert"
+        to="/chofer/incidente/nuevo"
+        class="report-fab"
+      >
+        Incidente
+      </v-btn>
+
+      <!-- Barra de navegación inferior del chofer -->
       <v-bottom-navigation grow color="primary" height="68">
         <v-btn
           v-for="item in navItems"
@@ -89,3 +91,13 @@ const navItems = [
     </v-app>
   </v-locale-provider>
 </template>
+
+<style scoped>
+/* FAB flotante por encima de la barra inferior (68px + margen). */
+.report-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 84px;
+  z-index: 1006;
+}
+</style>

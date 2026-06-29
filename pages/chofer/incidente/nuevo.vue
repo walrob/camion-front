@@ -76,7 +76,7 @@ onMounted(() => tripStore.getMyTrips());
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" variant="text" to="/chofer/incidentes" />
+      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/chofer/incidentes" />
       <h1 class="text-h6 font-weight-bold">Reportar incidente</h1>
     </div>
 

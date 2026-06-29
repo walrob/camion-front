@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
+import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useAlertStore } from "~/stores/alert";
 import {
@@ -7,7 +8,6 @@ import {
   alertStatusOptions,
   useAlertStatus,
 } from "~/composables/useAlertStatus";
-import { useAlertSocket } from "~/composables/useAlertSocket";
 
 definePageMeta({
   layout: "admin",
@@ -28,46 +28,24 @@ const LEVEL_HEX: Record<string, string> = {
 };
 const levelHex = (level: string) => LEVEL_HEX[level] ?? "#9E9E9E";
 
-const notifyRed = () => {
-  if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([200, 100, 200]);
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    osc.frequency.value = 880;
-    osc.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.25);
-  } catch {
-    /* noop */
-  }
-};
-
-const socket = useAlertSocket(
-  (alert) => {
-    alertStore.upsert(alert);
-    alertStore.getCount();
-    if (alert.level === "red") notifyRed();
-  },
-  (alert) => alertStore.upsert(alert),
-);
-
+// Las actualizaciones en vivo llegan por el centro de alertas global del navbar
+// (NotificationDD), que alimenta este mismo store. Acá solo cargamos el listado.
 onMounted(() => {
   alertStore.getAlerts();
   alertStore.getCount();
-  socket.connect();
 });
-onBeforeUnmount(() => socket.disconnect());
 </script>
 
 <template>
   <div>
-    <div class="d-flex align-center ga-2 mb-4">
-      <h1 class="text-h5 font-weight-bold">Alertas</h1>
-      <v-badge v-if="activeCount" :content="activeCount" color="error" inline />
-      <v-chip color="success" size="small" variant="tonal" class="ml-2">
-        <v-icon start size="14">mdi-circle</v-icon> En vivo
-      </v-chip>
-    </div>
+    <PageHeader title="Alertas" subtitle="Bandeja priorizada en tiempo real">
+      <template #actions>
+        <v-badge v-if="activeCount" :content="activeCount" color="error" inline />
+        <v-chip color="success" size="small" variant="tonal">
+          <v-icon start size="14">mdi-circle</v-icon> En vivo
+        </v-chip>
+      </template>
+    </PageHeader>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <v-select

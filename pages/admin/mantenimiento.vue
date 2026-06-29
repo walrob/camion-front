@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useMaintenanceStore } from "~/stores/maintenance";
@@ -90,7 +91,7 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-4">Mantenimiento</h1>
+    <PageHeader title="Mantenimiento" subtitle="Planes preventivos y órdenes de trabajo" />
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="upcoming">Próximos</v-tab>
@@ -144,9 +145,9 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEditPlan(item)" />
+            <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEditPlan(item)" />
             <v-btn
-              icon="mdi-delete"
+              icon="mdi-delete" aria-label="Eliminar"
               size="small"
               variant="text"
               color="error"
@@ -195,7 +196,7 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon="mdi-pencil" size="small" variant="text" @click="openEditOrder(item)" />
+            <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEditOrder(item)" />
           </template>
         </ResponsiveTable>
         <p v-else class="text-body-2 text-medium-emphasis">
