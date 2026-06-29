@@ -4,7 +4,7 @@ import { storeToRefs } from "pinia";
 import { useIncidentStore } from "~/stores/incident";
 import { useIncidentStatus } from "~/composables/useIncidentStatus";
 
-definePageMeta({ layout: "driver", middleware: "auth" });
+definePageMeta({ layout: "driver" });
 useHead({ title: "Mis incidentes" });
 
 const incidentStore = useIncidentStore();

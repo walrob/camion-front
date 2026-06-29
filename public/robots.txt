@@ -2,7 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /auth/
-Disallow: /mi-cuenta/
-Disallow: /checkout/
 
 Sitemap: https://www.supernatu.com.ar/sitemap.xml

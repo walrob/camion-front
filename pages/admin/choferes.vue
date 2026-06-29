@@ -10,7 +10,6 @@ import type { Driver } from "~/types/fleet";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "dispatcher", "manager", "hr"],
 });
 

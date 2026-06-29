@@ -2,12 +2,12 @@
 const props = defineProps({
   height: {
     type: String,
-    default: 200,
+    default: 120,
   },
 });
 </script>
 <template>
   <div class="logo">
-    <img src="/images/logos/logo_natu_negro.png" :height="height" alt="logo" />
+    <img src="/images/logos/FletLog.png" :height="height" alt="logo" />
   </div>
 </template>

@@ -7,7 +7,6 @@ import type { Settlement } from "~/types/trip";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "manager", "auditor"],
 });
 

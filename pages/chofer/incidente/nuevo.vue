@@ -8,7 +8,7 @@ import { useGeneralStore } from "~/stores/general";
 import { incidentTypeOptions } from "~/composables/useIncidentStatus";
 import VoiceTextarea from "~/components/form/VoiceTextarea.vue";
 
-definePageMeta({ layout: "driver", middleware: "auth" });
+definePageMeta({ layout: "driver" });
 useHead({ title: "Reportar incidente" });
 
 const router = useRouter();

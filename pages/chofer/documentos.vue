@@ -5,7 +5,7 @@ import { useDocumentStore } from "~/stores/document";
 import { useTripStore } from "~/stores/trip";
 import { useDocumentStatus } from "~/composables/useDocumentStatus";
 
-definePageMeta({ layout: "driver", middleware: "auth" });
+definePageMeta({ layout: "driver" });
 useHead({ title: "Documentos" });
 
 const store = useDocumentStore();

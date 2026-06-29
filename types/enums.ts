@@ -8,11 +8,7 @@ export enum Role {
   AUDITOR = 'auditor',
 }
 
-export type QuoteStatus = 'borrador' | 'enviado' | 'aprobado' | 'rechazado' | 'cancelado'
-export type ProductionOrderStatus = 'pendiente' | 'en_proceso' | 'completado' | 'entregado' | 'cancelado'
-export type SubOrderStatus = 'pendiente' | 'en_proceso' | 'completado' | 'entregado' | 'cancelado'
 export type Priority = 'baja' | 'normal' | 'alta' | 'urgente'
-export type PaymentRecordType = 'seña' | 'pago_final' | 'pago_parcial'
 
 export interface Snackbar {
   color: string

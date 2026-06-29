@@ -34,13 +34,7 @@ const onLogin = async () => {
     if (res.data && res.data.token) {
       authStore.setLastUserEmail(email.value);
       authStore.setAuth(res.data.token, res.data.expiresAt, res.data.user);
-      const paymentInProcess = await persistGet("paymentInProcess");
-      if (paymentInProcess === "TRUE") {
-        await navigateTo("/cart");
-      } else {
-        await navigateTo("/");
-      }
-      // si es admin, mandar a esa sección
+      await navigateTo("/");
     } else {
       errorMsg.value = "Credenciales incorrectas";
     }

@@ -6,7 +6,6 @@ import FleetFleetsTab from "~/components/fleet/FleetFleetsTab.vue";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "manager", "dispatcher", "maintenance"],
 });
 

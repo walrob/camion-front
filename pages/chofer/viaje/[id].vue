@@ -11,7 +11,6 @@ import type { TripLogEntry } from "~/types/trip";
 
 definePageMeta({
   layout: "driver",
-  middleware: "auth",
 });
 
 const route = useRoute();

@@ -8,7 +8,6 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "dispatcher", "manager"],
 });
 useHead({ title: "Mensajes" });

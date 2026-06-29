@@ -14,7 +14,6 @@ import type { Incident } from "~/types/incident";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "dispatcher", "manager", "maintenance"],
 });
 useHead({ title: "Incidentes" });

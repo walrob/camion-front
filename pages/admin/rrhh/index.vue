@@ -14,7 +14,6 @@ import type { Employee } from "~/types/hr";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "hr", "manager", "dispatcher"],
 });
 

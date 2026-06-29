@@ -9,7 +9,6 @@ import SignaturePad from "~/components/trip/SignaturePad.vue";
 
 definePageMeta({
   layout: "driver",
-  middleware: "auth",
 });
 
 useHead({ title: "Checklist" });

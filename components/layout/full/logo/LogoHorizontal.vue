@@ -11,6 +11,6 @@ const props = defineProps({
 </script>
 <template>
   <div style="padding-top: 5px">
-    <img src="/images/logos/icono_natu.png" :height="height" alt="logo" />
+    <img src="/images/logos/FletLog.png" :height="height" alt="logo" />
   </div>
 </template>

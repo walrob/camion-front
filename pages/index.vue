@@ -8,7 +8,7 @@ import { incidentSeverityOptions } from "~/composables/useIncidentStatus";
 import { useAlertSocket } from "~/composables/useAlertSocket";
 import { useIncidentSocket } from "~/composables/useIncidentSocket";
 
-definePageMeta({ layout: "admin", middleware: "auth" });
+definePageMeta({ layout: "admin" });
 useHead({ title: "Dashboard" });
 
 const dashboardStore = useDashboardStore();

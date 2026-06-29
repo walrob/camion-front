@@ -6,7 +6,7 @@ import { useAuthStore } from "~/stores/auth";
 import { useMessageSocket } from "~/composables/useMessageSocket";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 
-definePageMeta({ layout: "driver", middleware: "auth" });
+definePageMeta({ layout: "driver" });
 useHead({ title: "Mensajes" });
 
 const messageStore = useMessageStore();

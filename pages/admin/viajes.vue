@@ -10,7 +10,6 @@ import type { Trip } from "~/types/trip";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "dispatcher", "manager", "auditor"],
 });
 

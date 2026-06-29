@@ -18,10 +18,10 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: "es" },
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
-      titleTemplate: "%s | ERP Textil",
+      titleTemplate: "%s | FleetLog",
       meta: [
-        { name: "description", content: "ERP para empresa textil" },
-        { name: "author", content: "ERP Textil" },
+        { name: "description", content: "Sistema de gestión de flota de camiones" },
+        { name: "author", content: "NorthAr Consulting" },
         { name: "theme-color", content: "#5D87FF" },
       ],
       link: [
@@ -36,10 +36,6 @@ export default defineNuxtConfig({
       apiFilesUrl: process.env.NUXT_BASE_URL_FILES,
       gaMeasurementId: process.env.GA_MEASUREMENT_ID,
       gaEnabled: process.env.GA_ENABLED === "true",
-      bankInfoCbu: process.env.BANK_INFO_CBU,
-      bankInfoAlias: process.env.BANK_INFO_ALIAS,
-      bankInfoCuil: process.env.BANK_INFO_CUIL,
-      bankInfoTitular: process.env.BANK_INFO_TITULAR,
     },
   },
 
@@ -56,10 +52,6 @@ export default defineNuxtConfig({
   nitro: {
     serveStatic: true,
   },
-
-  devServerHandlers: [],
-
-  hooks: {},
 
   compatibilityDate: "2025-04-15",
 

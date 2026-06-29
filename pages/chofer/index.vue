@@ -7,7 +7,6 @@ import OdometerDialog from "~/components/trip/OdometerDialog.vue";
 
 definePageMeta({
   layout: "driver",
-  middleware: "auth",
 });
 
 useHead({ title: "Mis viajes" });

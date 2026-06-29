@@ -3,7 +3,6 @@ import { computed } from "vue";
 import { useAuth } from "~/composables/useAuth";
 import { useAuthStore } from "~/stores/auth";
 import { returnUrlImg } from "~/composables/functions";
-import { Role } from "~/types/enums";
 import { useDisplay } from "vuetify";
 
 const { mdAndUp } = useDisplay();
@@ -45,16 +44,8 @@ const logout = async () => {
     <!-- MENU -->
     <v-list density="compact">
       <template v-if="isAuthenticated">
-        <v-list-item to="/mi-cuenta">
-          <v-list-item-title>Mi Perfil</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item v-if="user.role === Role.ADMIN" to="/admin">
-          <v-list-item-title>Administración</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item to="/mi-cuenta/compras">
-          <v-list-item-title>Mis compras</v-list-item-title>
+        <v-list-item to="/">
+          <v-list-item-title>Inicio</v-list-item-title>
         </v-list-item>
 
         <v-divider class="my-2" />

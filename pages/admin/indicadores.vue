@@ -6,7 +6,6 @@ import { useIndicatorStore } from "~/stores/indicator";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "manager", "auditor"],
 });
 useHead({ title: "Indicadores" });

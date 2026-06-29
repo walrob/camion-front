@@ -11,7 +11,6 @@ import type { Certification, TruckAssignment } from "~/types/hr";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "hr", "manager", "dispatcher"],
 });
 

@@ -11,7 +11,6 @@ import { useAlertSocket } from "~/composables/useAlertSocket";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "manager", "dispatcher", "hr"],
 });
 useHead({ title: "Alertas" });

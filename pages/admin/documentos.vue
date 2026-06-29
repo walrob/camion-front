@@ -12,7 +12,6 @@ import ModalConfirm from "~/components/modal/Confirm.vue";
 
 definePageMeta({
   layout: "admin",
-  middleware: "auth",
   roles: ["admin", "maintenance", "dispatcher", "manager"],
 });
 useHead({ title: "Documentos" });
