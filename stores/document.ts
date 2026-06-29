@@ -8,6 +8,7 @@ export const useDocumentStore = defineStore("document", {
     myDocuments: [] as any[],
     ownerOptions: [] as { id: string; label: string }[],
     loading: false,
+    error: false,
     ownerType: "truck" as string,
     ownerId: "" as string,
     category: "" as string,
@@ -22,6 +23,7 @@ export const useDocumentStore = defineStore("document", {
         return;
       }
       this.loading = true;
+      this.error = false;
       return await $api
         .get("documents/", {
           params: {
@@ -31,7 +33,10 @@ export const useDocumentStore = defineStore("document", {
           },
         })
         .then((resp) => (this.documents = resp.data))
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 
@@ -73,7 +78,7 @@ export const useDocumentStore = defineStore("document", {
       }));
     },
 
-    async createDocument(form: FormData) {
+    async createDocument(form: FormData, throwOnError = false) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       try {
@@ -83,6 +88,7 @@ export const useDocumentStore = defineStore("document", {
         await this.getExpiring();
         return true;
       } catch (e) {
+        if (throwOnError) throw e;
         general.setErrorSnackbar(e);
         return false;
       }

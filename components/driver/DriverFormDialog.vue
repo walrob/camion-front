@@ -3,7 +3,11 @@ import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { driverStatusOptions } from "~/composables/useFleetStatus";
 import { useDriverStore } from "~/stores/driver";
+import { useGeneralStore } from "~/stores/general";
+import { useFormErrors } from "~/composables/useFormErrors";
 import VoiceTextarea from "~/components/form/VoiceTextarea.vue";
+import FormDialog from "~/components/shared/FormDialog.vue";
+import FormSection from "~/components/shared/FormSection.vue";
 import type { Driver } from "~/types/fleet";
 
 const props = defineProps<{
@@ -15,6 +19,8 @@ const emit = defineEmits(["update:modelValue", "saved"]);
 
 const r = useValidations();
 const driverStore = useDriverStore();
+const general = useGeneralStore();
+const formErrors = useFormErrors();
 
 const formRef = ref();
 const valid = ref(true);
@@ -50,6 +56,7 @@ watch(
             notes: props.driver.notes ?? "",
           }
         : emptyForm();
+      formErrors.clear();
     }
   },
 );
@@ -61,139 +68,121 @@ const submit = async () => {
   if (!res?.valid) return;
   saving.value = true;
 
-  let ok = false;
-  if (isEdit.value) {
-    const { licenseNumber, licenseType, licenseExpiry, phone, status, notes } =
-      form.value;
-    ok = await driverStore.updateDriver(props.driver!.id, {
-      licenseNumber,
-      licenseType,
-      licenseExpiry: licenseExpiry || undefined,
-      phone,
-      status,
-      notes,
-    });
-  } else {
-    const payload = { ...form.value };
-    if (!payload.licenseExpiry) delete payload.licenseExpiry;
-    ok = await driverStore.createDriver(payload);
-  }
-
-  saving.value = false;
-  if (ok) {
+  try {
+    if (isEdit.value) {
+      const { licenseNumber, licenseType, licenseExpiry, phone, status, notes } =
+        form.value;
+      await driverStore.updateDriver(props.driver!.id, {
+        licenseNumber,
+        licenseType,
+        licenseExpiry: licenseExpiry || undefined,
+        phone,
+        status,
+        notes,
+      });
+    } else {
+      const payload = { ...form.value };
+      if (!payload.licenseExpiry) delete payload.licenseExpiry;
+      await driverStore.createDriver(payload);
+    }
     emit("saved");
     close();
+  } catch (e) {
+    formErrors.setFromError(e);
+    general.setErrorSnackbar(e);
+  } finally {
+    saving.value = false;
   }
 };
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="640" @update:model-value="close">
-    <v-card>
-      <v-card-title class="text-h6 font-weight-bold">
-        {{ isEdit ? "Editar chofer" : "Nuevo chofer" }}
-      </v-card-title>
+  <FormDialog
+    :model-value="modelValue"
+    :title="isEdit ? 'Editar chofer' : 'Nuevo chofer'"
+    :loading="saving"
+    @update:model-value="emit('update:modelValue', $event)"
+    @cancel="close"
+    @save="submit"
+  >
+    <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
+      <!-- Datos de acceso (solo alta) -->
+      <FormSection v-if="!isEdit" title="Datos de acceso" hint="Credenciales para que el chofer use la app.">
+        <v-row dense>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.name"
+              :error-messages="formErrors.messages('name')"
+              label="Nombre *"
+              :rules="[r.isRequired]"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.email"
+              :error-messages="formErrors.messages('email')"
+              label="Email *"
+              :rules="[r.isRequired, r.isEmail]"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.password"
+              :error-messages="formErrors.messages('password')"
+              label="Contraseña *"
+              type="password"
+              :rules="[r.isRequired]"
+            />
+          </v-col>
+        </v-row>
+      </FormSection>
 
-      <v-card-text>
-        <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-          <v-row dense>
-            <!-- Datos de acceso (solo alta) -->
-            <template v-if="!isEdit">
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="form.name"
-                  label="Nombre *"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[r.isRequired]"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="form.email"
-                  label="Email *"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[r.isRequired, r.isEmail]"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="form.password"
-                  label="Contraseña *"
-                  type="password"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[r.isRequired]"
-                />
-              </v-col>
-            </template>
-
-            <!-- Perfil del chofer -->
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.licenseNumber"
-                label="N° de licencia"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.licenseType"
-                label="Tipo / clase de licencia"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.licenseExpiry"
-                label="Vencimiento licencia"
-                type="date"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.phone"
-                label="Teléfono"
-                variant="outlined"
-                density="compact"
-                :rules="[r.isPhone]"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="form.status"
-                label="Estado"
-                :items="driverStatusOptions"
-                item-title="label"
-                item-value="value"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12">
-              <VoiceTextarea
-                v-model="form.notes"
-                label="Notas"
-                variant="outlined"
-                density="compact"
-                rows="2"
-                auto-grow
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" :loading="saving" @click="submit">Guardar</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      <FormSection title="Perfil del chofer">
+        <v-row dense>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.licenseNumber"
+              :error-messages="formErrors.messages('licenseNumber')"
+              label="N° de licencia"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.licenseType"
+              :error-messages="formErrors.messages('licenseType')"
+              label="Tipo / clase de licencia"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.licenseExpiry"
+              :error-messages="formErrors.messages('licenseExpiry')"
+              label="Vencimiento licencia"
+              type="date"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.phone"
+              :error-messages="formErrors.messages('phone')"
+              label="Teléfono"
+              :rules="[r.isPhone]"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-select
+              v-model="form.status"
+              label="Estado"
+              :items="driverStatusOptions"
+              item-title="label"
+              item-value="value"
+            />
+          </v-col>
+          <v-col cols="12">
+            <VoiceTextarea v-model="form.notes" label="Notas" rows="2" auto-grow />
+          </v-col>
+        </v-row>
+      </FormSection>
+    </v-form>
+  </FormDialog>
 </template>

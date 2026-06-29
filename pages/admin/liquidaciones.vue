@@ -96,7 +96,7 @@ onMounted(() => settlementStore.getSettlements());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="settlements" :loading="loading" all-items>
+    <ResponsiveTable :headers="headers" :items="settlements" :loading="loading" :error="settlementStore.error" all-items @retry="settlementStore.getSettlements()">
       <template #item.totalExpenses="{ item }">{{ money(item.totalExpenses) }}</template>
       <template #item.totalAdvances="{ item }">{{ money(item.totalAdvances) }}</template>
       <template #item.netToSettle="{ item }">

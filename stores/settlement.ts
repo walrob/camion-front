@@ -7,6 +7,7 @@ export const useSettlementStore = defineStore("settlement", {
     settlements: [] as Settlement[],
     finishedTrips: [] as any[],
     loading: false,
+    error: false,
     filterStatus: "" as string,
     pagination: {
       totalItems: 0,
@@ -22,6 +23,7 @@ export const useSettlementStore = defineStore("settlement", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get("settlements/", {
           params: {
@@ -34,7 +36,10 @@ export const useSettlementStore = defineStore("settlement", {
           this.settlements = resp.data.items;
           this.pagination = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 

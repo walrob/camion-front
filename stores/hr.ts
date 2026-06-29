@@ -13,6 +13,7 @@ export const useHrStore = defineStore("hr", {
 
     loading: false,
     loadingDetail: false,
+    error: false,
     search: "",
     filterPosition: "" as string,
     filterStatus: "" as string,
@@ -31,6 +32,7 @@ export const useHrStore = defineStore("hr", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get("hr/employees/", {
           params: {
@@ -45,7 +47,10 @@ export const useHrStore = defineStore("hr", {
           this.employees = resp.data.items;
           this.pagination = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 
@@ -66,8 +71,13 @@ export const useHrStore = defineStore("hr", {
     },
 
     async createEmployee(payload: Partial<Employee>) {
-      return this.mutate("post", "hr/employees/", payload, "Empleado creado", () =>
-        this.getEmployees(),
+      return this.mutate(
+        "post",
+        "hr/employees/",
+        payload,
+        "Empleado creado",
+        () => this.getEmployees(),
+        true,
       );
     },
 
@@ -78,6 +88,7 @@ export const useHrStore = defineStore("hr", {
         payload,
         "Empleado actualizado",
         () => this.getEmployee(id),
+        true,
       );
     },
 
@@ -95,6 +106,7 @@ export const useHrStore = defineStore("hr", {
         payload,
         "Permiso agregado",
         () => this.getEmployee(payload.employeeId as string),
+        true,
       );
     },
 
@@ -105,6 +117,7 @@ export const useHrStore = defineStore("hr", {
         payload,
         "Permiso actualizado",
         () => this.getEmployee(employeeId),
+        true,
       );
     },
 
@@ -126,6 +139,7 @@ export const useHrStore = defineStore("hr", {
         payload,
         "Camión asignado",
         () => this.getEmployee(payload.employeeId),
+        true,
       );
     },
 
@@ -155,6 +169,8 @@ export const useHrStore = defineStore("hr", {
       payload: any,
       successMsg: string,
       refresh: () => Promise<any>,
+      // Si es true, propaga el error (para mapear validación a campos en el form).
+      throwOnError = false,
     ): Promise<boolean> {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
@@ -165,6 +181,7 @@ export const useHrStore = defineStore("hr", {
         await refresh();
         return true;
       } catch (e) {
+        if (throwOnError) throw e;
         general.setErrorSnackbar(e);
         return false;
       }

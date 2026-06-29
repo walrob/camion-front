@@ -132,7 +132,7 @@ onMounted(async () => {
             Nuevo plan
           </v-btn>
         </div>
-        <ResponsiveTable :headers="planHeaders" :items="plans" :loading="loading" all-items>
+        <ResponsiveTable :headers="planHeaders" :items="plans" :loading="loading" :error="store.error" all-items @retry="store.getPlans()">
           <template #item.triggerType="{ item }">
             <v-chip :color="triggerType(item.triggerType).color" size="x-small" label>
               {{ triggerType(item.triggerType).label }}
@@ -187,7 +187,9 @@ onMounted(async () => {
           :headers="orderHeaders"
           :items="orders"
           :loading="loading"
+          :error="store.error"
           all-items
+          @retry="store.getOrders(truckId)"
         >
           <template #item.cost="{ item }">{{ money(item.cost) }}</template>
           <template #item.status="{ item }">

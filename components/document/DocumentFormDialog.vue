@@ -2,7 +2,10 @@
 import { ref, watch } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { useDocumentStore } from "~/stores/document";
+import { useGeneralStore } from "~/stores/general";
+import { useFormErrors } from "~/composables/useFormErrors";
 import { documentCategoryOptions } from "~/composables/useDocumentStatus";
+import FormDialog from "~/components/shared/FormDialog.vue";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -13,6 +16,8 @@ const emit = defineEmits(["update:modelValue", "saved"]);
 
 const r = useValidations();
 const store = useDocumentStore();
+const general = useGeneralStore();
+const formErrors = useFormErrors();
 
 const formRef = ref();
 const valid = ref(true);
@@ -33,6 +38,7 @@ watch(
     if (open) {
       form.value = empty();
       file.value = null;
+      formErrors.clear();
     }
   },
 );
@@ -57,78 +63,76 @@ const submit = async () => {
   if (form.value.expiryDate) fd.append("expiryDate", form.value.expiryDate);
   if (file.value) fd.append("file", file.value);
 
-  const ok = await store.createDocument(fd);
-  saving.value = false;
-  if (ok) {
+  try {
+    await store.createDocument(fd, true);
     emit("saved");
     close();
+  } catch (e) {
+    formErrors.setFromError(e);
+    general.setErrorSnackbar(e);
+  } finally {
+    saving.value = false;
   }
 };
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="520" @update:model-value="close">
-    <v-card>
-      <v-card-title class="text-h6 font-weight-bold">Nuevo documento</v-card-title>
-      <v-card-text>
-        <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-          <v-row dense>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="form.category"
-                :items="documentCategoryOptions"
-                item-title="label"
-                item-value="value"
-                label="Categoría *"
-                variant="outlined"
-                density="compact"
-                :rules="[r.isRequired]"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.number"
-                label="Número"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.issueDate"
-                label="Emisión"
-                type="date"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.expiryDate"
-                label="Vencimiento"
-                type="date"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12">
-              <v-file-input
-                label="Archivo"
-                prepend-icon="mdi-paperclip"
-                variant="outlined"
-                density="compact"
-                hide-details
-                @change="onFile"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" :loading="saving" @click="submit">Guardar</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <FormDialog
+    :model-value="modelValue"
+    title="Nuevo documento"
+    :max-width="520"
+    :loading="saving"
+    @update:model-value="emit('update:modelValue', $event)"
+    @cancel="close"
+    @save="submit"
+  >
+    <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
+      <v-row dense>
+        <v-col cols="12" sm="6">
+          <v-select
+            v-model="form.category"
+            :error-messages="formErrors.messages('category')"
+            :items="documentCategoryOptions"
+            item-title="label"
+            item-value="value"
+            label="Categoría *"
+            :rules="[r.isRequired]"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.number"
+            :error-messages="formErrors.messages('number')"
+            label="Número"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.issueDate"
+            :error-messages="formErrors.messages('issueDate')"
+            label="Emisión"
+            type="date"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.expiryDate"
+            :error-messages="formErrors.messages('expiryDate')"
+            label="Vencimiento"
+            type="date"
+          />
+        </v-col>
+        <v-col cols="12">
+          <v-file-input
+            label="Archivo"
+            prepend-icon="mdi-paperclip"
+            variant="outlined"
+            density="compact"
+            hide-details
+            @change="onFile"
+          />
+        </v-col>
+      </v-row>
+    </v-form>
+  </FormDialog>
 </template>

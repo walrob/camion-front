@@ -10,6 +10,7 @@ export const useMaintenanceStore = defineStore("maintenance", {
     truckOptions: [] as Truck[],
     selectedTruckId: "" as string,
     loading: false,
+    error: false,
   }),
 
   actions: {
@@ -17,10 +18,14 @@ export const useMaintenanceStore = defineStore("maintenance", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get("maintenance/plans/")
         .then((resp) => (this.plans = resp.data))
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 
@@ -37,10 +42,14 @@ export const useMaintenanceStore = defineStore("maintenance", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get(`maintenance/trucks/${truckId}/orders/`)
         .then((resp) => (this.orders = resp.data))
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 
@@ -54,14 +63,10 @@ export const useMaintenanceStore = defineStore("maintenance", {
     },
 
     async createPlan(payload: any) {
-      return this.mutate("post", "maintenance/plans/", payload, "Plan creado", () =>
-        this.getPlans(),
-      );
+      return this.mutate("post", "maintenance/plans/", payload, "Plan creado", () => this.getPlans(), true);
     },
     async updatePlan(id: string, payload: any) {
-      return this.mutate("patch", `maintenance/plans/${id}/`, payload, "Plan actualizado", () =>
-        this.getPlans(),
-      );
+      return this.mutate("patch", `maintenance/plans/${id}/`, payload, "Plan actualizado", () => this.getPlans(), true);
     },
     async deletePlan(id: string) {
       return this.mutate("delete", `maintenance/plans/${id}/`, null, "Plan eliminado", () =>
@@ -70,14 +75,10 @@ export const useMaintenanceStore = defineStore("maintenance", {
     },
 
     async createOrder(payload: any) {
-      return this.mutate("post", "maintenance/orders/", payload, "OT creada", () =>
-        this.getOrders(payload.truckId),
-      );
+      return this.mutate("post", "maintenance/orders/", payload, "OT creada", () => this.getOrders(payload.truckId), true);
     },
     async updateOrder(id: string, truckId: string, payload: any) {
-      return this.mutate("patch", `maintenance/orders/${id}/`, payload, "OT actualizada", () =>
-        this.getOrders(truckId),
-      );
+      return this.mutate("patch", `maintenance/orders/${id}/`, payload, "OT actualizada", () => this.getOrders(truckId), true);
     },
 
     async mutate(
@@ -86,6 +87,7 @@ export const useMaintenanceStore = defineStore("maintenance", {
       payload: any,
       msg: string,
       refresh: () => Promise<any>,
+      throwOnError = false,
     ): Promise<boolean> {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
@@ -96,6 +98,7 @@ export const useMaintenanceStore = defineStore("maintenance", {
         await refresh();
         return true;
       } catch (e) {
+        if (throwOnError) throw e;
         general.setErrorSnackbar(e);
         return false;
       }

@@ -100,7 +100,7 @@ onMounted(() => tripStore.getTrips());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="trips" :loading="loading" all-items>
+    <ResponsiveTable :headers="headers" :items="trips" :loading="loading" :error="tripStore.error" all-items @retry="tripStore.getTrips()">
       <template #item.route="{ item }">
         {{ item.origin }} → {{ item.destination }}
       </template>

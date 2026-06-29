@@ -102,7 +102,7 @@ onMounted(() => driverStore.getDrivers());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="drivers" :loading="loading" all-items>
+    <ResponsiveTable :headers="headers" :items="drivers" :loading="loading" :error="driverStore.error" all-items @retry="driverStore.getDrivers()">
       <template #item.licenseExpiry="{ item }">
         <span :class="isExpiringSoon(item.licenseExpiry) ? 'text-error font-weight-bold' : ''">
           {{ item.licenseExpiry || "-" }}

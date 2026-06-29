@@ -109,7 +109,7 @@ onMounted(() => hrStore.getEmployees());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="employees" :loading="loading" all-items>
+    <ResponsiveTable :headers="headers" :items="employees" :loading="loading" :error="hrStore.error" all-items @retry="hrStore.getEmployees()">
       <template #item.position="{ item }">
         <v-chip :color="position(item.position).color" size="small" label>
           {{ position(item.position).label }}

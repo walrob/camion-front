@@ -126,33 +126,17 @@ export const useFleetStore = defineStore("fleet", {
     async createTrailer(payload: Partial<Trailer>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .post("trailers/", payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Acoplado creado");
-          await this.getTrailers();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.post("trailers/", payload);
+      general.setSuccessSnackbar("Acoplado creado");
+      await this.getTrailers();
     },
 
     async updateTrailer(id: string, payload: Partial<Trailer>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .patch(`trailers/${id}/`, payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Acoplado actualizado");
-          await this.getTrailers();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.patch(`trailers/${id}/`, payload);
+      general.setSuccessSnackbar("Acoplado actualizado");
+      await this.getTrailers();
     },
 
     async deleteTrailer(id: string) {
@@ -204,33 +188,17 @@ export const useFleetStore = defineStore("fleet", {
     async createFleet(payload: Partial<Fleet>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .post("fleets/", payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Flota creada");
-          await this.getFleets();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.post("fleets/", payload);
+      general.setSuccessSnackbar("Flota creada");
+      await this.getFleets();
     },
 
     async updateFleet(id: string, payload: Partial<Fleet>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .patch(`fleets/${id}/`, payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Flota actualizada");
-          await this.getFleets();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.patch(`fleets/${id}/`, payload);
+      general.setSuccessSnackbar("Flota actualizada");
+      await this.getFleets();
     },
 
     async deleteFleet(id: string) {

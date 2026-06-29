@@ -6,6 +6,7 @@ export const useDriverStore = defineStore("driver", {
   state: () => ({
     drivers: [] as Driver[],
     loading: false,
+    error: false,
     search: "",
     filterStatus: "" as string,
     pagination: {
@@ -22,6 +23,7 @@ export const useDriverStore = defineStore("driver", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get("drivers/", {
           params: {
@@ -35,40 +37,27 @@ export const useDriverStore = defineStore("driver", {
           this.drivers = resp.data.items;
           this.pagination = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 
     async createDriver(payload: Record<string, any>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .post("drivers/", payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Chofer creado");
-          await this.getDrivers();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.post("drivers/", payload);
+      general.setSuccessSnackbar("Chofer creado");
+      await this.getDrivers();
     },
 
     async updateDriver(id: string, payload: Partial<Driver>) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      return await $api
-        .patch(`drivers/${id}/`, payload)
-        .then(async () => {
-          general.setSuccessSnackbar("Chofer actualizado");
-          await this.getDrivers();
-          return true;
-        })
-        .catch((e) => {
-          general.setErrorSnackbar(e);
-          return false;
-        });
+      await $api.patch(`drivers/${id}/`, payload);
+      general.setSuccessSnackbar("Chofer actualizado");
+      await this.getDrivers();
     },
 
     async deleteDriver(id: string) {

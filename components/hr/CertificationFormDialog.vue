@@ -3,7 +3,10 @@ import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { certificationTypeOptions } from "~/composables/useHrStatus";
 import { useHrStore } from "~/stores/hr";
+import { useGeneralStore } from "~/stores/general";
+import { useFormErrors } from "~/composables/useFormErrors";
 import VoiceTextarea from "~/components/form/VoiceTextarea.vue";
+import FormDialog from "~/components/shared/FormDialog.vue";
 import type { Certification } from "~/types/hr";
 
 const props = defineProps<{
@@ -16,6 +19,8 @@ const emit = defineEmits(["update:modelValue", "saved"]);
 
 const r = useValidations();
 const hrStore = useHrStore();
+const general = useGeneralStore();
+const formErrors = useFormErrors();
 
 const formRef = ref();
 const valid = ref(true);
@@ -38,8 +43,10 @@ const form = ref<Partial<Certification>>(emptyForm());
 watch(
   () => props.modelValue,
   (open) => {
-    if (open)
+    if (open) {
       form.value = props.certification ? { ...props.certification } : emptyForm();
+      formErrors.clear();
+    }
   },
 );
 
@@ -55,111 +62,87 @@ const submit = async () => {
     if (!payload[k]) delete payload[k];
   });
 
-  let ok = false;
-  if (isEdit.value) {
-    ok = await hrStore.updateCertification(
-      props.certification!.id,
-      props.employeeId,
-      payload,
-    );
-  } else {
-    ok = await hrStore.createCertification({
-      ...payload,
-      employeeId: props.employeeId,
-    });
-  }
-
-  saving.value = false;
-  if (ok) {
+  try {
+    if (isEdit.value) {
+      await hrStore.updateCertification(props.certification!.id, props.employeeId, payload);
+    } else {
+      await hrStore.createCertification({ ...payload, employeeId: props.employeeId });
+    }
     emit("saved");
     close();
+  } catch (e) {
+    formErrors.setFromError(e);
+    general.setErrorSnackbar(e);
+  } finally {
+    saving.value = false;
   }
 };
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="620" @update:model-value="close">
-    <v-card>
-      <v-card-title class="text-h6 font-weight-bold">
-        {{ isEdit ? "Editar permiso" : "Nuevo permiso / habilitación" }}
-      </v-card-title>
-
-      <v-card-text>
-        <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-          <v-row dense>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="form.type"
-                :items="certificationTypeOptions"
-                item-title="label"
-                item-value="value"
-                label="Tipo *"
-                variant="outlined"
-                density="compact"
-                :rules="[r.isRequired]"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.class"
-                label="Clase / categoría"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.number"
-                label="Número"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.issuedBy"
-                label="Emitido por"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.issueDate"
-                label="Fecha de emisión"
-                type="date"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field
-                v-model="form.expiryDate"
-                label="Vencimiento"
-                type="date"
-                variant="outlined"
-                density="compact"
-              />
-            </v-col>
-            <v-col cols="12">
-              <VoiceTextarea
-                v-model="form.notes"
-                label="Notas"
-                variant="outlined"
-                density="compact"
-                rows="2"
-                auto-grow
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" :loading="saving" @click="submit">Guardar</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <FormDialog
+    :model-value="modelValue"
+    :title="isEdit ? 'Editar permiso' : 'Nuevo permiso / habilitación'"
+    :max-width="620"
+    :loading="saving"
+    @update:model-value="emit('update:modelValue', $event)"
+    @cancel="close"
+    @save="submit"
+  >
+    <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
+      <v-row dense>
+        <v-col cols="12" sm="6">
+          <v-select
+            v-model="form.type"
+            :error-messages="formErrors.messages('type')"
+            :items="certificationTypeOptions"
+            item-title="label"
+            item-value="value"
+            label="Tipo *"
+            :rules="[r.isRequired]"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.class"
+            :error-messages="formErrors.messages('class')"
+            label="Clase / categoría"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.number"
+            :error-messages="formErrors.messages('number')"
+            label="Número"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.issuedBy"
+            :error-messages="formErrors.messages('issuedBy')"
+            label="Emitido por"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.issueDate"
+            :error-messages="formErrors.messages('issueDate')"
+            label="Fecha de emisión"
+            type="date"
+          />
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="form.expiryDate"
+            :error-messages="formErrors.messages('expiryDate')"
+            label="Vencimiento"
+            type="date"
+          />
+        </v-col>
+        <v-col cols="12">
+          <VoiceTextarea v-model="form.notes" label="Notas" rows="2" auto-grow />
+        </v-col>
+      </v-row>
+    </v-form>
+  </FormDialog>
 </template>

@@ -11,6 +11,7 @@ export const useTripStore = defineStore("trip", {
     // Backoffice
     trips: [] as Trip[],
     loading: false,
+    error: false,
     search: "",
     filterStatus: "" as string,
     pagination: {
@@ -61,6 +62,7 @@ export const useTripStore = defineStore("trip", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get("trips/", {
           params: {
@@ -74,17 +76,25 @@ export const useTripStore = defineStore("trip", {
           this.trips = resp.data.items;
           this.pagination = resp.data.meta;
         })
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 
     async createTrip(payload: Partial<Trip>) {
-      return this.action("post", "trips/", payload, "Viaje creado", () => this.getTrips());
+      return this.action("post", "trips/", payload, "Viaje creado", () => this.getTrips(), true);
     },
 
     async updateTrip(id: string, payload: Partial<Trip>) {
-      return this.action("patch", `trips/${id}/`, payload, "Viaje actualizado", () =>
-        this.getTrips(),
+      return this.action(
+        "patch",
+        `trips/${id}/`,
+        payload,
+        "Viaje actualizado",
+        () => this.getTrips(),
+        true,
       );
     },
 
@@ -119,6 +129,8 @@ export const useTripStore = defineStore("trip", {
       payload: any,
       successMsg: string,
       refresh?: () => Promise<any>,
+      // Si es true, propaga el error (para mapear validación a campos en el form).
+      throwOnError = false,
     ): Promise<boolean> {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
@@ -129,6 +141,7 @@ export const useTripStore = defineStore("trip", {
         if (refresh) await refresh();
         return true;
       } catch (e) {
+        if (throwOnError) throw e;
         general.setErrorSnackbar(e);
         return false;
       }

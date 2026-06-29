@@ -124,7 +124,7 @@ onMounted(async () => {
           </v-btn>
         </div>
 
-        <ResponsiveTable :headers="headers" :items="documents" :loading="loading" all-items>
+        <ResponsiveTable :headers="headers" :items="documents" :loading="loading" :error="store.error" all-items @retry="store.getDocuments()">
           <template #item.category="{ item }">
             {{ documentCategory(item.category).label }}
           </template>
