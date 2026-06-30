@@ -54,7 +54,9 @@ export const useDriverStore = defineStore("driver", {
       const general = useGeneralStore();
       this.loadingEmployeeOptions = true;
       return await $api
-        .get("hr/employees/", { params: { position: "driver", limit: 100 } })
+        .get("hr/employees/", {
+          params: { position: "driver", limit: 100, withoutDriver: true },
+        })
         .then((resp) => (this.employeeOptions = resp.data.items))
         .catch((e) => general.setErrorSnackbar(e))
         .finally(() => (this.loadingEmployeeOptions = false));

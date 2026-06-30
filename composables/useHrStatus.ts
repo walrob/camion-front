@@ -5,8 +5,34 @@ export const positionOptions: StatusOption[] = [
   { value: "driver", label: "Chofer", color: "primary" },
   { value: "mechanic", label: "Mecánico", color: "info" },
   { value: "dispatcher", label: "Despachante", color: "secondary" },
+  { value: "manager", label: "Gerente", color: "warning" },
   { value: "admin", label: "Administrativo", color: "grey" },
   { value: "other", label: "Otro", color: "grey" },
+];
+
+// Mapa puesto → rol del sistema (login), idéntico al del backend. Define qué
+// rol recibe el User creado desde RRHH si no se pasa un override explícito.
+export const positionRole: Record<string, { value: string; label: string }> = {
+  driver: { value: "driver", label: "Chofer" },
+  mechanic: { value: "maintenance", label: "Mantenimiento" },
+  dispatcher: { value: "dispatcher", label: "Despachante" },
+  manager: { value: "manager", label: "Gerente" },
+  admin: { value: "admin", label: "Administrador" },
+  other: { value: "driver", label: "Chofer" },
+};
+
+export const roleForPosition = (p?: string) =>
+  positionRole[p ?? "driver"] ?? positionRole.other;
+
+// Roles asignables como override del rol derivado del puesto.
+export const roleOptions: StatusOption[] = [
+  { value: "admin", label: "Administrador", color: "error" },
+  { value: "manager", label: "Gerente", color: "warning" },
+  { value: "dispatcher", label: "Despachante", color: "secondary" },
+  { value: "maintenance", label: "Mantenimiento", color: "info" },
+  { value: "driver", label: "Chofer", color: "primary" },
+  { value: "hr", label: "RRHH", color: "secondary" },
+  { value: "auditor", label: "Auditor", color: "grey" },
 ];
 
 export const employmentStatusOptions: StatusOption[] = [
@@ -43,6 +69,8 @@ export const useHrStatus = () => {
     employmentStatusOptions,
     certificationTypeOptions,
     certificationStatusOptions,
+    roleOptions,
+    roleForPosition,
     position: (v?: string) => find(positionOptions, v),
     employmentStatus: (v?: string) => find(employmentStatusOptions, v),
     certificationType: (v?: string) => find(certificationTypeOptions, v),

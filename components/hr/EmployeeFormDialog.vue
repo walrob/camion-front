@@ -4,6 +4,8 @@ import { useValidations } from "~/composables/useValidations";
 import {
   positionOptions,
   employmentStatusOptions,
+  roleOptions,
+  roleForPosition,
 } from "~/composables/useHrStatus";
 import { useHrStore } from "~/stores/hr";
 import { useGeneralStore } from "~/stores/general";
@@ -48,11 +50,18 @@ const emptyForm = (): Partial<Employee> => ({
 
 const form = ref<Partial<Employee>>(emptyForm());
 
+// Alta opcional de cuenta de acceso (solo en creación). El backend crea el User
+// y lo vincula en el mismo POST si llegan email + password.
+const createAccount = ref(false);
+const account = ref({ email: "", password: "", role: "" });
+
 watch(
   () => props.modelValue,
   (open) => {
     if (open) {
       form.value = props.employee ? { ...props.employee } : emptyForm();
+      createAccount.value = false;
+      account.value = { email: "", password: "", role: "" };
       formErrors.clear();
     }
   },
@@ -71,6 +80,13 @@ const submit = async () => {
   });
   delete payload.certifications;
   delete payload.assignments;
+
+  // Datos de cuenta: solo en alta y si se activó el toggle. Nunca en edición.
+  if (!isEdit.value && createAccount.value) {
+    payload.email = account.value.email;
+    payload.password = account.value.password;
+    if (account.value.role) payload.role = account.value.role;
+  }
 
   try {
     if (isEdit.value) await hrStore.updateEmployee(props.employee!.id, payload);
@@ -200,6 +216,65 @@ const submit = async () => {
               auto-grow
             />
           </v-col>
+        </v-row>
+      </FormSection>
+
+      <!-- Cuenta de acceso: solo al crear. El backend crea el User en el mismo POST. -->
+      <FormSection
+        v-if="!isEdit"
+        title="Acceso a la app"
+        hint="Opcional: crea un usuario para que la persona inicie sesión."
+      >
+        <v-row dense>
+          <v-col cols="12">
+            <v-switch
+              v-model="createAccount"
+              label="Crear acceso a la app"
+              color="primary"
+              density="compact"
+              hide-details
+              unset
+            />
+          </v-col>
+          <template v-if="createAccount">
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="account.email"
+                :error-messages="formErrors.messages('email')"
+                label="Email *"
+                :rules="[r.isRequired, r.isEmail]"
+              />
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="account.password"
+                :error-messages="formErrors.messages('password')"
+                label="Contraseña *"
+                type="password"
+                :rules="[
+                  r.isRequired,
+                  (v: string) =>
+                    (!!v && v.length >= 6) || 'Mínimo 6 caracteres',
+                ]"
+              />
+            </v-col>
+            <v-col cols="12">
+              <div class="text-body-2 text-medium-emphasis mb-1">
+                Rol según el puesto:
+                <strong>{{ roleForPosition(form.position).label }}</strong>
+              </div>
+              <v-select
+                v-model="account.role"
+                :items="roleOptions"
+                item-title="label"
+                item-value="value"
+                label="Rol (override opcional)"
+                hint="Si lo dejás vacío, se usa el rol derivado del puesto."
+                persistent-hint
+                clearable
+              />
+            </v-col>
+          </template>
         </v-row>
       </FormSection>
     </v-form>
