@@ -64,10 +64,16 @@ const toggleTheme = async () => {
 
 const filterSidebarMenu = computed(() => {
   if (!user?.role) return [];
-  const temp = sidebarMenu.value.filter(
-    (x) => !x.roles || x.roles.includes(user.role!),
-  );
-  return temp.filter((x) => !x.plan);
+  const visible = sidebarMenu.value
+    .filter((x) => !x.roles || x.roles.includes(user.role!))
+    .filter((x) => !x.plan);
+  // Descarta headers de secciones que quedaron sin ítems visibles para el rol,
+  // para no mostrar títulos de sección huérfanos.
+  return visible.filter((item, i) => {
+    if (!item.header) return true;
+    const next = visible[i + 1];
+    return !!next && !next.header;
+  });
 });
 
 const props = defineProps({

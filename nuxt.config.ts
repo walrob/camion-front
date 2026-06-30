@@ -18,15 +18,17 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: "es" },
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
-      titleTemplate: "%s | FleetLog",
+      titleTemplate: "FleetLog",
+      // titleTemplate: "%s | FleetLog",
       meta: [
-        { name: "description", content: "Sistema de gestión de flota de camiones" },
+        {
+          name: "description",
+          content: "Sistema de gestión de flota de camiones",
+        },
         { name: "author", content: "NorthAr Consulting" },
         { name: "theme-color", content: "#5D87FF" },
       ],
-      link: [
-        { rel: "manifest", href: "/site.webmanifest" },
-      ],
+      link: [{ rel: "manifest", href: "/site.webmanifest" }],
     },
   },
 

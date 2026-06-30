@@ -1,4 +1,5 @@
 // Tipos base del dominio de flota. Cada fase amplía estos tipos.
+import type { Employee } from "~/types/hr"
 
 export type TruckStatus =
   | 'available'
@@ -55,12 +56,13 @@ export interface Trailer extends Audit {
 }
 
 export interface Driver extends Audit {
-  userId?: string
-  employeeId?: string
+  // Un chofer ES un empleado de RRHH: el dato personal (nombre, documento,
+  // teléfono, email) vive en `employee`, no acá. Driver solo guarda lo operativo.
+  employeeId: string
+  employee?: Employee
   licenseNumber?: string
   licenseType?: string
   licenseExpiry?: string
-  phone?: string
   status: DriverStatus
   notes?: string
 }

@@ -68,7 +68,7 @@ const sendComment = async () => {
         <p class="text-body-2 mb-1">{{ incident.description }}</p>
         <div class="text-caption text-medium-emphasis mb-3">
           {{ incident.truck?.plate }} ·
-          {{ incident.driver?.user?.name }} · {{ fmt(incident.createdAt) }}
+          {{ driverName(incident.driver) }} · {{ fmt(incident.createdAt) }}
           <a
             v-if="incident.lat && incident.lng"
             :href="`https://maps.google.com/?q=${incident.lat},${incident.lng}`"

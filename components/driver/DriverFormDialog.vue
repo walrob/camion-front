@@ -29,13 +29,10 @@ const saving = ref(false);
 const isEdit = computed(() => !!props.driver?.id);
 
 const emptyForm = () => ({
-  name: "",
-  email: "",
-  password: "",
+  employeeId: null as string | null,
   licenseNumber: "",
   licenseType: "",
   licenseExpiry: "",
-  phone: "",
   status: "active",
   notes: "",
 });
@@ -44,19 +41,21 @@ const form = ref<Record<string, any>>(emptyForm());
 
 watch(
   () => props.modelValue,
-  (open) => {
+  async (open) => {
     if (open) {
       form.value = props.driver
         ? {
+            employeeId: props.driver.employeeId ?? null,
             licenseNumber: props.driver.licenseNumber ?? "",
             licenseType: props.driver.licenseType ?? "",
             licenseExpiry: props.driver.licenseExpiry ?? "",
-            phone: props.driver.phone ?? "",
             status: props.driver.status ?? "active",
             notes: props.driver.notes ?? "",
           }
         : emptyForm();
       formErrors.clear();
+      // El empleado solo se elige en el alta; en edición queda fijo.
+      if (!isEdit.value) await driverStore.loadEmployeeOptions();
     }
   },
 );
@@ -70,13 +69,13 @@ const submit = async () => {
 
   try {
     if (isEdit.value) {
-      const { licenseNumber, licenseType, licenseExpiry, phone, status, notes } =
+      // En edición no se cambia el empleado: solo datos operativos.
+      const { licenseNumber, licenseType, licenseExpiry, status, notes } =
         form.value;
       await driverStore.updateDriver(props.driver!.id, {
         licenseNumber,
         licenseType,
         licenseExpiry: licenseExpiry || undefined,
-        phone,
         status,
         notes,
       });
@@ -106,32 +105,29 @@ const submit = async () => {
     @save="submit"
   >
     <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-      <!-- Datos de acceso (solo alta) -->
-      <FormSection v-if="!isEdit" title="Datos de acceso" hint="Credenciales para que el chofer use la app.">
+      <!-- Empleado: el chofer es un empleado de RRHH con puesto «Chofer». -->
+      <FormSection title="Empleado" hint="El chofer corresponde a un empleado de RRHH con puesto «Chofer». El nombre, documento y contacto se gestionan en RRHH.">
         <v-row dense>
-          <v-col cols="12" sm="6">
-            <v-text-field
-              v-model="form.name"
-              :error-messages="formErrors.messages('name')"
-              label="Nombre *"
+          <v-col cols="12">
+            <v-autocomplete
+              v-if="!isEdit"
+              v-model="form.employeeId"
+              :items="driverStore.employeeOptions"
+              :item-title="(e: any) => `${e.firstName} ${e.lastName} — ${e.documentId}`"
+              item-value="id"
+              :loading="driverStore.loadingEmployeeOptions"
+              :error-messages="formErrors.messages('employeeId')"
+              label="Empleado *"
               :rules="[r.isRequired]"
             />
-          </v-col>
-          <v-col cols="12" sm="6">
             <v-text-field
-              v-model="form.email"
-              :error-messages="formErrors.messages('email')"
-              label="Email *"
-              :rules="[r.isRequired, r.isEmail]"
-            />
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field
-              v-model="form.password"
-              :error-messages="formErrors.messages('password')"
-              label="Contraseña *"
-              type="password"
-              :rules="[r.isRequired]"
+              v-else
+              :model-value="props.driver?.employee
+                ? `${props.driver.employee.firstName} ${props.driver.employee.lastName}`
+                : '-'"
+              label="Empleado"
+              readonly
+              disabled
             />
           </v-col>
         </v-row>
@@ -159,14 +155,6 @@ const submit = async () => {
               :error-messages="formErrors.messages('licenseExpiry')"
               label="Vencimiento licencia"
               type="date"
-            />
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field
-              v-model="form.phone"
-              :error-messages="formErrors.messages('phone')"
-              label="Teléfono"
-              :rules="[r.isPhone]"
             />
           </v-col>
           <v-col cols="12" sm="6">

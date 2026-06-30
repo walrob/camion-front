@@ -28,11 +28,11 @@ const confirm = ref(false);
 const toDelete = ref<Driver | null>(null);
 
 const headers = [
-  { title: "Nombre", value: "user.name" },
-  { title: "Email", value: "user.email" },
+  { title: "Nombre", value: "driverName", sortable: false },
+  { title: "Documento", value: "employee.documentId" },
   { title: "Licencia", value: "licenseNumber" },
   { title: "Vence", value: "licenseExpiry" },
-  { title: "Teléfono", value: "phone" },
+  { title: "Teléfono", value: "employee.phone" },
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions" },
 ];
@@ -103,6 +103,7 @@ onMounted(() => driverStore.getDrivers());
     </div>
 
     <ResponsiveTable :headers="headers" :items="drivers" :loading="loading" :error="driverStore.error" all-items @retry="driverStore.getDrivers()">
+      <template #item.driverName="{ item }">{{ driverName(item) }}</template>
       <template #item.licenseExpiry="{ item }">
         <span :class="isExpiringSoon(item.licenseExpiry) ? 'text-error font-weight-bold' : ''">
           {{ item.licenseExpiry || "-" }}

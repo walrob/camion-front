@@ -11,6 +11,8 @@ import {
   FileTextIcon,
   ChartBarIcon,
   MessageIcon,
+  GasStationIcon,
+  ClipboardCheckIcon,
 } from "vue-tabler-icons";
 import { Role } from "~/types/enums";
 
@@ -32,10 +34,11 @@ export interface menu {
   plan?: string;
 }
 
-// Menú del backoffice de flota. Cada fase agrega sus ítems (viajes, incidentes,
-// alertas, mantenimiento, documentos, RRHH, indicadores).
+// Menú del backoffice de flota, agrupado por dominio de uso diario:
+// Inicio (resumen), Operación (viajes en vivo), Flota (activos),
+// Personal (choferes/RRHH) y Administración (finanzas y compliance).
 const sidebarItem: menu[] = [
-  { header: "Dashboard" },
+  { header: "Inicio" },
   {
     title: "Panel",
     icon: LayoutDashboardIcon,
@@ -74,12 +77,8 @@ const sidebarItem: menu[] = [
     to: "/admin/mensajes",
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER],
   },
-  {
-    title: "Liquidaciones",
-    icon: ReceiptIcon,
-    to: "/admin/liquidaciones",
-    roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
-  },
+
+  { header: "Flota" },
   {
     title: "Flota",
     icon: TruckIcon,
@@ -93,10 +92,16 @@ const sidebarItem: menu[] = [
     roles: [Role.ADMIN, Role.MAINTENANCE, Role.MANAGER],
   },
   {
-    title: "Choferes",
-    icon: UsersIcon,
-    to: "/admin/choferes",
-    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR],
+    title: "Combustible",
+    icon: GasStationIcon,
+    to: "/admin/combustible",
+    roles: [
+      Role.ADMIN,
+      Role.MANAGER,
+      Role.DISPATCHER,
+      Role.MAINTENANCE,
+      Role.AUDITOR,
+    ],
   },
   {
     title: "Documentos",
@@ -104,11 +109,33 @@ const sidebarItem: menu[] = [
     to: "/admin/documentos",
     roles: [Role.ADMIN, Role.MAINTENANCE, Role.DISPATCHER, Role.MANAGER],
   },
+
+  { header: "Personal" },
   {
     title: "RRHH",
     icon: IdIcon,
     to: "/admin/rrhh",
     roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER],
+  },
+  {
+    title: "Choferes",
+    icon: UsersIcon,
+    to: "/admin/choferes",
+    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR],
+  },
+
+  { header: "Administración" },
+  {
+    title: "Liquidaciones",
+    icon: ReceiptIcon,
+    to: "/admin/liquidaciones",
+    roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
+  },
+  {
+    title: "Planillas OEA",
+    icon: ClipboardCheckIcon,
+    to: "/admin/oea",
+    roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.AUDITOR],
   },
 ];
 

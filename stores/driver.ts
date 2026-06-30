@@ -1,10 +1,14 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
 import type { Driver } from "~/types/fleet";
+import type { Employee } from "~/types/hr";
 
 export const useDriverStore = defineStore("driver", {
   state: () => ({
     drivers: [] as Driver[],
+    // Empleados con puesto "Chofer" disponibles para crear un chofer.
+    employeeOptions: [] as Employee[],
+    loadingEmployeeOptions: false,
     loading: false,
     error: false,
     search: null as string | null,
@@ -42,6 +46,18 @@ export const useDriverStore = defineStore("driver", {
           general.setErrorSnackbar(e);
         })
         .finally(() => (this.loading = false));
+    },
+
+    // Empleados con puesto "Chofer" para el selector del alta de chofer.
+    async loadEmployeeOptions() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loadingEmployeeOptions = true;
+      return await $api
+        .get("hr/employees/", { params: { position: "driver", limit: 100 } })
+        .then((resp) => (this.employeeOptions = resp.data.items))
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loadingEmployeeOptions = false));
     },
 
     async createDriver(payload: Record<string, any>) {

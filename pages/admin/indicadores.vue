@@ -162,7 +162,7 @@ onMounted(async () => {
             v-model="store.filters.driverId"
             :items="driverOptions"
             item-value="id"
-            :item-title="(d: any) => d.user?.name || d.licenseNumber || d.id"
+            :item-title="(d: any) => driverName(d)"
             label="Chofer"
             clearable
           />

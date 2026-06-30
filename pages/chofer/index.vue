@@ -49,6 +49,26 @@ onMounted(() => tripStore.getMyTrips());
   <div>
     <h1 class="text-h6 font-weight-bold mb-3">Mis viajes</h1>
 
+    <!-- Accesos rápidos -->
+    <v-row dense class="mb-3">
+      <v-col cols="6">
+        <v-card variant="tonal" color="primary" to="/chofer/combustible" rounded="lg">
+          <v-card-text class="d-flex align-center ga-2 py-3">
+            <v-icon size="24">mdi-gas-station</v-icon>
+            <span class="text-body-2 font-weight-bold">Combustible</span>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="6">
+        <v-card variant="tonal" color="primary" to="/chofer/oea" rounded="lg">
+          <v-card-text class="d-flex align-center ga-2 py-3">
+            <v-icon size="24">mdi-shield-check-outline</v-icon>
+            <span class="text-body-2 font-weight-bold">Planilla OEA</span>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
     <div v-if="loading" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
     </div>

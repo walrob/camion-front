@@ -32,7 +32,7 @@ const headers = [
   { title: "Código", value: "code" },
   { title: "Origen → Destino", value: "route" },
   { title: "Camión", value: "truck.plate" },
-  { title: "Chofer", value: "driver.user.name" },
+  { title: "Chofer", value: "driverName", sortable: false },
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions" },
 ];
@@ -101,6 +101,7 @@ onMounted(() => tripStore.getTrips());
     </div>
 
     <ResponsiveTable :headers="headers" :items="trips" :loading="loading" :error="tripStore.error" all-items @retry="tripStore.getTrips()">
+      <template #item.driverName="{ item }">{{ driverName(item.driver) }}</template>
       <template #item.route="{ item }">
         {{ item.origin }} → {{ item.destination }}
       </template>

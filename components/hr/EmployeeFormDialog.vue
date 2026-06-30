@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
-import { positionOptions, employmentStatusOptions } from "~/composables/useHrStatus";
+import {
+  positionOptions,
+  employmentStatusOptions,
+} from "~/composables/useHrStatus";
 import { useHrStore } from "~/stores/hr";
 import { useGeneralStore } from "~/stores/general";
 import { useFormErrors } from "~/composables/useFormErrors";
@@ -190,7 +193,12 @@ const submit = async () => {
             />
           </v-col>
           <v-col cols="12">
-            <VoiceTextarea v-model="form.notes" label="Notas" rows="2" auto-grow />
+            <VoiceTextarea
+              v-model="form.notes"
+              label="Notas"
+              rows="2"
+              auto-grow
+            />
           </v-col>
         </v-row>
       </FormSection>

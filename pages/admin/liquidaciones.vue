@@ -30,7 +30,7 @@ const statusOptions = [
 
 const headers = [
   { title: "Viaje", value: "trip.code" },
-  { title: "Chofer", value: "trip.driver.user.name" },
+  { title: "Chofer", value: "driverName", sortable: false },
   { title: "Gastos", value: "totalExpenses" },
   { title: "Adelantos", value: "totalAdvances" },
   { title: "Neto", value: "netToSettle" },
@@ -97,6 +97,7 @@ onMounted(() => settlementStore.getSettlements());
     </div>
 
     <ResponsiveTable :headers="headers" :items="settlements" :loading="loading" :error="settlementStore.error" all-items @retry="settlementStore.getSettlements()">
+      <template #item.driverName="{ item }">{{ driverName(item.trip?.driver) }}</template>
       <template #item.totalExpenses="{ item }">{{ money(item.totalExpenses) }}</template>
       <template #item.totalAdvances="{ item }">{{ money(item.totalAdvances) }}</template>
       <template #item.netToSettle="{ item }">
