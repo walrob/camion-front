@@ -14,9 +14,9 @@ export const useHrStore = defineStore("hr", {
     loading: false,
     loadingDetail: false,
     error: false,
-    search: "",
-    filterPosition: "" as string,
-    filterStatus: "" as string,
+    search: null as string | null,
+    filterPosition: null as string | null,
+    filterStatus: null as string | null,
     pagination: {
       totalItems: 0,
       itemCount: 0,

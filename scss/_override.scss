@@ -143,10 +143,11 @@ html {
 }
 
 // Accesibilidad: foco visible para navegación por teclado (no afecta al mouse).
+// Nota: los campos (.v-field) NO se incluyen aquí; Vuetify ya les da un borde
+// de foco propio. Agregar un outline extra producía un "doble borde" al clickear.
 .v-btn:focus-visible,
 .v-list-item:focus-visible,
 .v-tab:focus-visible,
-.v-field:focus-within,
 a:focus-visible,
 [tabindex]:focus-visible {
     outline: 2px solid rgb(var(--v-theme-primary));

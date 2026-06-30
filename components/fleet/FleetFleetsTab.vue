@@ -59,7 +59,7 @@ onMounted(() => fleetStore.getFleets());
         variant="outlined"
         density="compact"
         hide-details
-        style="max-width: 260px"
+        style="min-width: 240px; max-width: 360px"
         @update:model-value="onSearch"
       />
       <v-spacer />

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
+import { useDisplay } from "vuetify";
 import { onKeyStroke } from "@vueuse/core";
 import sidebarItems from "~/components/layout/full/vertical-sidebar/sidebarItem";
 import { Role } from "~/types/enums";
 
 const router = useRouter();
 const user = useAuth();
+const { smAndUp } = useDisplay();
 
 const open = ref(false);
 const query = ref("");
@@ -91,16 +93,17 @@ const showHeader = (i: number) =>
 </script>
 
 <template>
-  <!-- Disparador estilo buscador -->
+  <!-- Disparador: barra de búsqueda en ≥sm, ícono en mobile -->
   <v-btn
+    v-if="smAndUp"
     variant="tonal"
     color="medium-emphasis"
-    class="text-none ms-3 ms-lg-4 px-3"
+    class="text-none ms-2 ms-lg-4 px-3"
     height="40"
     @click="open = true"
   >
     <v-icon size="20" start>mdi-magnify</v-icon>
-    <span class="d-none d-sm-inline text-medium-emphasis">Buscar o ir a…</span>
+    <span class="text-medium-emphasis">Buscar o ir a…</span>
     <v-chip
       size="x-small"
       variant="outlined"
@@ -110,6 +113,15 @@ const showHeader = (i: number) =>
       Ctrl K
     </v-chip>
   </v-btn>
+  <v-btn
+    v-else
+    icon="mdi-magnify"
+    variant="text"
+    size="small"
+    class="ms-1"
+    aria-label="Buscar"
+    @click="open = true"
+  />
 
   <v-dialog v-model="open" max-width="560" transition="fade-transition">
     <v-card rounded="lg">

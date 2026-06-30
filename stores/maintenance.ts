@@ -8,7 +8,7 @@ export const useMaintenanceStore = defineStore("maintenance", {
     upcoming: [] as any[],
     orders: [] as any[],
     truckOptions: [] as Truck[],
-    selectedTruckId: "" as string,
+    selectedTruckId: null as string | null,
     loading: false,
     error: false,
   }),

@@ -19,7 +19,7 @@
               </h2>
 
               <v-form ref="formRef" @submit.prevent="handleLogin">
-                <v-row dense>
+                <v-row>
                   <v-col cols="12">
                     <v-label class="font-weight-bold mb-1">Email</v-label>
                     <v-text-field
@@ -45,7 +45,7 @@
                       @click:append-inner="showPass = !showPass"
                     />
                   </v-col>
-                  <v-col cols="12" class="pt-2">
+                  <v-col cols="12">
                     <v-btn
                       color="primary"
                       size="large"
@@ -78,43 +78,43 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'blank',
-})
+  layout: "blank",
+});
 
-useHead({ title: 'Iniciar sesión' })
+useHead({ title: "Iniciar sesión" });
 
-import { useValidations } from '~/composables/useValidations'
-import { useAuthStore } from '~/stores/auth'
-import { useGeneralStore } from '~/stores/general'
+import { useValidations } from "~/composables/useValidations";
+import { useAuthStore } from "~/stores/auth";
+import { useGeneralStore } from "~/stores/general";
 
-const r = useValidations()
-const authStore = useAuthStore()
-const generalStore = useGeneralStore()
-const { $api } = useNuxtApp()
+const r = useValidations();
+const authStore = useAuthStore();
+const generalStore = useGeneralStore();
+const { $api } = useNuxtApp();
 
-const formRef = ref<any>(null)
-const email = ref('')
-const password = ref('')
-const showPass = ref(false)
-const loading = ref(false)
+const formRef = ref<any>(null);
+const email = ref("");
+const password = ref("");
+const showPass = ref(false);
+const loading = ref(false);
 
 const handleLogin = async () => {
-  const { valid } = await formRef.value?.validate()
-  if (!valid) return
+  const { valid } = await formRef.value?.validate();
+  if (!valid) return;
 
-  loading.value = true
+  loading.value = true;
   try {
-    const res = await $api.post('auth/login', {
+    const res = await $api.post("auth/login", {
       email: email.value,
       password: password.value,
-    })
-    const { token, expiresAt, user } = res.data
-    await authStore.setAuth(token, expiresAt, user)
-    await navigateTo('/')
+    });
+    const { token, expiresAt, user } = res.data;
+    await authStore.setAuth(token, expiresAt, user);
+    await navigateTo("/");
   } catch (error: any) {
-    generalStore.setErrorSnackbar(error)
+    generalStore.setErrorSnackbar(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>

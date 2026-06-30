@@ -50,7 +50,7 @@ const onConfirmDelete = async (payload: { resp: boolean }) => {
 watch(
   () => store.ownerType,
   async (t) => {
-    store.ownerId = "";
+    store.ownerId = null;
     await store.loadOwnerOptions(t);
     store.getDocuments();
   },

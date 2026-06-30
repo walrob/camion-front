@@ -18,8 +18,8 @@ export const useAlertStore = defineStore("alert", {
     alerts: [] as Alert[],
     activeCount: 0,
     loading: false,
-    filterLevel: "" as string,
-    filterStatus: "" as string,
+    filterLevel: null as string | null,
+    filterStatus: null as string | null,
   }),
 
   getters: {

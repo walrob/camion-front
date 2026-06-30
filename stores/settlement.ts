@@ -8,7 +8,7 @@ export const useSettlementStore = defineStore("settlement", {
     finishedTrips: [] as any[],
     loading: false,
     error: false,
-    filterStatus: "" as string,
+    filterStatus: null as string | null,
     pagination: {
       totalItems: 0,
       itemCount: 0,

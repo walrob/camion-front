@@ -20,9 +20,12 @@ const items = computed(() =>
 
 // Feedback háptico/sonoro para alertas rojas (críticas).
 const notifyRed = (alert: Alert) => {
-  if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  if (typeof navigator !== "undefined" && navigator.vibrate)
+    navigator.vibrate([200, 100, 200]);
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
     const osc = ctx.createOscillator();
     osc.frequency.value = 880;
     osc.connect(ctx.destination);
@@ -31,7 +34,11 @@ const notifyRed = (alert: Alert) => {
   } catch {
     /* el navegador puede bloquear audio sin interacción previa */
   }
-  general.setSnackbar({ color: "error", timeout: 8000, message: `🔴 ${alert.title}` });
+  general.setSnackbar({
+    color: "error",
+    timeout: 8000,
+    message: `🔴 ${alert.title}`,
+  });
 };
 
 // Conexión única al canal de alertas durante toda la sesión del backoffice.
@@ -80,7 +87,13 @@ const openAlert = (alert: Alert) => {
 <template>
   <v-menu :close-on-content-click="false" offset="8">
     <template #activator="{ props }">
-      <v-btn icon variant="text" class="custom-hover-primary mx-1 text-muted" aria-label="Notificaciones" v-bind="props">
+      <v-btn
+        icon
+        variant="text"
+        class="custom-hover-primary mx-1 text-muted"
+        aria-label="Notificaciones"
+        v-bind="props"
+      >
         <v-badge
           :content="activeCount"
           :model-value="activeCount > 0"
@@ -102,11 +115,19 @@ const openAlert = (alert: Alert) => {
       </div>
       <v-divider />
 
-      <v-list v-if="items.length" class="py-0" density="compact" max-height="380" style="overflow-y: auto">
+      <v-list
+        v-if="items.length"
+        class="py-0"
+        density="compact"
+        max-height="380"
+        style="overflow-y: auto"
+      >
         <template v-for="a in items" :key="a.id">
           <v-list-item :value="a.id" class="py-2" @click="openAlert(a)">
             <template #prepend>
-              <v-icon :color="alertLevel(a.level).color" size="14" class="mt-1">mdi-circle</v-icon>
+              <v-icon :color="alertLevel(a.level).color" size="14" class="mt-1"
+                >mdi-circle</v-icon
+              >
             </template>
             <v-list-item-title class="font-weight-medium text-body-2">
               {{ a.title }}
@@ -115,19 +136,32 @@ const openAlert = (alert: Alert) => {
               {{ a.message }}
             </v-list-item-subtitle>
             <template #append>
-              <span class="text-caption text-medium-emphasis">{{ fmtAgo(a.createdAt) }}</span>
+              <span class="text-caption text-medium-emphasis">{{
+                fmtAgo(a.createdAt)
+              }}</span>
             </template>
           </v-list-item>
           <v-divider />
         </template>
       </v-list>
 
-      <div v-else class="text-center text-body-2 text-medium-emphasis py-8 px-4">
-        <v-icon size="28" class="mb-2 d-block mx-auto">mdi-bell-check-outline</v-icon>
+      <div
+        v-else
+        class="text-center text-body-2 text-medium-emphasis py-8 px-4"
+      >
+        <v-icon size="28" class="mb-2 d-block mx-auto"
+          >mdi-bell-check-outline</v-icon
+        >
         Sin alertas activas
       </div>
 
-      <v-btn block variant="text" color="primary" class="rounded-0" to="/admin/alertas">
+      <v-btn
+        block
+        variant="text"
+        color="primary"
+        class="rounded-0 text-none"
+        to="/admin/alertas"
+      >
         Ver todas las alertas
       </v-btn>
     </v-sheet>

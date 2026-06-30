@@ -25,13 +25,13 @@ export const useFleetStore = defineStore("fleet", {
     errorTrailers: false,
     errorFleets: false,
 
-    searchTrucks: "",
-    searchTrailers: "",
-    searchFleets: "",
+    searchTrucks: null as string | null,
+    searchTrailers: null as string | null,
+    searchFleets: null as string | null,
 
-    filterTruckStatus: "" as string,
-    filterTruckFleetId: "" as string,
-    filterTrailerStatus: "" as string,
+    filterTruckStatus: null as string | null,
+    filterTruckFleetId: null as string | null,
+    filterTrailerStatus: null as string | null,
 
     paginationTrucks: emptyPagination(),
     paginationTrailers: emptyPagination(),

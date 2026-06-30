@@ -11,7 +11,8 @@ const authStore = useAuthStore();
 
 const isAuthenticated = computed(() => !!authStore.token);
 
-const showUserName = computed(() => mdAndUp && user?.name);
+// Solo mostramos el nombre en ≥md; en mobile queda solo el avatar.
+const showUserName = computed(() => mdAndUp.value && !!user?.name);
 
 const logout = async () => {
   authStore.clearAuth();

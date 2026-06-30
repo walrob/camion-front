@@ -21,9 +21,14 @@ const { overview, loading } = storeToRefs(dashboardStore);
 
 // Colores de gráficos derivados del tema (unifica con la identidad de marca).
 const theme = useTheme();
-const COLOR_FALLBACK: Record<string, string> = { grey: "#94A3B8", amber: "#F59E0B" };
+const COLOR_FALLBACK: Record<string, string> = {
+  grey: "#94A3B8",
+  amber: "#F59E0B",
+};
 const hex = (name: string) =>
-  (theme.current.value.colors as Record<string, string>)[name] || COLOR_FALLBACK[name] || name;
+  (theme.current.value.colors as Record<string, string>)[name] ||
+  COLOR_FALLBACK[name] ||
+  name;
 
 const donutBase = {
   legend: { position: "bottom" as const },
@@ -33,7 +38,10 @@ const donutBase = {
 };
 
 const totalTrucks = computed(() =>
-  Object.values(overview.value?.trucksByStatus ?? {}).reduce((a, b) => a + b, 0),
+  Object.values(overview.value?.trucksByStatus ?? {}).reduce(
+    (a, b) => a + b,
+    0,
+  ),
 );
 
 const truckChart = computed(() => {
@@ -41,7 +49,11 @@ const truckChart = computed(() => {
   const present = truckStatusOptions.filter((o) => (data[o.value] ?? 0) > 0);
   return {
     series: present.map((o) => data[o.value]),
-    options: { ...donutBase, labels: present.map((o) => o.label), colors: present.map((o) => hex(o.color)) },
+    options: {
+      ...donutBase,
+      labels: present.map((o) => o.label),
+      colors: present.map((o) => hex(o.color)),
+    },
   };
 });
 
@@ -57,7 +69,11 @@ const alertChart = computed(() => {
   const present = ALERT_LEVELS.filter((l) => (data[l.key] ?? 0) > 0);
   return {
     series: present.map((l) => data[l.key]),
-    options: { ...donutBase, labels: present.map((l) => l.label), colors: present.map((l) => hex(l.color)) },
+    options: {
+      ...donutBase,
+      labels: present.map((l) => l.label),
+      colors: present.map((l) => hex(l.color)),
+    },
   };
 });
 
@@ -69,13 +85,55 @@ const kpis = computed(() => {
   const o = overview.value;
   if (!o) return [];
   return [
-    { label: "Camiones", value: totalTrucks.value, icon: "mdi-truck-outline", tone: "primary", to: "/admin/flota" },
-    { label: "Incidentes abiertos", value: o.incidents.open, icon: "mdi-alert-circle-outline", tone: "error", to: "/admin/incidentes" },
-    { label: "Alertas activas", value: o.alerts.active, icon: "mdi-bell-ring-outline", tone: "warning", to: "/admin/alertas" },
-    { label: "Viajes demorados", value: o.delayedTrips, icon: "mdi-clock-alert-outline", tone: "info", to: "/admin/viajes" },
-    { label: "Gasto del día", value: money(o.todayExpenses), icon: "mdi-cash-multiple", tone: "success", to: "/admin/liquidaciones" },
-    { label: "Mant. próximos", value: o.upcomingMaintenance, icon: "mdi-wrench-clock", tone: "secondary", to: "/admin/mantenimiento" },
-    { label: "Choferes con novedades", value: o.driversWithNews, icon: "mdi-account-alert-outline", tone: "accent", to: "/admin/choferes" },
+    {
+      label: "Camiones",
+      value: totalTrucks.value,
+      icon: "mdi-truck-outline",
+      tone: "primary",
+      to: "/admin/flota",
+    },
+    {
+      label: "Incidentes abiertos",
+      value: o.incidents.open,
+      icon: "mdi-alert-circle-outline",
+      tone: "error",
+      to: "/admin/incidentes",
+    },
+    {
+      label: "Alertas activas",
+      value: o.alerts.active,
+      icon: "mdi-bell-ring-outline",
+      tone: "warning",
+      to: "/admin/alertas",
+    },
+    {
+      label: "Viajes demorados",
+      value: o.delayedTrips,
+      icon: "mdi-clock-alert-outline",
+      tone: "info",
+      to: "/admin/viajes",
+    },
+    {
+      label: "Gasto del día",
+      value: money(o.todayExpenses),
+      icon: "mdi-cash-multiple",
+      tone: "success",
+      to: "/admin/liquidaciones",
+    },
+    {
+      label: "Mant. próximos",
+      value: o.upcomingMaintenance,
+      icon: "mdi-wrench-clock",
+      tone: "secondary",
+      to: "/admin/mantenimiento",
+    },
+    {
+      label: "Choferes con novedades",
+      value: o.driversWithNews,
+      icon: "mdi-account-alert-outline",
+      tone: "accent",
+      to: "/admin/choferes",
+    },
   ];
 });
 
@@ -84,11 +142,41 @@ const attention = computed(() => {
   const o = overview.value;
   if (!o) return [];
   return [
-    { label: "incidentes abiertos", count: o.incidents.open, icon: "mdi-alert-circle", tone: "error", to: "/admin/incidentes" },
-    { label: "alertas activas sin resolver", count: o.alerts.active, icon: "mdi-bell-ring", tone: "warning", to: "/admin/alertas" },
-    { label: "mantenimientos próximos", count: o.upcomingMaintenance, icon: "mdi-wrench", tone: "info", to: "/admin/mantenimiento" },
-    { label: "viajes demorados", count: o.delayedTrips, icon: "mdi-clock-alert", tone: "warning", to: "/admin/viajes" },
-    { label: "choferes con novedades", count: o.driversWithNews, icon: "mdi-account-alert", tone: "accent", to: "/admin/choferes" },
+    {
+      label: "incidentes abiertos",
+      count: o.incidents.open,
+      icon: "mdi-alert-circle",
+      tone: "error",
+      to: "/admin/incidentes",
+    },
+    {
+      label: "alertas activas sin resolver",
+      count: o.alerts.active,
+      icon: "mdi-bell-ring",
+      tone: "warning",
+      to: "/admin/alertas",
+    },
+    {
+      label: "mantenimientos próximos",
+      count: o.upcomingMaintenance,
+      icon: "mdi-wrench",
+      tone: "info",
+      to: "/admin/mantenimiento",
+    },
+    {
+      label: "viajes demorados",
+      count: o.delayedTrips,
+      icon: "mdi-clock-alert",
+      tone: "warning",
+      to: "/admin/viajes",
+    },
+    {
+      label: "choferes con novedades",
+      count: o.driversWithNews,
+      icon: "mdi-account-alert",
+      tone: "accent",
+      to: "/admin/choferes",
+    },
   ].filter((i) => i.count > 0);
 });
 
@@ -109,7 +197,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <PageHeader title="Panel gerencial" subtitle="Estado operativo de la flota en tiempo real" />
+    <PageHeader
+      title="Panel gerencial"
+      subtitle="Estado operativo de la flota en tiempo real"
+    />
 
     <div v-if="loading && !overview" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
@@ -133,26 +224,42 @@ onBeforeUnmount(() => {
         <!-- Requiere atención -->
         <v-col cols="12" md="4">
           <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-3">Requiere atención</div>
+            <div class="text-subtitle-2 font-weight-bold mb-3">
+              Requiere atención
+            </div>
             <v-list v-if="attention.length" density="compact" class="py-0">
-              <v-list-item v-for="a in attention" :key="a.label" :to="a.to" class="px-0">
+              <v-list-item
+                v-for="a in attention"
+                :key="a.label"
+                :to="a.to"
+                class="px-0"
+              >
                 <template #prepend>
-                  <v-avatar :color="a.tone" variant="tonal" size="34" rounded="lg" class="mr-3">
+                  <v-avatar
+                    :color="a.tone"
+                    variant="tonal"
+                    size="34"
+                    rounded="lg"
+                    class="mr-3"
+                  >
                     <v-icon :color="a.tone" size="18">{{ a.icon }}</v-icon>
                   </v-avatar>
                 </template>
                 <v-list-item-title class="text-body-2">
-                  <span class="font-weight-bold">{{ a.count }}</span> {{ a.label }}
+                  <span class="font-weight-bold">{{ a.count }}</span>
+                  {{ a.label }}
                 </v-list-item-title>
                 <template #append>
-                  <v-icon size="16" color="medium-emphasis">mdi-chevron-right</v-icon>
+                  <v-icon size="16" color="medium-emphasis"
+                    >mdi-chevron-right</v-icon
+                  >
                 </template>
               </v-list-item>
             </v-list>
             <EmptyState
               v-else
               icon="mdi-check-circle-outline"
-              text="Todo en orden, sin pendientes."
+              text="Sin pendientes."
             />
           </v-card>
         </v-col>
@@ -160,7 +267,9 @@ onBeforeUnmount(() => {
         <!-- Flota por estado -->
         <v-col cols="12" md="4">
           <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-2">Flota por estado</div>
+            <div class="text-subtitle-2 font-weight-bold mb-2">
+              Flota por estado
+            </div>
             <ClientOnly>
               <VueApexCharts
                 v-if="truckChart.series.length"
@@ -169,7 +278,7 @@ onBeforeUnmount(() => {
                 :options="truckChart.options"
                 :series="truckChart.series"
               />
-              <p v-else class="text-caption text-medium-emphasis">Sin datos.</p>
+              <EmptyState v-else text="Sin datos." />
             </ClientOnly>
           </v-card>
         </v-col>
@@ -177,7 +286,9 @@ onBeforeUnmount(() => {
         <!-- Alertas por nivel -->
         <v-col cols="12" md="4">
           <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-2">Alertas por nivel</div>
+            <div class="text-subtitle-2 font-weight-bold mb-2">
+              Alertas por nivel
+            </div>
             <ClientOnly>
               <VueApexCharts
                 v-if="alertChart.series.length"
@@ -186,7 +297,11 @@ onBeforeUnmount(() => {
                 :options="alertChart.options"
                 :series="alertChart.series"
               />
-              <p v-else class="text-caption text-medium-emphasis">Sin alertas activas.</p>
+              <EmptyState
+                v-else
+                icon="mdi-check-circle-outline"
+                text="Sin alertas activas."
+              />
             </ClientOnly>
           </v-card>
         </v-col>
@@ -196,14 +311,18 @@ onBeforeUnmount(() => {
       <v-row dense>
         <v-col cols="12" md="4">
           <v-card border flat rounded="lg" class="pa-4">
-            <div class="text-subtitle-2 font-weight-bold mb-2">Incidentes por severidad</div>
+            <div class="text-subtitle-2 font-weight-bold mb-2">
+              Incidentes por severidad
+            </div>
             <div class="d-flex flex-column ga-2 mt-2">
               <div
                 v-for="s in incidentSeverityOptions"
                 :key="s.value"
                 class="d-flex align-center justify-space-between"
               >
-                <v-chip :color="s.color" size="small" label>{{ s.label }}</v-chip>
+                <v-chip :color="s.color" size="small" label>{{
+                  s.label
+                }}</v-chip>
                 <span class="font-weight-bold">{{ sevCount(s.value) }}</span>
               </div>
             </div>

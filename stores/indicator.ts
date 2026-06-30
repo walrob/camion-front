@@ -9,11 +9,11 @@ export const useIndicatorStore = defineStore("indicator", {
     driverOptions: [] as any[],
     fleetOptions: [] as any[],
     filters: {
-      truckId: "" as string,
-      driverId: "" as string,
-      fleetId: "" as string,
-      from: "" as string,
-      to: "" as string,
+      truckId: null as string | null,
+      driverId: null as string | null,
+      fleetId: null as string | null,
+      from: null as string | null,
+      to: null as string | null,
     },
   }),
 

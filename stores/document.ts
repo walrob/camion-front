@@ -10,8 +10,8 @@ export const useDocumentStore = defineStore("document", {
     loading: false,
     error: false,
     ownerType: "truck" as string,
-    ownerId: "" as string,
-    category: "" as string,
+    ownerId: null as string | null,
+    category: null as string | null,
   }),
 
   actions: {

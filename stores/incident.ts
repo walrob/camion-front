@@ -10,8 +10,11 @@ export const useIncidentStore = defineStore("incident", {
     attachments: [] as any[],
     staffUsers: [] as { id: string; name: string }[],
     loading: false,
-    filterType: "" as string,
-    filterSeverity: "" as string,
+    error: false,
+    filterType: null as string | null,
+    filterSeverity: null as string | null,
+    filterFrom: null as string | null,
+    filterTo: null as string | null,
   }),
 
   actions: {
@@ -53,16 +56,22 @@ export const useIncidentStore = defineStore("incident", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       this.loading = true;
+      this.error = false;
       return await $api
         .get("incidents/", {
           params: {
             limit: 100,
             type: this.filterType || undefined,
             severity: this.filterSeverity || undefined,
+            from: this.filterFrom || undefined,
+            to: this.filterTo || undefined,
           },
         })
         .then((resp) => (this.incidents = resp.data.items))
-        .catch((e) => general.setErrorSnackbar(e))
+        .catch((e) => {
+          this.error = true;
+          general.setErrorSnackbar(e);
+        })
         .finally(() => (this.loading = false));
     },
 

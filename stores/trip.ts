@@ -12,8 +12,8 @@ export const useTripStore = defineStore("trip", {
     trips: [] as Trip[],
     loading: false,
     error: false,
-    search: "",
-    filterStatus: "" as string,
+    search: null as string | null,
+    filterStatus: null as string | null,
     pagination: {
       totalItems: 0,
       itemCount: 0,

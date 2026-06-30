@@ -4,7 +4,7 @@ import sidebarItems from "@/components/layout/full/vertical-sidebar/sidebarItem"
 import { useDisplay, useTheme } from "vuetify";
 import { Menu2Icon, MoonIcon, SunIcon } from "vue-tabler-icons";
 
-const { smAndDown, lgAndUp } = useDisplay();
+const { smAndDown, smAndUp, lgAndUp } = useDisplay();
 const sidebarMenu = shallowRef(sidebarItems);
 
 const sDrawer = ref(false);
@@ -143,16 +143,28 @@ const props = defineProps({
 
         <v-menu v-if="quickCreateItems.length">
           <template #activator="{ props: menuProps }">
+            <!-- Con texto en ≥sm, solo ícono en mobile -->
             <v-btn
+              v-if="smAndUp"
               v-bind="menuProps"
               color="primary"
               variant="flat"
               prepend-icon="mdi-plus"
               append-icon="mdi-menu-down"
-              class="ms-3 ms-lg-4"
+              class="ms-2 ms-lg-4"
             >
               Crear
             </v-btn>
+            <v-btn
+              v-else
+              v-bind="menuProps"
+              color="primary"
+              variant="flat"
+              icon="mdi-plus"
+              size="small"
+              aria-label="Crear"
+              class="ms-1"
+            />
           </template>
           <v-list density="compact" nav min-width="220">
             <v-list-item
@@ -172,7 +184,7 @@ const props = defineProps({
         <v-btn
           icon
           variant="text"
-          class="custom-hover-primary mx-2 text-muted"
+          class="custom-hover-primary mx-1 text-muted"
           aria-label="Cambiar tema"
           @click="toggleTheme"
         >
