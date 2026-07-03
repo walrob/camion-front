@@ -42,7 +42,7 @@ const createCommands: Cmd[] = [
   { title: "Nuevo camión", to: "/admin/flota", group: "Crear", icon: "mdi-plus", roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.MAINTENANCE] },
   { title: "Nuevo chofer", to: "/admin/choferes", group: "Crear", icon: "mdi-plus", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR] },
   { title: "Nuevo empleado", to: "/admin/rrhh", group: "Crear", icon: "mdi-plus", roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER] },
-  { title: "Generar liquidación", to: "/admin/liquidaciones", group: "Crear", icon: "mdi-plus", roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR] },
+  { title: "Generar rendición", to: "/admin/liquidaciones", group: "Crear", icon: "mdi-plus", roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR] },
 ];
 
 const all = computed<Cmd[]>(() =>

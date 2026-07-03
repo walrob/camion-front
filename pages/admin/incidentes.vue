@@ -110,7 +110,6 @@ onBeforeUnmount(() => socket.disconnect());
         v-model="incidentStore.filterFrom"
         label="Desde"
         type="date"
-        clearable
         style="min-width: 160px; max-width: 180px"
         @update:model-value="incidentStore.getIncidents()"
       />
@@ -118,7 +117,6 @@ onBeforeUnmount(() => socket.disconnect());
         v-model="incidentStore.filterTo"
         label="Hasta"
         type="date"
-        clearable
         style="min-width: 160px; max-width: 180px"
         @update:model-value="incidentStore.getIncidents()"
       />

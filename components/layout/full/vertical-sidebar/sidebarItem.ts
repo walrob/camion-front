@@ -126,7 +126,7 @@ const sidebarItem: menu[] = [
 
   { header: "Administración" },
   {
-    title: "Liquidaciones",
+    title: "Rendiciones",
     icon: ReceiptIcon,
     to: "/admin/liquidaciones",
     roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],

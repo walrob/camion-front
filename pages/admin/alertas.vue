@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PageHeader from "~/components/shared/PageHeader.vue";
+import EmptyState from "~/components/shared/EmptyState.vue";
 import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useAlertStore } from "~/stores/alert";
@@ -74,6 +75,26 @@ onMounted(() => {
         style="max-width: 200px"
         @update:model-value="alertStore.getAlerts()"
       />
+      <v-text-field
+        v-model="alertStore.filterFrom"
+        label="Desde"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        style="max-width: 180px"
+        @update:model-value="alertStore.getAlerts()"
+      />
+      <v-text-field
+        v-model="alertStore.filterTo"
+        label="Hasta"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        style="max-width: 180px"
+        @update:model-value="alertStore.getAlerts()"
+      />
     </div>
 
     <div v-if="loading" class="d-flex justify-center my-8">
@@ -81,42 +102,54 @@ onMounted(() => {
     </div>
 
     <template v-else>
-      <p v-if="!sorted.length" class="text-body-2 text-medium-emphasis">
-        No hay alertas.
-      </p>
+      <EmptyState
+        v-if="!sorted.length"
+        icon="mdi-check-circle-outline"
+        text="No hay alertas."
+      />
 
       <v-card
         v-for="a in sorted"
         :key="a.id"
-        variant="outlined"
-        class="mb-2"
-        :style="`border-left: 4px solid ${levelHex(a.level)}`"
+        border
+        flat
+        rounded="lg"
+        class="mb-3 alert-card"
+        :class="{ 'alert-card--resolved': a.status === 'resolved' }"
+        :style="`--accent: ${levelHex(a.level)}`"
       >
-        <v-card-text class="py-2">
-          <div class="d-flex align-center ga-2 mb-1">
-            <v-chip :color="alertLevel(a.level).color" size="small" label>
-              {{ alertLevel(a.level).label }}
-            </v-chip>
-            <span class="font-weight-bold">{{ a.title }}</span>
-            <v-spacer />
-            <v-chip :color="alertStatus(a.status).color" size="x-small" label>
+        <div class="pa-3">
+          <div class="d-flex align-center ga-2">
+            <v-avatar :color="alertLevel(a.level).color" variant="tonal" rounded="lg" size="40">
+              <v-icon :color="alertLevel(a.level).color" size="20">mdi-bell-ring-outline</v-icon>
+            </v-avatar>
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex align-center ga-2 flex-wrap">
+                <span class="text-subtitle-2 font-weight-bold">{{ a.title }}</span>
+                <v-chip :color="alertLevel(a.level).color" size="x-small" label variant="tonal">
+                  {{ alertLevel(a.level).label }}
+                </v-chip>
+              </div>
+              <div class="text-caption text-medium-emphasis">{{ fmt(a.createdAt) }}</div>
+            </div>
+            <v-chip :color="alertStatus(a.status).color" size="small" label variant="flat">
               {{ alertStatus(a.status).label }}
             </v-chip>
           </div>
-          <div class="text-body-2">{{ a.message }}</div>
-          <div class="text-caption text-medium-emphasis">{{ fmt(a.createdAt) }}</div>
 
-          <div class="d-flex ga-1 mt-2" v-if="a.status !== 'resolved'">
+          <div class="text-body-2 mt-2 ms-1">{{ a.message }}</div>
+
+          <div class="d-flex ga-2 mt-3" v-if="a.status !== 'resolved'">
             <v-btn
               v-if="a.status === 'new'"
-              size="x-small"
+              size="small"
               variant="tonal"
               @click="alertStore.setStatus(a.id, 'seen')"
             >
               Visto
             </v-btn>
             <v-btn
-              size="x-small"
+              size="small"
               variant="tonal"
               color="warning"
               @click="alertStore.setStatus(a.id, 'acknowledge')"
@@ -124,7 +157,7 @@ onMounted(() => {
               Atender
             </v-btn>
             <v-btn
-              size="x-small"
+              size="small"
               variant="tonal"
               color="success"
               @click="alertStore.setStatus(a.id, 'resolve')"
@@ -132,8 +165,35 @@ onMounted(() => {
               Resolver
             </v-btn>
           </div>
-        </v-card-text>
+        </div>
       </v-card>
     </template>
   </div>
 </template>
+
+<style scoped>
+.alert-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.alert-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent, #9e9e9e);
+}
+.alert-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.alert-card--resolved {
+  opacity: 0.72;
+}
+.min-w-0 {
+  min-width: 0;
+}
+</style>

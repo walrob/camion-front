@@ -34,6 +34,16 @@ const FleetDark: ThemeTypes = {
     "on-surface-variant": "#1E293B",
     grey100: "#1E293B",
     grey200: "#152032",
+    // Paleta de gráficos: mismos hues, escalonados para el fondo oscuro.
+    chartPrimary: "#6B9BF2",
+    chartSecondary: "#45C9BE",
+    chartInfo: "#5CC7E4",
+    chartSuccess: "#63C495",
+    chartWarning: "#E8A45C",
+    chartError: "#E88585",
+    chartAccent: "#A99BF0",
+    chartAmber: "#E9C766",
+    chartGrey: "#94A3B8",
   },
 };
 export { FleetDark };

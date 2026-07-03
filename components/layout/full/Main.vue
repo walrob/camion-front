@@ -32,7 +32,7 @@ const quickCreate = [
   { title: "Nuevo camión", to: "/admin/flota", icon: "mdi-truck-outline", roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.MAINTENANCE] },
   { title: "Nuevo chofer", to: "/admin/choferes", icon: "mdi-account-plus-outline", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR] },
   { title: "Nuevo empleado", to: "/admin/rrhh", icon: "mdi-badge-account-outline", roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER] },
-  { title: "Generar liquidación", to: "/admin/liquidaciones", icon: "mdi-file-document-plus-outline", roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR] },
+  { title: "Generar rendición", to: "/admin/liquidaciones", icon: "mdi-file-document-plus-outline", roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR] },
 ];
 const quickCreateItems = computed(() =>
   quickCreate.filter((x) => user?.role && x.roles.includes(user.role as Role)),

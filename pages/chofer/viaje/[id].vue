@@ -31,7 +31,8 @@ const confirm = ref(false);
 const toDelete = ref<TripLogEntry | null>(null);
 
 const canEdit = computed(
-  () => trip.value?.status === "assigned" || trip.value?.status === "in_progress",
+  () =>
+    trip.value?.status === "assigned" || trip.value?.status === "in_progress",
 );
 const money = (n?: number) => `$ ${Number(n ?? 0).toFixed(2)}`;
 
@@ -64,10 +65,20 @@ onMounted(reload);
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/chofer" />
+      <v-btn
+        icon="mdi-arrow-left"
+        aria-label="Volver"
+        variant="text"
+        to="/chofer"
+      />
       <h1 class="text-h6 font-weight-bold">{{ trip?.code || "Viaje" }}</h1>
       <v-spacer />
-      <v-chip v-if="trip" :color="tripStatus(trip.status).color" size="small" label>
+      <v-chip
+        v-if="trip"
+        :color="tripStatus(trip.status).color"
+        size="small"
+        label
+      >
         {{ tripStatus(trip.status).label }}
       </v-chip>
     </div>
@@ -80,7 +91,9 @@ onMounted(reload);
         </div>
         <div class="text-caption text-medium-emphasis">
           {{ trip.truck?.plate }}
-          <span v-if="trip.cargoDescription"> · {{ trip.cargoDescription }}</span>
+          <span v-if="trip.cargoDescription">
+            · {{ trip.cargoDescription }}</span
+          >
         </div>
 
         <div class="d-flex ga-2 mt-3 flex-wrap">
@@ -128,7 +141,7 @@ onMounted(reload);
           <div class="font-weight-bold">{{ money(summary.totalAdvances) }}</div>
         </div>
         <div>
-          <div class="text-caption">Neto a rendir</div>
+          <div class="text-caption">Diferencia</div>
           <div class="font-weight-bold">{{ money(summary.netToSettle) }}</div>
         </div>
       </v-card-text>
@@ -150,11 +163,15 @@ onMounted(reload);
       <v-card v-for="e in entries" :key="e.id" variant="outlined" class="mb-2">
         <v-card-text class="py-2 d-flex align-center ga-3">
           <v-avatar :color="expenseType(e.type).color" size="36">
-            <v-icon color="white" size="20">{{ expenseType(e.type).icon }}</v-icon>
+            <v-icon color="white" size="20">{{
+              expenseType(e.type).icon
+            }}</v-icon>
           </v-avatar>
           <div class="flex-grow-1">
             <div class="d-flex justify-space-between">
-              <span class="font-weight-bold">{{ expenseType(e.type).label }}</span>
+              <span class="font-weight-bold">{{
+                expenseType(e.type).label
+              }}</span>
               <span class="font-weight-bold">{{ money(e.amount) }}</span>
             </div>
             <div class="text-caption text-medium-emphasis">
@@ -164,7 +181,8 @@ onMounted(reload);
           </div>
           <v-btn
             v-if="canEdit"
-            icon="mdi-delete" aria-label="Eliminar"
+            icon="mdi-delete"
+            aria-label="Eliminar"
             size="x-small"
             variant="text"
             color="error"
@@ -177,7 +195,8 @@ onMounted(reload);
     <!-- FAB para agregar gasto -->
     <v-btn
       v-if="canEdit"
-      icon="mdi-plus" aria-label="Agregar"
+      icon="mdi-plus"
+      aria-label="Agregar"
       color="primary"
       size="large"
       position="fixed"
@@ -192,7 +211,11 @@ onMounted(reload);
       v-model="odoDialog"
       :trip-id="id"
       :mode="odoMode"
-      :suggested-km="odoMode === 'start' ? trip?.truck?.currentOdometerKm : trip?.startOdometerKm"
+      :suggested-km="
+        odoMode === 'start'
+          ? trip?.truck?.currentOdometerKm
+          : trip?.startOdometerKm
+      "
       @done="reload"
     />
     <ModalConfirm

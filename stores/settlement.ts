@@ -57,7 +57,7 @@ export const useSettlementStore = defineStore("settlement", {
       const general = useGeneralStore();
       try {
         await $api.post(`settlements/trip/${tripId}/generate/`);
-        general.setSuccessSnackbar("Liquidación generada");
+        general.setSuccessSnackbar("Rendición generada");
         await this.getSettlements();
         return true;
       } catch (e) {
@@ -71,7 +71,7 @@ export const useSettlementStore = defineStore("settlement", {
       const general = useGeneralStore();
       try {
         await $api.post(`settlements/${id}/close/`);
-        general.setSuccessSnackbar("Liquidación cerrada");
+        general.setSuccessSnackbar("Rendición cerrada");
         await this.getSettlements();
         return true;
       } catch (e) {

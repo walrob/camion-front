@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
 import { ALERT_LEVEL_PRIORITY } from "~/composables/useAlertStatus";
+import { lastNDaysRange } from "~/composables/useDateRange";
 
 export interface Alert {
   id: string;
@@ -14,13 +15,19 @@ export interface Alert {
 }
 
 export const useAlertStore = defineStore("alert", {
-  state: () => ({
-    alerts: [] as Alert[],
-    activeCount: 0,
-    loading: false,
-    filterLevel: null as string | null,
-    filterStatus: null as string | null,
-  }),
+  state: () => {
+    // Rango precargado: últimos 15 días (from/to siempre se envían al back).
+    const { from, to } = lastNDaysRange(15);
+    return {
+      alerts: [] as Alert[],
+      activeCount: 0,
+      loading: false,
+      filterLevel: null as string | null,
+      filterStatus: null as string | null,
+      filterFrom: from as string | null,
+      filterTo: to as string | null,
+    };
+  },
 
   getters: {
     sorted: (state) =>
@@ -29,7 +36,9 @@ export const useAlertStore = defineStore("alert", {
           (ALERT_LEVEL_PRIORITY[a.level] ?? 9) -
           (ALERT_LEVEL_PRIORITY[b.level] ?? 9);
         if (p !== 0) return p;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       }),
   },
 
@@ -43,6 +52,8 @@ export const useAlertStore = defineStore("alert", {
           params: {
             level: this.filterLevel || undefined,
             status: this.filterStatus || undefined,
+            from: this.filterFrom || undefined,
+            to: this.filterTo || undefined,
           },
         })
         .then((resp) => (this.alerts = resp.data))
@@ -54,7 +65,8 @@ export const useAlertStore = defineStore("alert", {
       const { $api } = useNuxtApp();
       try {
         const resp = await $api.get("alerts/count/");
-        this.activeCount = typeof resp.data === "number" ? resp.data : resp.data?.count ?? 0;
+        this.activeCount =
+          typeof resp.data === "number" ? resp.data : (resp.data?.count ?? 0);
       } catch {
         /* noop */
       }

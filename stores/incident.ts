@@ -1,21 +1,26 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
+import { lastNDaysRange } from "~/composables/useDateRange";
 import type { Incident } from "~/types/incident";
 
 export const useIncidentStore = defineStore("incident", {
-  state: () => ({
-    myIncidents: [] as Incident[],
-    incidents: [] as Incident[],
-    incident: null as Incident | null,
-    attachments: [] as any[],
-    staffUsers: [] as { id: string; name: string }[],
-    loading: false,
-    error: false,
-    filterType: null as string | null,
-    filterSeverity: null as string | null,
-    filterFrom: null as string | null,
-    filterTo: null as string | null,
-  }),
+  state: () => {
+    // Rango precargado: últimos 15 días (from/to siempre se envían al back).
+    const { from, to } = lastNDaysRange(15);
+    return {
+      myIncidents: [] as Incident[],
+      incidents: [] as Incident[],
+      incident: null as Incident | null,
+      attachments: [] as any[],
+      staffUsers: [] as { id: string; name: string }[],
+      loading: false,
+      error: false,
+      filterType: null as string | null,
+      filterSeverity: null as string | null,
+      filterFrom: from as string | null,
+      filterTo: to as string | null,
+    };
+  },
 
   actions: {
     // ───────── Chofer ─────────
@@ -118,18 +123,38 @@ export const useIncidentStore = defineStore("incident", {
     },
 
     async assign(id: string, assignedToUserId: string) {
-      return this.mutate(`incidents/${id}/assign/`, "patch", { assignedToUserId }, "Responsable asignado");
+      return this.mutate(
+        `incidents/${id}/assign/`,
+        "patch",
+        { assignedToUserId },
+        "Responsable asignado",
+      );
     },
 
     async changeStatus(id: string, status: string, note?: string) {
-      return this.mutate(`incidents/${id}/status/`, "patch", { status, note }, "Estado actualizado");
+      return this.mutate(
+        `incidents/${id}/status/`,
+        "patch",
+        { status, note },
+        "Estado actualizado",
+      );
     },
 
     async comment(id: string, note: string) {
-      return this.mutate(`incidents/${id}/comment/`, "post", { note }, "Comentario agregado");
+      return this.mutate(
+        `incidents/${id}/comment/`,
+        "post",
+        { note },
+        "Comentario agregado",
+      );
     },
 
-    async mutate(url: string, method: "patch" | "post", payload: any, msg: string) {
+    async mutate(
+      url: string,
+      method: "patch" | "post",
+      payload: any,
+      msg: string,
+    ) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       try {

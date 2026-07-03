@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
+import { lastNDaysRange } from "~/composables/useDateRange";
 
 export interface FuelTruckRow {
   truckId: string;
@@ -49,22 +50,26 @@ export interface FuelReport {
 }
 
 export const useFuelStore = defineStore("fuel", {
-  state: () => ({
-    report: null as FuelReport | null,
-    myLoads: [] as any[],
-    loading: false,
-    saving: false,
-    truckOptions: [] as any[],
-    driverOptions: [] as any[],
-    fleetOptions: [] as any[],
-    filters: {
-      truckId: null as string | null,
-      driverId: null as string | null,
-      fleetId: null as string | null,
-      from: null as string | null,
-      to: null as string | null,
-    },
-  }),
+  state: () => {
+    // Rango precargado: últimos 30 días (from/to siempre se envían al back).
+    const { from, to } = lastNDaysRange(30);
+    return {
+      report: null as FuelReport | null,
+      myLoads: [] as any[],
+      loading: false,
+      saving: false,
+      truckOptions: [] as any[],
+      driverOptions: [] as any[],
+      fleetOptions: [] as any[],
+      filters: {
+        truckId: null as string | null,
+        driverId: null as string | null,
+        fleetId: null as string | null,
+        from: from as string | null,
+        to: to as string | null,
+      },
+    };
+  },
 
   actions: {
     cleanParams() {

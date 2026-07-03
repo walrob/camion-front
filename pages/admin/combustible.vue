@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useTheme } from "vuetify";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
 import ResponsiveTable from "~/components/ResponsiveTable.vue";
@@ -19,9 +18,8 @@ const store = useFuelStore();
 const { report, loading, truckOptions, driverOptions, fleetOptions } =
   storeToRefs(store);
 
-const theme = useTheme();
-const hex = (name: string) =>
-  (theme.current.value.colors as Record<string, string>)[name] || name;
+// Paleta suave de gráficos (tintes claros y armónicos, no la saturación de la UI).
+const { chartHex: hex } = useChartColors();
 
 const money = (n?: number) => `$ ${Number(n ?? 0).toLocaleString("es-AR")}`;
 const num = (n?: number | null) =>
@@ -42,17 +40,42 @@ const kpis = computed(() => {
   ];
 });
 
-const barOptions = (color: string, categories: string[]) => ({
+// Eje compacto en miles de pesos ("$250k") para evitar montos con muchos ceros.
+const moneyK = (v: any) => {
+  const n = Number(v) || 0;
+  return `$${(n / 1000).toLocaleString("es-AR", { maximumFractionDigits: 1 })}k`;
+};
+
+const barOptions = (color: string, categories: string[], asMoney = false) => ({
   chart: { type: "bar" as const, fontFamily: "inherit", toolbar: { show: false } },
-  xaxis: { categories },
+  xaxis: {
+    categories,
+    labels: asMoney ? { formatter: moneyK } : {},
+  },
   colors: [hex(color)],
   plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: "60%" } },
   dataLabels: { enabled: false },
   grid: { borderColor: "rgba(0,0,0,0.06)" },
+  tooltip: asMoney ? { y: { formatter: (v: number) => money(v) } } : {},
 });
 
+// Top N que se muestra en la página; el detalle completo va al modal "Ver todos".
+const TOP = 10;
+
+const kmRows = computed(() =>
+  (report.value?.byTruck ?? [])
+    .filter((t) => t.kmPerLiter != null)
+    .slice()
+    .sort((a, b) => (b.kmPerLiter as number) - (a.kmPerLiter as number)),
+);
+const costRows = computed(() =>
+  (report.value?.byTruck ?? [])
+    .slice()
+    .sort((a, b) => b.totalCost - a.totalCost),
+);
+
 const kmPerLiterByTruck = computed(() => {
-  const data = (report.value?.byTruck ?? []).filter((t) => t.kmPerLiter != null);
+  const data = kmRows.value.slice(0, TOP);
   return {
     series: [{ name: "km/l", data: data.map((d) => d.kmPerLiter) }],
     options: barOptions("primary", data.map((d) => d.plate)),
@@ -60,12 +83,43 @@ const kmPerLiterByTruck = computed(() => {
 });
 
 const costByTruck = computed(() => {
-  const data = report.value?.byTruck ?? [];
+  const data = costRows.value.slice(0, TOP);
   return {
     series: [{ name: "Gasto", data: data.map((d) => d.totalCost) }],
-    options: barOptions("error", data.map((d) => d.plate)),
+    options: barOptions("error", data.map((d) => d.plate), true),
   };
 });
+
+// ── Modal "Ver todos": gráfico grande con todos los camiones (según filtro) ──
+const detailOpen = ref(false);
+const detailKind = ref<"kmPerLiter" | "cost">("cost");
+
+const openDetail = (kind: "kmPerLiter" | "cost") => {
+  detailKind.value = kind;
+  detailOpen.value = true;
+};
+
+const detailChart = computed(() => {
+  if (detailKind.value === "kmPerLiter") {
+    const d = kmRows.value;
+    return {
+      title: "Rendimiento por camión (km/l)",
+      series: [{ name: "km/l", data: d.map((x) => x.kmPerLiter) }],
+      options: barOptions("primary", d.map((x) => x.plate)),
+      count: d.length,
+    };
+  }
+  const d = costRows.value;
+  return {
+    title: "Gasto por camión (en miles $)",
+    series: [{ name: "Gasto", data: d.map((x) => x.totalCost) }],
+    options: barOptions("error", d.map((x) => x.plate), true),
+    count: d.length,
+  };
+});
+
+// Altura dinámica: ~34px por barra horizontal para que no se apretujen.
+const detailHeight = computed(() => Math.max(360, detailChart.value.count * 34));
 
 const truckHeaders = [
   { title: "Camión", value: "plate" },
@@ -183,8 +237,22 @@ onMounted(async () => {
       <v-row dense class="mb-2">
         <v-col cols="12" md="6">
           <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-2">
-              Rendimiento por camión (km/l)
+            <div class="d-flex align-center mb-2">
+              <div class="text-subtitle-2 font-weight-bold">
+                Rendimiento por camión (km/l)
+                <span class="text-caption text-medium-emphasis font-weight-regular">(Top 10)</span>
+              </div>
+              <v-spacer />
+              <v-btn
+                v-if="kmRows.length > TOP"
+                size="small"
+                variant="text"
+                color="primary"
+                append-icon="mdi-arrow-expand"
+                @click="openDetail('kmPerLiter')"
+              >
+                Ver todos
+              </v-btn>
             </div>
             <ClientOnly>
               <VueApexCharts
@@ -202,8 +270,22 @@ onMounted(async () => {
         </v-col>
         <v-col cols="12" md="6">
           <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-2">
-              Gasto por camión
+            <div class="d-flex align-center mb-2">
+              <div class="text-subtitle-2 font-weight-bold">
+                Gasto por camión
+                <span class="text-caption text-medium-emphasis font-weight-regular">(Top 10 · en miles $)</span>
+              </div>
+              <v-spacer />
+              <v-btn
+                v-if="costRows.length > TOP"
+                size="small"
+                variant="text"
+                color="error"
+                append-icon="mdi-arrow-expand"
+                @click="openDetail('cost')"
+              >
+                Ver todos
+              </v-btn>
             </div>
             <ClientOnly>
               <VueApexCharts
@@ -227,7 +309,7 @@ onMounted(async () => {
         <ResponsiveTable
           :headers="truckHeaders"
           :items="report.byTruck"
-          :all-items="true"
+          :items-per-page="10"
           no-data-text="Sin cargas en el período"
         >
           <template #item.totalLiters="{ item }">{{ num(item.totalLiters) }}</template>
@@ -249,7 +331,7 @@ onMounted(async () => {
         <ResponsiveTable
           :headers="driverHeaders"
           :items="report.byDriver"
-          :all-items="true"
+          :items-per-page="10"
           no-data-text="Sin cargas en el período"
         >
           <template #item.totalLiters="{ item }">{{ num(item.totalLiters) }}</template>
@@ -264,5 +346,35 @@ onMounted(async () => {
         </ResponsiveTable>
       </v-card>
     </template>
+
+    <!-- Modal: detalle completo del gráfico (todos los camiones del filtro) -->
+    <v-dialog v-model="detailOpen" max-width="920" scrollable>
+      <v-card rounded="lg">
+        <v-card-title class="d-flex align-center pe-2">
+          <span class="text-subtitle-1 font-weight-bold">
+            {{ detailChart.title }}
+            <span class="text-caption text-medium-emphasis font-weight-regular">
+              (todos)
+            </span>
+          </span>
+          <v-spacer />
+          <v-btn icon="mdi-close" variant="text" @click="detailOpen = false" />
+        </v-card-title>
+        <v-divider />
+        <v-card-text style="max-height: 70vh">
+          <ClientOnly v-if="detailChart.series[0].data.length">
+            <VueApexCharts
+              type="bar"
+              :height="detailHeight"
+              :options="detailChart.options"
+              :series="detailChart.series"
+            />
+          </ClientOnly>
+          <p v-else class="text-caption text-medium-emphasis py-8 text-center">
+            Sin datos en el período.
+          </p>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>

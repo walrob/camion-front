@@ -27,5 +27,16 @@ export type ThemeTypes = {
         grey100?: string;
         grey200?: string;
         muted?:string;
+        // Paleta suave/armónica exclusiva de gráficos (tintes más claros que los
+        // semánticos de UI, para que los charts no se vean saturados ni "arcoíris").
+        chartPrimary?: string;
+        chartSecondary?: string;
+        chartInfo?: string;
+        chartSuccess?: string;
+        chartWarning?: string;
+        chartError?: string;
+        chartAccent?: string;
+        chartAmber?: string;
+        chartGrey?: string;
     };
 };

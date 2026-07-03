@@ -11,7 +11,7 @@ definePageMeta({
   roles: ["admin", "manager", "auditor"],
 });
 
-useHead({ title: "Liquidaciones" });
+useHead({ title: "Rendiciones" });
 
 const settlementStore = useSettlementStore();
 const { settlements, finishedTrips, loading, pagination } =
@@ -72,10 +72,10 @@ onMounted(() => settlementStore.getSettlements());
 
 <template>
   <div>
-    <PageHeader title="Liquidaciones" subtitle="Rendiciones y cierres por viaje o período">
+    <PageHeader title="Rendiciones" subtitle="Cierres de gastos por viaje o período">
       <template #actions>
         <v-btn color="primary" prepend-icon="mdi-file-document-plus" @click="openGenerate">
-          Generar liquidación
+          Generar rendición
         </v-btn>
       </template>
     </PageHeader>
@@ -139,7 +139,7 @@ onMounted(() => settlementStore.getSettlements());
     <!-- Diálogo generar -->
     <v-dialog v-model="genDialog" max-width="520">
       <v-card>
-        <v-card-title class="text-h6 font-weight-bold">Generar liquidación</v-card-title>
+        <v-card-title class="text-h6 font-weight-bold">Generar rendición</v-card-title>
         <v-card-text>
           <v-select
             v-model="selectedTrip"
@@ -163,8 +163,8 @@ onMounted(() => settlementStore.getSettlements());
 
     <ModalConfirm
       v-model="confirm"
-      title="Cerrar liquidación"
-      description="<p>¿Cerrar esta liquidación? No podrá recalcularse.</p>"
+      title="Cerrar rendición"
+      description="<p>¿Cerrar esta rendición? No podrá recalcularse.</p>"
       @save="onConfirmClose"
     />
   </div>

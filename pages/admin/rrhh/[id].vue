@@ -60,7 +60,37 @@ const fullName = computed(() =>
   employee.value ? `${employee.value.lastName}, ${employee.value.firstName}` : "",
 );
 
+const initials = computed(() => {
+  const e = employee.value;
+  if (!e) return "";
+  return `${e.firstName?.[0] ?? ""}${e.lastName?.[0] ?? ""}`.toUpperCase();
+});
+
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString() : "-");
+
+// Datos de contacto/legajo como items con ícono, para aprovechar el ancho.
+type InfoItem = {
+  icon: string;
+  tone: string;
+  label: string;
+  value: string;
+  full?: boolean;
+};
+const infoItems = computed<InfoItem[]>(() => {
+  const e = employee.value;
+  if (!e) return [];
+  const emergency = e.emergencyContactName
+    ? `${e.emergencyContactName}${e.emergencyContactPhone ? ` (${e.emergencyContactPhone})` : ""}`
+    : "-";
+  return [
+    { icon: "mdi-card-account-details-outline", tone: "primary", label: "DNI/CUIL", value: e.documentId || "-" },
+    { icon: "mdi-phone-outline", tone: "info", label: "Teléfono", value: e.phone || "-" },
+    { icon: "mdi-calendar-check-outline", tone: "success", label: "Ingreso", value: fmtDate(e.hireDate) },
+    { icon: "mdi-map-marker-outline", tone: "error", label: "Domicilio", value: e.address || "-" },
+    { icon: "mdi-lifebuoy", tone: "warning", label: "Contacto emergencia", value: emergency },
+    { icon: "mdi-note-text-outline", tone: "secondary", label: "Notas", value: e.notes || "-", full: true },
+  ];
+});
 
 const openNewCert = () => {
   selectedCert.value = null;
@@ -117,50 +147,51 @@ onMounted(() => hrStore.getEmployee(id));
       <v-window v-model="tab">
         <!-- DATOS -->
         <v-window-item value="data">
-          <v-card variant="outlined" class="pa-4">
-            <v-row dense>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">DNI/CUIL</div>
-                <div>{{ employee.documentId }}</div>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">Puesto</div>
-                <v-chip :color="position(employee.position).color" size="small" label>
-                  {{ position(employee.position).label }}
-                </v-chip>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">Estado</div>
-                <v-chip
-                  :color="employmentStatus(employee.employmentStatus).color"
-                  size="small"
-                  label
-                >
-                  {{ employmentStatus(employee.employmentStatus).label }}
-                </v-chip>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">Teléfono</div>
-                <div>{{ employee.phone || "-" }}</div>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">Ingreso</div>
-                <div>{{ fmtDate(employee.hireDate) }}</div>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">Domicilio</div>
-                <div>{{ employee.address || "-" }}</div>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <div class="text-caption text-medium-emphasis">Contacto emergencia</div>
-                <div>
-                  {{ employee.emergencyContactName || "-" }}
-                  {{ employee.emergencyContactPhone ? `(${employee.emergencyContactPhone})` : "" }}
+          <v-card border flat rounded="lg" class="overflow-hidden">
+            <!-- Hero: identidad + estado -->
+            <div class="d-flex align-center ga-4 pa-4 flex-wrap profile-hero">
+              <v-avatar size="64" color="primary" variant="tonal">
+                <span class="text-h6 font-weight-bold">{{ initials }}</span>
+              </v-avatar>
+              <div class="flex-grow-1 min-w-0">
+                <div class="text-h6 font-weight-bold">{{ fullName }}</div>
+                <div class="d-flex ga-2 mt-1 flex-wrap">
+                  <v-chip :color="position(employee.position).color" size="small" label>
+                    <v-icon start size="14">mdi-briefcase-outline</v-icon>
+                    {{ position(employee.position).label }}
+                  </v-chip>
+                  <v-chip
+                    :color="employmentStatus(employee.employmentStatus).color"
+                    size="small"
+                    label
+                  >
+                    <v-icon start size="14">mdi-circle-medium</v-icon>
+                    {{ employmentStatus(employee.employmentStatus).label }}
+                  </v-chip>
                 </div>
-              </v-col>
-              <v-col cols="12">
-                <div class="text-caption text-medium-emphasis">Notas</div>
-                <div>{{ employee.notes || "-" }}</div>
+              </div>
+            </div>
+
+            <v-divider />
+
+            <!-- Detalle -->
+            <v-row dense class="pa-4">
+              <v-col
+                v-for="item in infoItems"
+                :key="item.label"
+                cols="12"
+                :sm="item.full ? 12 : 6"
+                :md="item.full ? 12 : 4"
+              >
+                <div class="d-flex align-start ga-3 info-item">
+                  <v-avatar :color="item.tone" variant="tonal" rounded="lg" size="38">
+                    <v-icon :color="item.tone" size="20">{{ item.icon }}</v-icon>
+                  </v-avatar>
+                  <div class="min-w-0">
+                    <div class="text-caption text-medium-emphasis">{{ item.label }}</div>
+                    <div class="text-body-2 font-weight-medium text-break">{{ item.value }}</div>
+                  </div>
+                </div>
               </v-col>
             </v-row>
           </v-card>
@@ -260,3 +291,22 @@ onMounted(() => hrStore.getEmployee(id));
     />
   </div>
 </template>
+
+<style scoped>
+.profile-hero {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-primary), 0.06),
+    rgba(var(--v-theme-primary), 0.01)
+  );
+}
+.info-item {
+  padding: 8px 0;
+}
+.min-w-0 {
+  min-width: 0;
+}
+.text-break {
+  overflow-wrap: anywhere;
+}
+</style>

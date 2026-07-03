@@ -36,6 +36,16 @@ const FleetLight: ThemeTypes = {
     "on-surface-variant": "#ffffff",
     grey100: "#F8FAFC",
     grey200: "#F1F5F9",
+    // Paleta de gráficos: tintes suaves y armónicos (no la saturación de la UI).
+    chartPrimary: "#5B8DEF",
+    chartSecondary: "#3FBFB5",
+    chartInfo: "#56C4E0",
+    chartSuccess: "#6FC79A",
+    chartWarning: "#ED9F52",
+    chartError: "#E87C7C",
+    chartAccent: "#9B8CEC",
+    chartAmber: "#F1C85A",
+    chartGrey: "#AEB8C4",
   },
 };
 export { FleetLight };

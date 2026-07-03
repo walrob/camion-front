@@ -30,9 +30,7 @@ const saving = ref(false);
 const isEdit = computed(() => !!props.trip?.id);
 
 const emptyForm = (): Partial<Trip> => ({
-  truckId: "",
   trailerId: null,
-  driverId: "",
   origin: "",
   destination: "",
   cargoDescription: "",

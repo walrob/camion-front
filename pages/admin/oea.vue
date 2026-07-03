@@ -121,6 +121,7 @@ onMounted(async () => {
       :headers="headers"
       :items="list"
       :loading="loading"
+      all-items
       no-data-text="No hay planillas registradas"
     >
       <template #item.driverName="{ item }">{{ driverName(item.driver) }}</template>

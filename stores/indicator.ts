@@ -1,21 +1,29 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
+import { lastNDaysRange } from "~/composables/useDateRange";
 
 export const useIndicatorStore = defineStore("indicator", {
-  state: () => ({
-    summary: null as any,
-    loading: false,
-    truckOptions: [] as any[],
-    driverOptions: [] as any[],
-    fleetOptions: [] as any[],
-    filters: {
-      truckId: null as string | null,
-      driverId: null as string | null,
-      fleetId: null as string | null,
-      from: null as string | null,
-      to: null as string | null,
-    },
-  }),
+  state: () => {
+    // Rango precargado: últimos 30 días (from/to siempre se envían al back).
+    const { from, to } = lastNDaysRange(30);
+    return {
+      summary: null as any,
+      loading: false,
+      // Detalle completo de gastos (modal "Ver todos"); se pide bajo demanda.
+      expenseDetail: [] as { key: string; total: number }[],
+      detailLoading: false,
+      truckOptions: [] as any[],
+      driverOptions: [] as any[],
+      fleetOptions: [] as any[],
+      filters: {
+        truckId: null as string | null,
+        driverId: null as string | null,
+        fleetId: null as string | null,
+        from: from as string | null,
+        to: to as string | null,
+      },
+    };
+  },
 
   actions: {
     cleanParams() {
@@ -35,6 +43,21 @@ export const useIndicatorStore = defineStore("indicator", {
         .then((resp) => (this.summary = resp.data))
         .catch((e) => general.setErrorSnackbar(e))
         .finally(() => (this.loading = false));
+    },
+
+    // Lista completa de gastos por camión/chofer, según el filtro aplicado.
+    async getExpenseDetail(group: "truck" | "driver") {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.detailLoading = true;
+      this.expenseDetail = [];
+      return await $api
+        .get("indicators/expenses/", {
+          params: { ...this.cleanParams(), group },
+        })
+        .then((resp) => (this.expenseDetail = resp.data))
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.detailLoading = false));
     },
 
     async loadOptions() {

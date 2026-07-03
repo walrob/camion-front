@@ -108,19 +108,42 @@ onMounted(async () => {
         <v-card
           v-for="u in upcoming"
           :key="u.plan.id"
-          variant="outlined"
-          class="mb-2"
-          :style="`border-left: 4px solid ${u.remaining < 0 ? '#F44336' : '#FF9800'}`"
+          border
+          flat
+          rounded="lg"
+          class="mb-3 accent-card"
+          :style="`--accent: ${u.remaining < 0 ? '#F44336' : '#FF9800'}`"
         >
-          <v-card-text class="py-2 d-flex align-center ga-3">
-            <v-icon :color="u.remaining < 0 ? 'error' : 'warning'">mdi-wrench-clock</v-icon>
-            <div>
-              <div class="font-weight-bold">
-                {{ u.plan.truck?.plate }} · {{ u.plan.name }}
+          <div class="pa-3">
+            <div class="d-flex align-center ga-2">
+              <v-avatar
+                :color="u.remaining < 0 ? 'error' : 'warning'"
+                variant="tonal"
+                rounded="lg"
+                size="40"
+              >
+                <v-icon :color="u.remaining < 0 ? 'error' : 'warning'" size="20">
+                  mdi-wrench-clock
+                </v-icon>
+              </v-avatar>
+              <div class="flex-grow-1 min-w-0">
+                <div class="d-flex align-center ga-2 flex-wrap">
+                  <span class="text-subtitle-2 font-weight-bold">
+                    {{ u.plan.truck?.plate }} · {{ u.plan.name }}
+                  </span>
+                  <v-chip
+                    :color="u.remaining < 0 ? 'error' : 'warning'"
+                    size="x-small"
+                    label
+                    variant="tonal"
+                  >
+                    {{ u.remaining < 0 ? "Vencido" : "Próximo" }}
+                  </v-chip>
+                </div>
+                <div class="text-caption text-medium-emphasis">{{ u.reason }}</div>
               </div>
-              <div class="text-caption">{{ u.reason }}</div>
             </div>
-          </v-card-text>
+          </div>
         </v-card>
       </v-window-item>
 
@@ -227,3 +250,28 @@ onMounted(async () => {
     />
   </div>
 </template>
+
+<style scoped>
+/* Mismo estilo que las tarjetas de admin/alertas: barra de acento + hover. */
+.accent-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.accent-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent, #9e9e9e);
+}
+.accent-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.min-w-0 {
+  min-width: 0;
+}
+</style>

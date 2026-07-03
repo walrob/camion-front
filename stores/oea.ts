@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
+import { lastNDaysRange } from "~/composables/useDateRange";
 
 export interface OeaItem {
   id: string;
@@ -36,21 +37,25 @@ export interface OeaInspection {
 }
 
 export const useOeaStore = defineStore("oea", {
-  state: () => ({
-    list: [] as OeaInspection[],
-    meta: null as any,
-    current: null as OeaInspection | null,
-    myList: [] as OeaInspection[],
-    loading: false,
-    saving: false,
-    filters: {
-      truckId: null as string | null,
-      driverId: null as string | null,
-      result: null as string | null,
-      from: null as string | null,
-      to: null as string | null,
-    },
-  }),
+  state: () => {
+    // Rango precargado: últimos 30 días (from/to siempre se envían al back).
+    const { from, to } = lastNDaysRange(30);
+    return {
+      list: [] as OeaInspection[],
+      meta: null as any,
+      current: null as OeaInspection | null,
+      myList: [] as OeaInspection[],
+      loading: false,
+      saving: false,
+      filters: {
+        truckId: null as string | null,
+        driverId: null as string | null,
+        result: null as string | null,
+        from: from as string | null,
+        to: to as string | null,
+      },
+    };
+  },
 
   getters: {
     isSigned: (state) => !!state.current?.signedAt,
@@ -72,7 +77,8 @@ export const useOeaStore = defineStore("oea", {
       this.loading = true;
       try {
         const resp = await $api.get("oea/", {
-          params: this.cleanParams({ page, limit: 20 }),
+          params: this.cleanParams({ page }),
+          // params: this.cleanParams({ page, limit: 20 }),
         });
         this.list = resp.data.items;
         this.meta = resp.data.meta;
@@ -163,7 +169,9 @@ export const useOeaStore = defineStore("oea", {
       const general = useGeneralStore();
       this.saving = true;
       try {
-        const file = new File([signatureBlob], "firma.png", { type: "image/png" });
+        const file = new File([signatureBlob], "firma.png", {
+          type: "image/png",
+        });
         const att = await this.uploadAttachment("oea_signature", id, file);
         await $api.post(`oea/${id}/sign/`, {
           signatureKey: att.s3Key,

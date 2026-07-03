@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
-import { useTheme } from "vuetify";
 // ApexCharts diferido: se carga en un chunk aparte solo al renderizar el gráfico.
 const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
 import PageHeader from "~/components/shared/PageHeader.vue";
@@ -19,16 +18,9 @@ useHead({ title: "Dashboard" });
 const dashboardStore = useDashboardStore();
 const { overview, loading } = storeToRefs(dashboardStore);
 
-// Colores de gráficos derivados del tema (unifica con la identidad de marca).
-const theme = useTheme();
-const COLOR_FALLBACK: Record<string, string> = {
-  grey: "#94A3B8",
-  amber: "#F59E0B",
-};
-const hex = (name: string) =>
-  (theme.current.value.colors as Record<string, string>)[name] ||
-  COLOR_FALLBACK[name] ||
-  name;
+// Colores de gráficos: paleta suave y armónica derivada del tema (tintes más
+// claros que la UI, para que los donuts no se vean saturados ni "arcoíris").
+const { chartHex: hex } = useChartColors();
 
 const donutBase = {
   legend: { position: "bottom" as const },

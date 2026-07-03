@@ -10,6 +10,7 @@ import {
 } from "~/composables/useDocumentStatus";
 import DocumentFormDialog from "~/components/document/DocumentFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import EmptyState from "~/components/shared/EmptyState.vue";
 
 definePageMeta({
   layout: "admin",
@@ -35,6 +36,13 @@ const headers = [
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions" },
 ];
+
+const STATUS_HEX: Record<string, string> = {
+  valid: "#4CAF50",
+  expiring: "#FF9800",
+  expired: "#F44336",
+};
+const statusHex = (s: string) => STATUS_HEX[s] ?? "#9E9E9E";
 
 const canAdd = () => store.ownerType === "company" || !!store.ownerId;
 
@@ -148,31 +156,42 @@ onMounted(async () => {
 
       <!-- VENCIMIENTOS -->
       <v-window-item value="expiring">
-        <p v-if="!expiring.length" class="text-body-2 text-medium-emphasis">
-          No hay documentos por vencer ni vencidos.
-        </p>
+        <EmptyState
+          v-if="!expiring.length"
+          icon="mdi-check-circle-outline"
+          text="No hay documentos por vencer ni vencidos."
+        />
         <v-card
           v-for="d in expiring"
           :key="d.id"
-          variant="outlined"
-          class="mb-2"
-          :style="`border-left: 4px solid ${d.status === 'expired' ? '#F44336' : '#FF9800'}`"
+          border
+          flat
+          rounded="lg"
+          class="mb-3 alert-card"
+          :style="`--accent: ${statusHex(d.status)}`"
         >
-          <v-card-text class="py-2 d-flex align-center ga-3">
-            <v-icon :color="documentStatus(d.status).color">mdi-file-alert</v-icon>
-            <div class="flex-grow-1">
-              <div class="font-weight-bold">
-                {{ documentCategory(d.category).label }}
+          <div class="d-flex align-center ga-3 pa-3">
+            <v-avatar :color="documentStatus(d.status).color" variant="tonal" rounded="lg" size="44">
+              <v-icon :color="documentStatus(d.status).color" size="22">mdi-file-alert-outline</v-icon>
+            </v-avatar>
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex align-center ga-2 flex-wrap">
+                <span class="text-subtitle-2 font-weight-bold">
+                  {{ documentCategory(d.category).label }}
+                </span>
                 <span class="text-caption text-medium-emphasis">
-                  · {{ ownerTypeLabel(d.ownerType).label }}
+                  {{ ownerTypeLabel(d.ownerType).label }}
                 </span>
               </div>
-              <div class="text-caption">Vence: {{ d.expiryDate || "-" }}</div>
+              <div class="d-flex align-center ga-1 text-caption text-medium-emphasis mt-1">
+                <v-icon size="14">mdi-calendar-clock</v-icon>
+                <span>Vence {{ d.expiryDate || "-" }}</span>
+              </div>
             </div>
-            <v-chip :color="documentStatus(d.status).color" size="small" label>
+            <v-chip :color="documentStatus(d.status).color" size="small" label variant="flat">
               {{ documentStatus(d.status).label }}
             </v-chip>
-          </v-card-text>
+          </div>
         </v-card>
       </v-window-item>
     </v-window>
@@ -191,3 +210,27 @@ onMounted(async () => {
     />
   </div>
 </template>
+
+<style scoped>
+.alert-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.alert-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent, #9e9e9e);
+}
+.alert-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.min-w-0 {
+  min-width: 0;
+}
+</style>
