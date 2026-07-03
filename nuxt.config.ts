@@ -17,7 +17,11 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: "es" },
       charset: "utf-8",
-      viewport: "width=device-width, initial-scale=1",
+      // interactive-widget=resizes-content: al abrir el teclado en mobile el
+      // viewport (y las unidades dvh) se achica, así los inputs fijos/al fondo
+      // suben por encima del teclado en vez de quedar tapados.
+      viewport:
+        "width=device-width, initial-scale=1, interactive-widget=resizes-content",
       titleTemplate: "FleetLog",
       // titleTemplate: "%s | FleetLog",
       meta: [

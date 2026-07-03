@@ -81,7 +81,8 @@ onMounted(async () => {
       <v-card
         v-for="p in myList"
         :key="p.id"
-        variant="outlined"
+        rounded="lg"
+        elevation="2"
         class="mb-2"
         @click="router.push(`/chofer/oea/${p.id}`)"
       >

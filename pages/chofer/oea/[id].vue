@@ -119,7 +119,7 @@ onMounted(async () => {
 
     <template v-else-if="current">
       <!-- Sección 1: datos del transporte y documentación -->
-      <v-card variant="outlined" class="mb-3">
+      <v-card rounded="lg" elevation="2" class="mb-3">
         <v-card-text>
           <p class="text-subtitle-2 font-weight-bold mb-2">
             Transporte y documentación

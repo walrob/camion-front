@@ -20,8 +20,11 @@ useHead({ title: "Documentos" });
 
 const store = useDocumentStore();
 const { documents, expiring, ownerOptions, loading } = storeToRefs(store);
-const { documentCategory, documentStatus, ownerType: ownerTypeLabel } =
-  useDocumentStatus();
+const {
+  documentCategory,
+  documentStatus,
+  ownerType: ownerTypeLabel,
+} = useDocumentStatus();
 
 const tab = ref("manager");
 const dialog = ref(false);
@@ -51,7 +54,8 @@ const askDelete = (d: any) => {
   confirm.value = true;
 };
 const onConfirmDelete = async (payload: { resp: boolean }) => {
-  if (payload.resp && toDelete.value) await store.deleteDocument(toDelete.value.id);
+  if (payload.resp && toDelete.value)
+    await store.deleteDocument(toDelete.value.id);
   toDelete.value = null;
 };
 
@@ -77,13 +81,22 @@ onMounted(async () => {
 
 <template>
   <div>
-    <PageHeader title="Centro Documental" subtitle="Documentación de unidades, choferes y empresa" />
+    <PageHeader
+      title="Centro Documental"
+      subtitle="Documentación de unidades, choferes y empresa"
+    />
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="manager">Gestor</v-tab>
       <v-tab value="expiring">
         Vencimientos
-        <v-badge v-if="expiring.length" :content="expiring.length" color="error" inline class="ml-2" />
+        <v-badge
+          v-if="expiring.length"
+          :content="expiring.length"
+          color="error"
+          inline
+          class="ml-2"
+        />
       </v-tab>
     </v-tabs>
 
@@ -127,24 +140,47 @@ onMounted(async () => {
             style="max-width: 200px"
           />
           <v-spacer />
-          <v-btn color="primary" prepend-icon="mdi-plus" :disabled="!canAdd()" @click="dialog = true">
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-plus"
+            :disabled="!canAdd()"
+            @click="dialog = true"
+          >
             Nuevo documento
           </v-btn>
         </div>
 
-        <ResponsiveTable :headers="headers" :items="documents" :loading="loading" :error="store.error" all-items @retry="store.getDocuments()">
+        <ResponsiveTable
+          :headers="headers"
+          :items="documents"
+          :loading="loading"
+          :error="store.error"
+          all-items
+          @retry="store.getDocuments()"
+        >
           <template #item.category="{ item }">
             {{ documentCategory(item.category).label }}
           </template>
           <template #item.status="{ item }">
-            <v-chip :color="documentStatus(item.status).color" size="small" label>
+            <v-chip
+              :color="documentStatus(item.status).color"
+              size="small"
+              label
+            >
               {{ documentStatus(item.status).label }}
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon="mdi-file-eye" aria-label="Ver archivo" size="small" variant="text" @click="store.openFile(item.id)" />
             <v-btn
-              icon="mdi-delete" aria-label="Eliminar"
+              icon="mdi-file-eye"
+              aria-label="Ver archivo"
+              size="small"
+              variant="text"
+              @click="store.openFile(item.id)"
+            />
+            <v-btn
+              icon="mdi-delete"
+              aria-label="Eliminar"
               size="small"
               variant="text"
               color="error"
@@ -171,8 +207,10 @@ onMounted(async () => {
           :style="`--accent: ${statusHex(d.status)}`"
         >
           <div class="d-flex align-center ga-3 pa-3">
-            <v-avatar :color="documentStatus(d.status).color" variant="tonal" rounded="lg" size="44">
-              <v-icon :color="documentStatus(d.status).color" size="22">mdi-file-alert-outline</v-icon>
+            <v-avatar rounded="lg" size="44">
+              <v-icon :color="documentStatus(d.status).color" size="22"
+                >mdi-file-alert-outline</v-icon
+              >
             </v-avatar>
             <div class="flex-grow-1 min-w-0">
               <div class="d-flex align-center ga-2 flex-wrap">
@@ -183,12 +221,19 @@ onMounted(async () => {
                   {{ ownerTypeLabel(d.ownerType).label }}
                 </span>
               </div>
-              <div class="d-flex align-center ga-1 text-caption text-medium-emphasis mt-1">
+              <div
+                class="d-flex align-center ga-1 text-caption text-medium-emphasis mt-1"
+              >
                 <v-icon size="14">mdi-calendar-clock</v-icon>
                 <span>Vence {{ d.expiryDate || "-" }}</span>
               </div>
             </div>
-            <v-chip :color="documentStatus(d.status).color" size="small" label variant="flat">
+            <v-chip
+              :color="documentStatus(d.status).color"
+              size="small"
+              label
+              variant="flat"
+            >
               {{ documentStatus(d.status).label }}
             </v-chip>
           </div>

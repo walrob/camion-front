@@ -83,7 +83,7 @@ onMounted(reload);
       </v-chip>
     </div>
 
-    <v-card v-if="trip" variant="outlined" class="mb-4">
+    <v-card v-if="trip" rounded="lg" elevation="2" class="mb-4">
       <v-card-text>
         <div class="text-body-2">
           <v-icon size="16">mdi-map-marker-path</v-icon>
@@ -160,10 +160,20 @@ onMounted(reload);
       <p v-if="!entries.length" class="text-body-2 text-medium-emphasis">
         Sin gastos registrados.
       </p>
-      <v-card v-for="e in entries" :key="e.id" variant="outlined" class="mb-2">
+      <v-card
+        v-for="e in entries"
+        :key="e.id"
+        rounded="lg"
+        elevation="2"
+        class="mb-2"
+      >
         <v-card-text class="py-2 d-flex align-center ga-3">
-          <v-avatar :color="expenseType(e.type).color" size="36">
-            <v-icon color="white" size="20">{{
+          <v-avatar
+            :color="expenseType(e.type).color"
+            size="36"
+            variant="tonal"
+          >
+            <v-icon :color="expenseType(e.type).color" size="20">{{
               expenseType(e.type).icon
             }}</v-icon>
           </v-avatar>

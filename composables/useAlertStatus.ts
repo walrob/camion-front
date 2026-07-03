@@ -1,10 +1,10 @@
 import type { StatusOption } from "~/composables/useFleetStatus";
 
 export const alertLevelOptions: StatusOption[] = [
-  { value: "red", label: "🔴 Crítica", color: "error" },
-  { value: "orange", label: "🟠 Alta", color: "warning" },
-  { value: "yellow", label: "🟡 Media", color: "amber" },
-  { value: "green", label: "🟢 Aviso", color: "success" },
+  { value: "red", label: "Crítica", color: "error" },
+  { value: "orange", label: "Alta", color: "warning" },
+  { value: "yellow", label: "Media", color: "amber" },
+  { value: "green", label: "Aviso", color: "success" },
 ];
 
 export const alertStatusOptions: StatusOption[] = [
@@ -23,7 +23,11 @@ export const ALERT_LEVEL_PRIORITY: Record<string, number> = {
 
 export const useAlertStatus = () => {
   const find = (opts: StatusOption[], v?: string) =>
-    opts.find((o) => o.value === v) ?? { value: v ?? "", label: v ?? "-", color: "grey" };
+    opts.find((o) => o.value === v) ?? {
+      value: v ?? "",
+      label: v ?? "-",
+      color: "grey",
+    };
   return {
     alertLevelOptions,
     alertStatusOptions,

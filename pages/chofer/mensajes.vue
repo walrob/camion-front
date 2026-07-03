@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { useMessageStore } from "~/stores/message";
 import { useAuthStore } from "~/stores/auth";
 import { useMessageSocket } from "~/composables/useMessageSocket";
+import { useKeyboardInset } from "~/composables/useKeyboardInset";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 
 definePageMeta({ layout: "driver" });
@@ -21,6 +22,9 @@ const scrollDown = () =>
   nextTick(() => {
     if (listRef.value) listRef.value.scrollTop = listRef.value.scrollHeight;
   });
+
+// Refuerzo iOS: sube el input sobre el teclado y mantiene el chat al final.
+useKeyboardInset(scrollDown);
 
 const send = async () => {
   if (!text.value.trim()) return;
@@ -96,14 +100,25 @@ onBeforeUnmount(() => socket.disconnect());
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 200px);
+  /*
+    Llena el alto disponible entre el app bar y la barra inferior.
+    dvh (dynamic viewport height) se ajusta al viewport visible en mobile y,
+    con `interactive-widget=resizes-content`, se achica al abrir el teclado,
+    subiendo el input por encima de él.
+    140px = app bar (48) + padding sup. del contenedor (12) + padding inf. (80).
+    --keyboard-inset (visualViewport) refuerza el caso iOS, donde dvh no se achica.
+  */
+  height: calc(100dvh - 140px - var(--keyboard-inset, 0px));
 }
 .chat-list {
   flex: 1;
+  min-height: 0; /* permite el scroll interno dentro del flex */
   overflow-y: auto;
   padding: 8px 0;
 }
 .chat-input {
   padding-top: 8px;
+  /* El input queda pegado al fondo del wrapper (justo sobre la barra inferior). */
+  background: rgb(var(--v-theme-surface));
 }
 </style>

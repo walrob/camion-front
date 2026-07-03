@@ -165,12 +165,7 @@ onBeforeUnmount(() => socket.disconnect());
             >
               <v-card-text class="py-3">
                 <div class="d-flex align-center ga-2 mb-1">
-                  <v-avatar
-                    :color="incidentType(i.type).color"
-                    variant="tonal"
-                    size="30"
-                    rounded="lg"
-                  >
+                  <v-avatar size="30" rounded="lg">
                     <v-icon :color="incidentType(i.type).color" size="18">
                       {{ incidentType(i.type).icon }}
                     </v-icon>

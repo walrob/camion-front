@@ -17,26 +17,64 @@ const { pendingCount } = useOfflineQueue();
 
 // Navegación inferior del chofer: una mano, objetivos táctiles grandes (≥48px).
 const navItems = [
-  { value: "inicio", title: "Inicio", icon: "mdi-home-variant-outline", to: "/chofer" },
-  { value: "incidentes", title: "Incidentes", icon: "mdi-alert-outline", to: "/chofer/incidentes" },
-  { value: "documentos", title: "Docs", icon: "mdi-file-document-outline", to: "/chofer/documentos" },
-  { value: "mensajes", title: "Mensajes", icon: "mdi-message-outline", to: "/chofer/mensajes" },
+  {
+    value: "inicio",
+    title: "Inicio",
+    icon: "mdi-home-variant-outline",
+    to: "/chofer",
+  },
+  {
+    value: "incidentes",
+    title: "Incidentes",
+    icon: "mdi-alert-outline",
+    to: "/chofer/incidentes",
+  },
+  {
+    value: "documentos",
+    title: "Docs",
+    icon: "mdi-file-document-outline",
+    to: "/chofer/documentos",
+  },
+  {
+    value: "mensajes",
+    title: "Mensajes",
+    icon: "mdi-message-outline",
+    to: "/chofer/mensajes",
+  },
 ];
 </script>
 
 <template>
   <v-locale-provider>
     <v-app>
-      <v-app-bar density="compact" color="primary" flat>
-        <v-app-bar-title class="text-subtitle-1 font-weight-bold">FleetLog</v-app-bar-title>
+      <v-app-bar density="compact" color="surface" flat border="b">
+        <LayoutFullLogoHorizontal :height="30" class="ms-3" />
         <template #append>
-          <v-chip v-if="!isOnline" color="white" size="small" variant="flat" class="mr-2">
+          <v-chip
+            v-if="!isOnline"
+            color="error"
+            size="small"
+            variant="tonal"
+            class="mr-2"
+          >
             <v-icon start size="14">mdi-wifi-off</v-icon> Sin conexión
           </v-chip>
-          <v-chip v-if="pendingCount > 0" color="amber" size="small" variant="flat" class="mr-2">
+          <v-chip
+            v-if="pendingCount > 0"
+            color="warning"
+            size="small"
+            variant="tonal"
+            class="mr-2"
+          >
             <v-icon start size="14">mdi-sync</v-icon> {{ pendingCount }} pend.
           </v-chip>
-          <v-btn v-if="canInstall" size="small" variant="text" @click="promptInstall">
+          <v-btn
+            v-if="canInstall"
+            size="small"
+            variant="text"
+            color="primary"
+            @click="promptInstall"
+          >
             <v-icon start>mdi-download</v-icon> Instalar
           </v-btn>
         </template>

@@ -23,3 +23,18 @@
 .v-field {
     font-size: 0.875rem;
 }
+
+// Espaciado consistente entre campos de formulario dentro de diálogos/modales.
+// Con el default global `hide-details="auto"`, el área de mensajes se colapsa y
+// los inputs apilados quedan pegados. Este margen les da aire (solo en overlays;
+// no afecta las barras de filtro de las páginas).
+.v-overlay__content {
+    .v-card-text .v-input {
+        margin-bottom: 14px;
+    }
+
+    // Dentro de una grilla el gutter de las columnas ya separa: evitar doble espacio.
+    .v-card-text .v-row .v-input {
+        margin-bottom: 0;
+    }
+}

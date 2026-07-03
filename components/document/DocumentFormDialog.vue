@@ -125,7 +125,8 @@ const submit = async () => {
         <v-col cols="12">
           <v-file-input
             label="Archivo"
-            prepend-icon="mdi-paperclip"
+            prepend-icon=""
+            prepend-inner-icon="mdi-paperclip"
             variant="outlined"
             density="compact"
             hide-details

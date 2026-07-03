@@ -181,7 +181,8 @@ const submit = async () => {
             label="Foto del ticket"
             accept="image/*"
             capture="environment"
-            prepend-icon="mdi-camera"
+            prepend-icon=""
+            prepend-inner-icon="mdi-camera"
             variant="outlined"
             density="comfortable"
             hide-details

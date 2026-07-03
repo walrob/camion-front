@@ -82,7 +82,8 @@ onMounted(() => tripStore.getMyTrips());
         v-for="t in activeTrips"
         :key="t.id"
         class="mb-3"
-        variant="outlined"
+        rounded="lg"
+        elevation="2"
         @click="goDetail(t.id)"
       >
         <v-card-text>
@@ -133,6 +134,7 @@ onMounted(() => tripStore.getMyTrips());
           :key="t.id"
           class="mb-2"
           variant="tonal"
+          rounded="lg"
           @click="goDetail(t.id)"
         >
           <v-card-text class="py-2">

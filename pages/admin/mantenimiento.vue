@@ -85,13 +85,20 @@ watch(truckId, (id) => {
 });
 
 onMounted(async () => {
-  await Promise.all([store.getUpcoming(), store.getPlans(), store.getTruckOptions()]);
+  await Promise.all([
+    store.getUpcoming(),
+    store.getPlans(),
+    store.getTruckOptions(),
+  ]);
 });
 </script>
 
 <template>
   <div>
-    <PageHeader title="Mantenimiento" subtitle="Planes preventivos y órdenes de trabajo" />
+    <PageHeader
+      title="Mantenimiento"
+      subtitle="Planes preventivos y órdenes de trabajo"
+    />
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="upcoming">Próximos</v-tab>
@@ -116,13 +123,11 @@ onMounted(async () => {
         >
           <div class="pa-3">
             <div class="d-flex align-center ga-2">
-              <v-avatar
-                :color="u.remaining < 0 ? 'error' : 'warning'"
-                variant="tonal"
-                rounded="lg"
-                size="40"
-              >
-                <v-icon :color="u.remaining < 0 ? 'error' : 'warning'" size="20">
+              <v-avatar rounded="lg" size="40">
+                <v-icon
+                  :color="u.remaining < 0 ? 'error' : 'warning'"
+                  size="20"
+                >
                   mdi-wrench-clock
                 </v-icon>
               </v-avatar>
@@ -140,7 +145,9 @@ onMounted(async () => {
                     {{ u.remaining < 0 ? "Vencido" : "Próximo" }}
                   </v-chip>
                 </div>
-                <div class="text-caption text-medium-emphasis">{{ u.reason }}</div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ u.reason }}
+                </div>
               </div>
             </div>
           </div>
@@ -155,9 +162,20 @@ onMounted(async () => {
             Nuevo plan
           </v-btn>
         </div>
-        <ResponsiveTable :headers="planHeaders" :items="plans" :loading="loading" :error="store.error" all-items @retry="store.getPlans()">
+        <ResponsiveTable
+          :headers="planHeaders"
+          :items="plans"
+          :loading="loading"
+          :error="store.error"
+          all-items
+          @retry="store.getPlans()"
+        >
           <template #item.triggerType="{ item }">
-            <v-chip :color="triggerType(item.triggerType).color" size="x-small" label>
+            <v-chip
+              :color="triggerType(item.triggerType).color"
+              size="x-small"
+              label
+            >
               {{ triggerType(item.triggerType).label }}
             </v-chip>
           </template>
@@ -168,9 +186,16 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEditPlan(item)" />
             <v-btn
-              icon="mdi-delete" aria-label="Eliminar"
+              icon="mdi-pencil"
+              aria-label="Editar"
+              size="small"
+              variant="text"
+              @click="openEditPlan(item)"
+            />
+            <v-btn
+              icon="mdi-delete"
+              aria-label="Eliminar"
               size="small"
               variant="text"
               color="error"
@@ -221,7 +246,13 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEditOrder(item)" />
+            <v-btn
+              icon="mdi-pencil"
+              aria-label="Editar"
+              size="small"
+              variant="text"
+              @click="openEditOrder(item)"
+            />
           </template>
         </ResponsiveTable>
         <p v-else class="text-body-2 text-medium-emphasis">

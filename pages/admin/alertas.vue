@@ -41,7 +41,12 @@ onMounted(() => {
   <div>
     <PageHeader title="Alertas" subtitle="Bandeja priorizada en tiempo real">
       <template #actions>
-        <v-badge v-if="activeCount" :content="activeCount" color="error" inline />
+        <v-badge
+          v-if="activeCount"
+          :content="activeCount"
+          color="error"
+          inline
+        />
         <v-chip color="success" size="small" variant="tonal">
           <v-icon start size="14">mdi-circle</v-icon> En vivo
         </v-chip>
@@ -120,19 +125,35 @@ onMounted(() => {
       >
         <div class="pa-3">
           <div class="d-flex align-center ga-2">
-            <v-avatar :color="alertLevel(a.level).color" variant="tonal" rounded="lg" size="40">
-              <v-icon :color="alertLevel(a.level).color" size="20">mdi-bell-ring-outline</v-icon>
+            <v-avatar rounded="lg" size="40">
+              <v-icon :color="alertLevel(a.level).color" size="20"
+                >mdi-bell-ring-outline</v-icon
+              >
             </v-avatar>
             <div class="flex-grow-1 min-w-0">
               <div class="d-flex align-center ga-2 flex-wrap">
-                <span class="text-subtitle-2 font-weight-bold">{{ a.title }}</span>
-                <v-chip :color="alertLevel(a.level).color" size="x-small" label variant="tonal">
+                <span class="text-subtitle-2 font-weight-bold">{{
+                  a.title
+                }}</span>
+                <v-chip
+                  :color="alertLevel(a.level).color"
+                  size="x-small"
+                  label
+                  variant="tonal"
+                >
                   {{ alertLevel(a.level).label }}
                 </v-chip>
               </div>
-              <div class="text-caption text-medium-emphasis">{{ fmt(a.createdAt) }}</div>
+              <div class="text-caption text-medium-emphasis">
+                {{ fmt(a.createdAt) }}
+              </div>
             </div>
-            <v-chip :color="alertStatus(a.status).color" size="small" label variant="flat">
+            <v-chip
+              :color="alertStatus(a.status).color"
+              size="small"
+              label
+              variant="flat"
+            >
               {{ alertStatus(a.status).label }}
             </v-chip>
           </div>

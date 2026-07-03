@@ -34,15 +34,33 @@ onMounted(() => incidentStore.getMyIncidents());
       <p v-if="!myIncidents.length" class="text-body-2 text-medium-emphasis">
         No reportaste incidentes.
       </p>
-      <v-card v-for="i in myIncidents" :key="i.id" variant="outlined" class="mb-2">
+      <v-card
+        v-for="i in myIncidents"
+        :key="i.id"
+        rounded="lg"
+        elevation="2"
+        class="mb-2"
+      >
         <v-card-text class="py-2 d-flex align-center ga-3">
-          <v-avatar :color="incidentType(i.type).color" size="40">
-            <v-icon color="white">{{ incidentType(i.type).icon }}</v-icon>
+          <v-avatar
+            :color="incidentType(i.type).color"
+            size="40"
+            variant="tonal"
+          >
+            <v-icon :color="incidentType(i.type).color">{{
+              incidentType(i.type).icon
+            }}</v-icon>
           </v-avatar>
           <div class="flex-grow-1">
             <div class="d-flex justify-space-between">
-              <span class="font-weight-bold">{{ incidentType(i.type).label }}</span>
-              <v-chip :color="incidentStatus(i.status).color" size="x-small" label>
+              <span class="font-weight-bold">{{
+                incidentType(i.type).label
+              }}</span>
+              <v-chip
+                :color="incidentStatus(i.status).color"
+                size="x-small"
+                label
+              >
                 {{ incidentStatus(i.status).label }}
               </v-chip>
             </div>

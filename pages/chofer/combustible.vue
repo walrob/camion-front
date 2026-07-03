@@ -71,7 +71,8 @@ onMounted(async () => {
       <v-card
         v-for="l in myLoads"
         :key="l.id"
-        variant="outlined"
+        rounded="lg"
+        elevation="2"
         class="mb-2"
       >
         <v-card-text class="py-2 d-flex align-center ga-3">

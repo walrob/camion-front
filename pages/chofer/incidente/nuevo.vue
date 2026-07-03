@@ -40,20 +40,31 @@ const pick = (e: Event, target: "photo" | "audio" | "video") => {
 
 const submit = async () => {
   if (!selectedType.value) {
-    general.setSnackbar({ color: "warning", message: "Elegí el tipo de incidente." });
+    general.setSnackbar({
+      color: "warning",
+      message: "Elegí el tipo de incidente.",
+    });
     return;
   }
   if (!description.value.trim()) {
-    general.setSnackbar({ color: "warning", message: "Describí brevemente el incidente." });
+    general.setSnackbar({
+      color: "warning",
+      message: "Describí brevemente el incidente.",
+    });
     return;
   }
   if (!activeTrip.value) {
-    general.setSnackbar({ color: "error", message: "No tenés un viaje/camión activo." });
+    general.setSnackbar({
+      color: "error",
+      message: "No tenés un viaje/camión activo.",
+    });
     return;
   }
   saving.value = true;
   const pos = await getPosition();
-  const files = [photo.value, audio.value, video.value].filter(Boolean) as File[];
+  const files = [photo.value, audio.value, video.value].filter(
+    Boolean,
+  ) as File[];
 
   const ok = await incidentStore.createIncident(
     {
@@ -76,7 +87,12 @@ onMounted(() => tripStore.getMyTrips());
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/chofer/incidentes" />
+      <v-btn
+        icon="mdi-arrow-left"
+        aria-label="Volver"
+        variant="text"
+        to="/chofer/incidentes"
+      />
       <h1 class="text-h6 font-weight-bold">Reportar incidente</h1>
     </div>
 
@@ -109,7 +125,8 @@ onMounted(() => tripStore.getMyTrips());
         label="Foto"
         accept="image/*"
         capture="environment"
-        prepend-icon="mdi-camera"
+        prepend-icon=""
+        prepend-inner-icon="mdi-camera"
         variant="outlined"
         density="compact"
         hide-details
@@ -118,7 +135,8 @@ onMounted(() => tripStore.getMyTrips());
       <v-file-input
         label="Audio"
         accept="audio/*"
-        prepend-icon="mdi-microphone"
+        prepend-icon=""
+        prepend-inner-icon="mdi-microphone"
         variant="outlined"
         density="compact"
         hide-details
@@ -128,7 +146,8 @@ onMounted(() => tripStore.getMyTrips());
         label="Video"
         accept="video/*"
         capture="environment"
-        prepend-icon="mdi-video"
+        prepend-icon=""
+        prepend-inner-icon="mdi-video"
         variant="outlined"
         density="compact"
         hide-details
