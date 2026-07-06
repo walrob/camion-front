@@ -65,9 +65,14 @@ onMounted(() => hrStore.getEmployees());
 
 <template>
   <div>
-    <PageHeader title="Recursos Humanos" subtitle="Legajos, permisos y vencimientos del personal">
+    <PageHeader
+      title="Recursos Humanos"
+      subtitle="Legajos, permisos y vencimientos del personal"
+    >
       <template #actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo empleado</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
+          >Nuevo empleado</v-btn
+        >
       </template>
     </PageHeader>
 
@@ -109,21 +114,39 @@ onMounted(() => hrStore.getEmployees());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="employees" :loading="loading" :error="hrStore.error" all-items @retry="hrStore.getEmployees()">
+    <ResponsiveTable
+      :headers="headers"
+      :items="employees"
+      :loading="loading"
+      :error="hrStore.error"
+      all-items
+      @retry="hrStore.getEmployees()"
+    >
       <template #item.position="{ item }">
         <v-chip :color="position(item.position).color" size="small" label>
           {{ position(item.position).label }}
         </v-chip>
       </template>
       <template #item.employmentStatus="{ item }">
-        <v-chip :color="employmentStatus(item.employmentStatus).color" size="small" label>
+        <v-chip
+          :color="employmentStatus(item.employmentStatus).color"
+          size="small"
+          label
+        >
           {{ employmentStatus(item.employmentStatus).label }}
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-eye" aria-label="Ver" size="small" variant="text" @click="goDetail(item)" />
         <v-btn
-          icon="mdi-delete" aria-label="Eliminar"
+          icon="mdi-eye"
+          aria-label="Ver"
+          size="small"
+          variant="text"
+          @click="goDetail(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
@@ -137,11 +160,16 @@ onMounted(() => hrStore.getEmployees());
         :model-value="pagination.currentPage"
         :length="pagination.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>
 
-    <EmployeeFormDialog v-model="dialog" :employee="selected" @saved="hrStore.getEmployees()" />
+    <EmployeeFormDialog
+      v-model="dialog"
+      :employee="selected"
+      @saved="hrStore.getEmployees()"
+    />
     <ModalConfirm
       v-model="confirm"
       title="Eliminar empleado"

@@ -56,7 +56,9 @@ export const useMessageStore = defineStore("message", {
       const general = useGeneralStore();
       try {
         const resp = await $api.post("messages/", payload);
-        this.messages.push(resp.data);
+        // Usamos append (dedup por id) porque el eco por WebSocket puede llegar
+        // antes que la respuesta del POST y agregar el mismo mensaje.
+        this.append(resp.data);
         return true;
       } catch (e) {
         general.setErrorSnackbar(e);

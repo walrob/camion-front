@@ -3,7 +3,10 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { useFleetStore } from "~/stores/fleet";
-import { truckStatusOptions, useFleetStatus } from "~/composables/useFleetStatus";
+import {
+  truckStatusOptions,
+  useFleetStatus,
+} from "~/composables/useFleetStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TruckFormDialog from "~/components/fleet/TruckFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
@@ -46,7 +49,8 @@ const askDelete = (truck: Truck) => {
   confirm.value = true;
 };
 const onConfirmDelete = async (payload: { resp: boolean }) => {
-  if (payload.resp && toDelete.value) await fleetStore.deleteTruck(toDelete.value.id);
+  if (payload.resp && toDelete.value)
+    await fleetStore.deleteTruck(toDelete.value.id);
   toDelete.value = null;
 };
 
@@ -119,9 +123,16 @@ onMounted(() => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete" aria-label="Eliminar"
+          icon="mdi-pencil"
+          aria-label="Editar"
+          size="small"
+          variant="text"
+          @click="openEdit(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
@@ -130,11 +141,15 @@ onMounted(() => {
       </template>
     </ResponsiveTable>
 
-    <div v-if="paginationTrucks.totalPages > 1" class="d-flex justify-center mt-3">
+    <div
+      v-if="paginationTrucks.totalPages > 1"
+      class="d-flex justify-center mt-3"
+    >
       <v-pagination
         :model-value="paginationTrucks.currentPage"
         :length="paginationTrucks.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>

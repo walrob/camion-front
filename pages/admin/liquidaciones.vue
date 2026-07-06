@@ -59,7 +59,8 @@ const askClose = (s: Settlement) => {
   confirm.value = true;
 };
 const onConfirmClose = async (payload: { resp: boolean }) => {
-  if (payload.resp && toClose.value) await settlementStore.close(toClose.value.id);
+  if (payload.resp && toClose.value)
+    await settlementStore.close(toClose.value.id);
   toClose.value = null;
 };
 const changePage = (page: number) => {
@@ -72,9 +73,16 @@ onMounted(() => settlementStore.getSettlements());
 
 <template>
   <div>
-    <PageHeader title="Rendiciones" subtitle="Cierres de gastos por viaje o período">
+    <PageHeader
+      title="Rendiciones"
+      subtitle="Cierres de gastos por viaje o período"
+    >
       <template #actions>
-        <v-btn color="primary" prepend-icon="mdi-file-document-plus" @click="openGenerate">
+        <v-btn
+          color="primary"
+          prepend-icon="mdi-file-document-plus"
+          @click="openGenerate"
+        >
           Generar rendición
         </v-btn>
       </template>
@@ -96,10 +104,23 @@ onMounted(() => settlementStore.getSettlements());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="settlements" :loading="loading" :error="settlementStore.error" all-items @retry="settlementStore.getSettlements()">
-      <template #item.driverName="{ item }">{{ driverName(item.trip?.driver) }}</template>
-      <template #item.totalExpenses="{ item }">{{ money(item.totalExpenses) }}</template>
-      <template #item.totalAdvances="{ item }">{{ money(item.totalAdvances) }}</template>
+    <ResponsiveTable
+      :headers="headers"
+      :items="settlements"
+      :loading="loading"
+      :error="settlementStore.error"
+      all-items
+      @retry="settlementStore.getSettlements()"
+    >
+      <template #item.driverName="{ item }">{{
+        driverName(item.trip?.driver)
+      }}</template>
+      <template #item.totalExpenses="{ item }">{{
+        money(item.totalExpenses)
+      }}</template>
+      <template #item.totalAdvances="{ item }">{{
+        money(item.totalAdvances)
+      }}</template>
       <template #item.netToSettle="{ item }">
         <span class="font-weight-bold">{{ money(item.netToSettle) }}</span>
       </template>
@@ -110,7 +131,8 @@ onMounted(() => settlementStore.getSettlements());
       </template>
       <template #item.actions="{ item }">
         <v-btn
-          icon="mdi-file-pdf-box" aria-label="Ver PDF"
+          icon="mdi-file-pdf-box"
+          aria-label="Ver PDF"
           size="small"
           variant="text"
           color="error"
@@ -132,6 +154,7 @@ onMounted(() => settlementStore.getSettlements());
         :model-value="pagination.currentPage"
         :length="pagination.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>
@@ -139,13 +162,17 @@ onMounted(() => settlementStore.getSettlements());
     <!-- Diálogo generar -->
     <v-dialog v-model="genDialog" max-width="520">
       <v-card>
-        <v-card-title class="text-h6 font-weight-bold">Generar rendición</v-card-title>
+        <v-card-title class="text-h6 font-weight-bold"
+          >Generar rendición</v-card-title
+        >
         <v-card-text>
           <v-select
             v-model="selectedTrip"
             :items="finishedTrips"
             item-value="id"
-            :item-title="(t: any) => `${t.code} · ${t.origin} → ${t.destination}`"
+            :item-title="
+              (t: any) => `${t.code} · ${t.origin} → ${t.destination}`
+            "
             label="Viaje finalizado"
             variant="outlined"
             density="comfortable"
@@ -154,7 +181,12 @@ onMounted(() => settlementStore.getSettlements());
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="genDialog = false">Cancelar</v-btn>
-          <v-btn color="primary" :loading="generating" :disabled="!selectedTrip" @click="doGenerate">
+          <v-btn
+            color="primary"
+            :loading="generating"
+            :disabled="!selectedTrip"
+            @click="doGenerate"
+          >
             Generar
           </v-btn>
         </v-card-actions>

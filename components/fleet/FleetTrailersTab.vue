@@ -102,9 +102,16 @@ onMounted(() => fleetStore.getTrailers());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete" aria-label="Eliminar"
+          icon="mdi-pencil"
+          aria-label="Editar"
+          size="small"
+          variant="text"
+          @click="openEdit(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
@@ -113,11 +120,15 @@ onMounted(() => fleetStore.getTrailers());
       </template>
     </ResponsiveTable>
 
-    <div v-if="paginationTrailers.totalPages > 1" class="d-flex justify-center mt-3">
+    <div
+      v-if="paginationTrailers.totalPages > 1"
+      class="d-flex justify-center mt-3"
+    >
       <v-pagination
         :model-value="paginationTrailers.currentPage"
         :length="paginationTrailers.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>

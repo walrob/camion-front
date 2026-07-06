@@ -10,7 +10,8 @@ import type { Fleet } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
 const onSearch = useDebounceFn(() => fleetStore.getFleets(), 350);
-const { fleets, loadingFleets, errorFleets, paginationFleets } = storeToRefs(fleetStore);
+const { fleets, loadingFleets, errorFleets, paginationFleets } =
+  storeToRefs(fleetStore);
 
 const dialog = ref(false);
 const selected = ref<Fleet | null>(null);
@@ -82,9 +83,16 @@ onMounted(() => fleetStore.getFleets());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete" aria-label="Eliminar"
+          icon="mdi-pencil"
+          aria-label="Editar"
+          size="small"
+          variant="text"
+          @click="openEdit(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
@@ -93,11 +101,15 @@ onMounted(() => fleetStore.getFleets());
       </template>
     </ResponsiveTable>
 
-    <div v-if="paginationFleets.totalPages > 1" class="d-flex justify-center mt-3">
+    <div
+      v-if="paginationFleets.totalPages > 1"
+      class="d-flex justify-center mt-3"
+    >
       <v-pagination
         :model-value="paginationFleets.currentPage"
         :length="paginationFleets.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>

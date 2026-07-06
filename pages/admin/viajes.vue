@@ -71,7 +71,9 @@ onMounted(() => tripStore.getTrips());
   <div>
     <PageHeader title="Viajes" subtitle="Planificación y asignación de viajes">
       <template #actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo viaje</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
+          >Nuevo viaje</v-btn
+        >
       </template>
     </PageHeader>
 
@@ -100,8 +102,17 @@ onMounted(() => tripStore.getTrips());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="trips" :loading="loading" :error="tripStore.error" all-items @retry="tripStore.getTrips()">
-      <template #item.driverName="{ item }">{{ driverName(item.driver) }}</template>
+    <ResponsiveTable
+      :headers="headers"
+      :items="trips"
+      :loading="loading"
+      :error="tripStore.error"
+      all-items
+      @retry="tripStore.getTrips()"
+    >
+      <template #item.driverName="{ item }">{{
+        driverName(item.driver)
+      }}</template>
       <template #item.route="{ item }">
         {{ item.origin }} → {{ item.destination }}
       </template>
@@ -113,7 +124,8 @@ onMounted(() => tripStore.getTrips());
       <template #item.actions="{ item }">
         <v-btn
           v-if="item.status === 'assigned'"
-          icon="mdi-pencil" aria-label="Editar"
+          icon="mdi-pencil"
+          aria-label="Editar"
           size="small"
           variant="text"
           @click="openEdit(item)"
@@ -127,7 +139,8 @@ onMounted(() => tripStore.getTrips());
           @click="askCancel(item)"
         />
         <v-btn
-          icon="mdi-delete" aria-label="Eliminar"
+          icon="mdi-delete"
+          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
@@ -141,6 +154,7 @@ onMounted(() => tripStore.getTrips());
         :model-value="pagination.currentPage"
         :length="pagination.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PageHeader from "~/components/shared/PageHeader.vue";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useDocumentStore } from "~/stores/document";
 import {
@@ -11,6 +11,7 @@ import {
 import DocumentFormDialog from "~/components/document/DocumentFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
+import { useAuthStore } from "~/stores/auth";
 
 definePageMeta({
   layout: "admin",
@@ -48,6 +49,29 @@ const STATUS_HEX: Record<string, string> = {
 const statusHex = (s: string) => STATUS_HEX[s] ?? "#9E9E9E";
 
 const canAdd = () => store.ownerType === "company" || !!store.ownerId;
+
+const OWNER_ICON: Record<string, string> = {
+  truck: "mdi-truck",
+  trailer: "mdi-truck-trailer",
+  driver: "mdi-account",
+  company: "mdi-office-building",
+};
+const ownerIcon = (t: string) => OWNER_ICON[t] ?? "mdi-file";
+
+// La bandeja de mensajes no está habilitada para mantenimiento (ver roles de
+// /admin/mensajes), así que solo mostramos el botón a quien puede usarla.
+const auth = useAuthStore();
+const canMessage = computed(
+  () => auth.isAdmin || auth.isManager || auth.isDispatcher,
+);
+
+const messageDriver = (userId: string) =>
+  navigateTo({ path: "/admin/mensajes", query: { user: userId } });
+
+const openWhatsApp = (phone: string) => {
+  const digits = phone.replace(/[^\d]/g, "");
+  if (digits) window.open(`https://wa.me/${digits}`, "_blank");
+};
 
 const askDelete = (d: any) => {
   toDelete.value = d;
@@ -217,25 +241,78 @@ onMounted(async () => {
                 <span class="text-subtitle-2 font-weight-bold">
                   {{ documentCategory(d.category).label }}
                 </span>
-                <span class="text-caption text-medium-emphasis">
+                <v-chip size="x-small" label variant="tonal">
                   {{ ownerTypeLabel(d.ownerType).label }}
+                </v-chip>
+              </div>
+
+              <!-- Dueño: nombre del chofer / patente del camión -->
+              <div class="d-flex align-center ga-1 mt-1">
+                <v-icon size="14" class="text-medium-emphasis">
+                  {{ ownerIcon(d.ownerType) }}
+                </v-icon>
+                <span class="text-body-2 font-weight-medium">
+                  {{ d.owner?.label || "—" }}
+                </span>
+                <span
+                  v-if="d.owner?.sublabel"
+                  class="text-caption text-medium-emphasis"
+                >
+                  · {{ d.owner.sublabel }}
                 </span>
               </div>
+
               <div
-                class="d-flex align-center ga-1 text-caption text-medium-emphasis mt-1"
+                class="d-flex align-center ga-3 text-caption text-medium-emphasis mt-1 flex-wrap"
               >
-                <v-icon size="14">mdi-calendar-clock</v-icon>
-                <span>Vence {{ d.expiryDate || "-" }}</span>
+                <span v-if="d.number" class="d-flex align-center ga-1">
+                  <v-icon size="14">mdi-pound</v-icon>{{ d.number }}
+                </span>
+                <span class="d-flex align-center ga-1">
+                  <v-icon size="14">mdi-calendar-clock</v-icon>Vence
+                  {{ d.expiryDate || "-" }}
+                </span>
               </div>
             </div>
-            <v-chip
-              :color="documentStatus(d.status).color"
-              size="small"
-              label
-              variant="flat"
-            >
-              {{ documentStatus(d.status).label }}
-            </v-chip>
+
+            <div class="d-flex flex-column align-end ga-2">
+              <v-chip
+                :color="documentStatus(d.status).color"
+                size="small"
+                label
+                variant="flat"
+              >
+                {{ documentStatus(d.status).label }}
+              </v-chip>
+              <div class="d-flex ga-1">
+                <v-btn
+                  v-if="d.fileKey"
+                  icon="mdi-file-eye"
+                  aria-label="Ver archivo"
+                  size="small"
+                  variant="text"
+                  @click="store.openFile(d.id)"
+                />
+                <v-btn
+                  v-if="d.owner?.phone"
+                  icon="mdi-whatsapp"
+                  aria-label="WhatsApp"
+                  color="success"
+                  size="small"
+                  variant="text"
+                  @click="openWhatsApp(d.owner.phone)"
+                />
+                <v-btn
+                  v-if="d.owner?.userId && canMessage"
+                  icon="mdi-message-text-outline"
+                  aria-label="Enviar mensaje"
+                  color="primary"
+                  size="small"
+                  variant="text"
+                  @click="messageDriver(d.owner.userId)"
+                />
+              </div>
+            </div>
           </div>
         </v-card>
       </v-window-item>

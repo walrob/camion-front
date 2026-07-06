@@ -27,6 +27,22 @@ export const incidentStatusOptions: StatusOption[] = [
   { value: "resolved", label: "Resuelto", color: "success" },
 ];
 
+// Traducción de los tipos de evento del historial del incidente.
+export const incidentEventLabels: Record<string, string> = {
+  created: "Creado",
+  assigned: "Asignado",
+  status_changed: "Cambio de estado",
+  severity_changed: "Cambio de severidad",
+  commented: "Comentario",
+  comment: "Comentario",
+  resolved: "Resuelto",
+  reopened: "Reabierto",
+  attachment_added: "Evidencia agregada",
+};
+
+export const incidentEventLabel = (action?: string) =>
+  incidentEventLabels[action ?? ""] ?? action ?? "-";
+
 export const useIncidentStatus = () => {
   const find = (opts: StatusOption[], v?: string) =>
     opts.find((o) => o.value === v) ?? { value: v ?? "", label: v ?? "-", color: "grey" };
@@ -35,6 +51,7 @@ export const useIncidentStatus = () => {
     incidentTypeOptions,
     incidentSeverityOptions,
     incidentStatusOptions,
+    incidentEventLabel,
     incidentType: (v?: string) =>
       (incidentTypeOptions.find((o) => o.value === v) ?? {
         value: v ?? "",

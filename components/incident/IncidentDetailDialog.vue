@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { useIncidentStore } from "~/stores/incident";
 import {
   incidentStatusOptions,
+  incidentSeverityOptions,
   useIncidentStatus,
 } from "~/composables/useIncidentStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -13,7 +14,8 @@ const emit = defineEmits(["update:modelValue"]);
 
 const incidentStore = useIncidentStore();
 const { incident, attachments, staffUsers } = storeToRefs(incidentStore);
-const { incidentType, incidentSeverity, incidentStatus } = useIncidentStatus();
+const { incidentType, incidentSeverity, incidentStatus, incidentEventLabel } =
+  useIncidentStatus();
 
 const assignTo = ref("");
 const comment = ref("");
@@ -40,6 +42,10 @@ const doAssign = () => {
 };
 const setStatus = (status: string) => {
   if (incident.value) incidentStore.changeStatus(incident.value.id, status);
+};
+const setSeverity = (severity: string) => {
+  if (incident.value && severity !== incident.value.severity)
+    incidentStore.changeSeverity(incident.value.id, severity);
 };
 const sendComment = async () => {
   if (comment.value.trim() && incident.value) {
@@ -97,7 +103,7 @@ const sendComment = async () => {
           </div>
         </div>
 
-        <!-- Asignación + estado -->
+        <!-- Asignación + severidad -->
         <v-row dense class="mb-2">
           <v-col cols="12" sm="7">
             <v-select
@@ -112,7 +118,24 @@ const sendComment = async () => {
               @update:model-value="doAssign"
             />
           </v-col>
-          <v-col cols="12" sm="5" class="d-flex align-center ga-1">
+          <v-col cols="12" sm="5">
+            <v-select
+              :model-value="incident.severity"
+              :items="incidentSeverityOptions"
+              item-title="label"
+              item-value="value"
+              label="Severidad"
+              variant="outlined"
+              density="compact"
+              hide-details
+              @update:model-value="setSeverity"
+            />
+          </v-col>
+        </v-row>
+
+        <!-- Estado -->
+        <v-row dense class="mb-2">
+          <v-col cols="12" class="d-flex align-center ga-1">
             <v-btn
               v-for="s in incidentStatusOptions"
               :key="s.value"
@@ -135,9 +158,12 @@ const sendComment = async () => {
             size="x-small"
             dot-color="primary"
           >
-            <div class="text-caption text-medium-emphasis">{{ fmt(ev.at) }}</div>
+            <div class="text-caption text-medium-emphasis">
+              {{ fmt(ev.at) }}
+              <span v-if="ev.user"> · {{ ev.user.name }}</span>
+            </div>
             <div class="text-body-2">
-              <strong>{{ ev.action }}</strong>
+              <strong>{{ incidentEventLabel(ev.action) }}</strong>
               <span v-if="ev.note"> — {{ ev.note }}</span>
             </div>
           </v-timeline-item>

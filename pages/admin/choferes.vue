@@ -4,7 +4,10 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { useDriverStore } from "~/stores/driver";
-import { driverStatusOptions, useFleetStatus } from "~/composables/useFleetStatus";
+import {
+  driverStatusOptions,
+  useFleetStatus,
+} from "~/composables/useFleetStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import DriverFormDialog from "~/components/driver/DriverFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
@@ -71,9 +74,14 @@ onMounted(() => driverStore.getDrivers());
 
 <template>
   <div>
-    <PageHeader title="Choferes" subtitle="Perfiles operativos y asignación de conductores">
+    <PageHeader
+      title="Choferes"
+      subtitle="Perfiles operativos y asignación de conductores"
+    >
       <template #actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">Nuevo chofer</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
+          >Nuevo chofer</v-btn
+        >
       </template>
     </PageHeader>
 
@@ -102,10 +110,23 @@ onMounted(() => driverStore.getDrivers());
       />
     </div>
 
-    <ResponsiveTable :headers="headers" :items="drivers" :loading="loading" :error="driverStore.error" all-items @retry="driverStore.getDrivers()">
+    <ResponsiveTable
+      :headers="headers"
+      :items="drivers"
+      :loading="loading"
+      :error="driverStore.error"
+      all-items
+      @retry="driverStore.getDrivers()"
+    >
       <template #item.driverName="{ item }">{{ driverName(item) }}</template>
       <template #item.licenseExpiry="{ item }">
-        <span :class="isExpiringSoon(item.licenseExpiry) ? 'text-error font-weight-bold' : ''">
+        <span
+          :class="
+            isExpiringSoon(item.licenseExpiry)
+              ? 'text-error font-weight-bold'
+              : ''
+          "
+        >
           {{ item.licenseExpiry || "-" }}
         </span>
       </template>
@@ -115,9 +136,16 @@ onMounted(() => driverStore.getDrivers());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEdit(item)" />
         <v-btn
-          icon="mdi-delete" aria-label="Eliminar"
+          icon="mdi-pencil"
+          aria-label="Editar"
+          size="small"
+          variant="text"
+          @click="openEdit(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
@@ -131,11 +159,16 @@ onMounted(() => driverStore.getDrivers());
         :model-value="pagination.currentPage"
         :length="pagination.totalPages"
         density="comfortable"
+        :total-visible="6"
         @update:model-value="changePage"
       />
     </div>
 
-    <DriverFormDialog v-model="dialog" :driver="selected" @saved="driverStore.getDrivers()" />
+    <DriverFormDialog
+      v-model="dialog"
+      :driver="selected"
+      @saved="driverStore.getDrivers()"
+    />
     <ModalConfirm
       v-model="confirm"
       title="Eliminar chofer"

@@ -17,6 +17,7 @@ export const useIncidentStore = defineStore("incident", {
       error: false,
       filterType: null as string | null,
       filterSeverity: null as string | null,
+      filterAssignee: null as string | null,
       filterFrom: from as string | null,
       filterTo: to as string | null,
     };
@@ -68,6 +69,7 @@ export const useIncidentStore = defineStore("incident", {
             limit: 100,
             type: this.filterType || undefined,
             severity: this.filterSeverity || undefined,
+            assignedToUserId: this.filterAssignee || undefined,
             from: this.filterFrom || undefined,
             to: this.filterTo || undefined,
           },
@@ -137,6 +139,15 @@ export const useIncidentStore = defineStore("incident", {
         "patch",
         { status, note },
         "Estado actualizado",
+      );
+    },
+
+    async changeSeverity(id: string, severity: string) {
+      return this.mutate(
+        `incidents/${id}/severity/`,
+        "patch",
+        { severity },
+        "Severidad actualizada",
       );
     },
 

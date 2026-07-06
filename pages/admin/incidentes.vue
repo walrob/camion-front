@@ -23,7 +23,7 @@ definePageMeta({
 useHead({ title: "Incidentes" });
 
 const incidentStore = useIncidentStore();
-const { incidents, loading, error } = storeToRefs(incidentStore);
+const { incidents, loading, error, staffUsers } = storeToRefs(incidentStore);
 const { incidentType, incidentSeverity } = useIncidentStatus();
 
 const dialog = ref(false);
@@ -66,6 +66,7 @@ const socket = useIncidentSocket((incident) => {
 
 onMounted(() => {
   incidentStore.getIncidents();
+  if (!staffUsers.value.length) incidentStore.loadStaffUsers();
   socket.connect();
 });
 onBeforeUnmount(() => socket.disconnect());
@@ -102,6 +103,16 @@ onBeforeUnmount(() => socket.disconnect());
         item-title="label"
         item-value="value"
         label="Severidad"
+        clearable
+        style="min-width: 200px; max-width: 240px"
+        @update:model-value="incidentStore.getIncidents()"
+      />
+      <v-select
+        v-model="incidentStore.filterAssignee"
+        :items="staffUsers"
+        item-title="name"
+        item-value="id"
+        label="Responsable"
         clearable
         style="min-width: 200px; max-width: 240px"
         @update:model-value="incidentStore.getIncidents()"
@@ -191,7 +202,16 @@ onBeforeUnmount(() => socket.disconnect());
                 <div class="text-body-2 incident-desc">{{ i.description }}</div>
 
                 <v-chip
-                  v-if="!i.assignedToUserId"
+                  v-if="i.assignedToUserId"
+                  size="x-small"
+                  variant="plain"
+                  class="mt-2"
+                >
+                  <v-icon start size="12">mdi-account-outline</v-icon>
+                  {{ i.assignedTo?.name || "Asignado" }}
+                </v-chip>
+                <v-chip
+                  v-else
                   color="warning"
                   size="x-small"
                   variant="tonal"

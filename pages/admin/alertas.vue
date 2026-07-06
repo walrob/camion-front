@@ -170,12 +170,22 @@ onMounted(() => {
               Visto
             </v-btn>
             <v-btn
+              v-if="a.status !== 'acknowledged'"
               size="small"
               variant="tonal"
               color="warning"
               @click="alertStore.setStatus(a.id, 'acknowledge')"
             >
               Atender
+            </v-btn>
+            <v-btn
+              v-else
+              size="small"
+              variant="text"
+              color="medium-emphasis"
+              @click="alertStore.setStatus(a.id, 'seen')"
+            >
+              Desatender
             </v-btn>
             <v-btn
               size="small"
@@ -213,6 +223,9 @@ onMounted(() => {
 }
 .alert-card--resolved {
   opacity: 0.72;
+}
+.alert-card--resolved::before {
+  background: #fff;
 }
 .min-w-0 {
   min-width: 0;

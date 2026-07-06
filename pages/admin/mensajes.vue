@@ -26,12 +26,14 @@ const text = ref("");
 const search = ref("");
 const listRef = ref<HTMLElement | null>(null);
 
-// Conversaciones a partir de la bandeja (por interlocutor distinto a mí).
+// Conversaciones a partir de la bandeja, agrupadas por interlocutor. El "otro"
+// es el destinatario si el mensaje lo envié yo, o el remitente si lo recibí.
 const conversations = computed(() => {
   const map = new Map<string, any>();
   for (const m of inbox.value) {
-    if (m.fromUserId === myId.value) continue;
-    if (!map.has(m.fromUserId)) map.set(m.fromUserId, m);
+    const otherId = m.fromUserId === myId.value ? m.toUserId : m.fromUserId;
+    if (!otherId) continue; // mensajes a un rol (sin destinatario puntual)
+    if (!map.has(otherId)) map.set(otherId, m);
   }
   return Array.from(map.entries()).map(([userId, last]) => ({
     userId,
@@ -132,9 +134,15 @@ const socket = useMessageSocket((m) => {
   }
 });
 
+const route = useRoute();
+
 onMounted(async () => {
   await Promise.all([messageStore.getInbox(), loadUsers()]);
   socket.connect();
+  // Permite abrir/iniciar una conversación directo desde otra pantalla
+  // (ej. "Enviar mensaje" al chofer desde Vencimientos): /admin/mensajes?user=<id>
+  const target = route.query.user;
+  if (typeof target === "string" && target) await openConversation(target);
 });
 onBeforeUnmount(() => socket.disconnect());
 </script>

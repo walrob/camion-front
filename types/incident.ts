@@ -4,6 +4,7 @@ export interface IncidentEvent {
   id: string;
   at: string;
   userId?: string;
+  user?: { id: string; name: string };
   action: string;
   note?: string;
 }
@@ -19,6 +20,7 @@ export interface Incident extends Audit {
   severity: string;
   status: string;
   assignedToUserId?: string | null;
+  assignedTo?: { id: string; name: string } | null;
   lat?: number | null;
   lng?: number | null;
   description: string;
