@@ -78,7 +78,7 @@ const openEditOrder = (o: any) => {
   selectedOrder.value = o;
   orderDialog.value = true;
 };
-const money = (n?: number) => `$ ${Number(n ?? 0).toFixed(2)}`;
+const { moneyFixed: money } = useFormatters();
 
 watch(truckId, (id) => {
   if (id) store.getOrders(id);
@@ -281,28 +281,3 @@ onMounted(async () => {
     />
   </div>
 </template>
-
-<style scoped>
-/* Mismo estilo que las tarjetas de admin/alertas: barra de acento + hover. */
-.accent-card {
-  position: relative;
-  overflow: hidden;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-.accent-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--accent, #9e9e9e);
-}
-.accent-card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-.min-w-0 {
-  min-width: 0;
-}
-</style>

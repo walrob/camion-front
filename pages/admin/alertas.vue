@@ -119,8 +119,8 @@ onMounted(() => {
         border
         flat
         rounded="lg"
-        class="mb-3 alert-card"
-        :class="{ 'alert-card--resolved': a.status === 'resolved' }"
+        class="mb-3 accent-card"
+        :class="{ 'accent-card--resolved': a.status === 'resolved' }"
         :style="`--accent: ${levelHex(a.level)}`"
       >
         <div class="pa-3">
@@ -201,33 +201,3 @@ onMounted(() => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.alert-card {
-  position: relative;
-  overflow: hidden;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-.alert-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--accent, #9e9e9e);
-}
-.alert-card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-.alert-card--resolved {
-  opacity: 0.72;
-}
-.alert-card--resolved::before {
-  background: #fff;
-}
-.min-w-0 {
-  min-width: 0;
-}
-</style>

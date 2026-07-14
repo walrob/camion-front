@@ -6,6 +6,7 @@ import { useDebounceFn } from "@vueuse/core";
 import { useTripStore } from "~/stores/trip";
 import { tripStatusOptions, useTripStatus } from "~/composables/useTripStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
+import TablePagination from "~/components/shared/TablePagination.vue";
 import TripFormDialog from "~/components/trip/TripFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Trip } from "~/types/trip";
@@ -30,7 +31,8 @@ const confirmText = ref("");
 
 const headers = [
   { title: "Código", value: "code" },
-  { title: "Origen → Destino", value: "route" },
+  { title: "Origen", value: "origin" },
+  { title: "Destino", value: "destination" },
   { title: "Camión", value: "truck.plate" },
   { title: "Chofer", value: "driverName", sortable: false },
   { title: "Estado", value: "status" },
@@ -61,6 +63,12 @@ const onConfirm = async (payload: { resp: boolean }) => {
 };
 const changePage = (page: number) => {
   pagination.value.currentPage = page;
+  tripStore.getTrips();
+};
+// Al cambiar un filtro volvemos a la primera página para no quedar en una página
+// que ya no existe con el nuevo resultado.
+const reload = () => {
+  pagination.value.currentPage = 1;
   tripStore.getTrips();
 };
 
@@ -98,7 +106,27 @@ onMounted(() => tripStore.getTrips());
         clearable
         hide-details
         style="max-width: 200px"
-        @update:model-value="tripStore.getTrips()"
+        @update:model-value="reload"
+      />
+      <v-text-field
+        v-model="tripStore.filterFrom"
+        label="Desde"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        style="max-width: 170px"
+        @update:model-value="reload"
+      />
+      <v-text-field
+        v-model="tripStore.filterTo"
+        label="Hasta"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        style="max-width: 170px"
+        @update:model-value="reload"
       />
     </div>
 
@@ -113,9 +141,6 @@ onMounted(() => tripStore.getTrips());
       <template #item.driverName="{ item }">{{
         driverName(item.driver)
       }}</template>
-      <template #item.route="{ item }">
-        {{ item.origin }} → {{ item.destination }}
-      </template>
       <template #item.status="{ item }">
         <v-chip :color="tripStatus(item.status).color" size="small" label>
           {{ tripStatus(item.status).label }}
@@ -149,15 +174,11 @@ onMounted(() => tripStore.getTrips());
       </template>
     </ResponsiveTable>
 
-    <div v-if="pagination.totalPages > 1" class="d-flex justify-center mt-3">
-      <v-pagination
-        :model-value="pagination.currentPage"
-        :length="pagination.totalPages"
-        density="comfortable"
-        :total-visible="6"
-        @update:model-value="changePage"
-      />
-    </div>
+    <TablePagination
+      :page="pagination.currentPage"
+      :length="pagination.totalPages"
+      @change="changePage"
+    />
 
     <TripFormDialog v-model="dialog" :trip="selected" />
     <ModalConfirm

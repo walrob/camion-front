@@ -10,6 +10,7 @@ import {
   useHrStatus,
 } from "~/composables/useHrStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
+import TablePagination from "~/components/shared/TablePagination.vue";
 import EmployeeFormDialog from "~/components/hr/EmployeeFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Employee } from "~/types/hr";
@@ -155,15 +156,11 @@ onMounted(() => hrStore.getEmployees());
       </template>
     </ResponsiveTable>
 
-    <div v-if="pagination.totalPages > 1" class="d-flex justify-center mt-3">
-      <v-pagination
-        :model-value="pagination.currentPage"
-        :length="pagination.totalPages"
-        density="comfortable"
-        :total-visible="6"
-        @update:model-value="changePage"
-      />
-    </div>
+    <TablePagination
+      :page="pagination.currentPage"
+      :length="pagination.totalPages"
+      @change="changePage"
+    />
 
     <EmployeeFormDialog
       v-model="dialog"

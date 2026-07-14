@@ -105,7 +105,9 @@ const submit = async () => {
               :error-messages="formErrors.messages('truckId')"
               :items="truckOptions"
               item-value="id"
-              :item-title="(t: any) => `${t.plate}${t.brand ? ' - ' + t.brand : ''}`"
+              :item-title="
+                (t: any) => `${t.plate}${t.brand ? ' - ' + t.brand : ''}`
+              "
               label="Camión *"
               :rules="[r.isRequired]"
             />
@@ -176,7 +178,12 @@ const submit = async () => {
             />
           </v-col>
           <v-col cols="12">
-            <VoiceTextarea v-model="form.notes" label="Notas" rows="2" auto-grow />
+            <VoiceTextarea
+              v-model="form.notes"
+              label="Notas"
+              rows="2"
+              auto-grow
+            />
           </v-col>
         </v-row>
       </FormSection>

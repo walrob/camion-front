@@ -1,19 +1,27 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
+import { dayOffsetRange } from "~/composables/useDateRange";
 import type { Trip } from "~/types/trip";
 import type { Truck, Trailer, Driver } from "~/types/fleet";
 
 export const useTripStore = defineStore("trip", {
-  state: () => ({
-    // Chofer
-    myTrips: [] as Trip[],
-    trip: null as Trip | null,
-    // Backoffice
-    trips: [] as Trip[],
-    loading: false,
-    error: false,
-    search: null as string | null,
-    filterStatus: null as string | null,
+  state: () => {
+    // Rango precargado sobre la fecha planificada: 15 días atrás y 7 adelante,
+    // para ver lo reciente y lo próximo sin traer todo el histórico. El usuario
+    // puede ampliar/limpiar el rango.
+    const { from, to } = dayOffsetRange(15, 7);
+    return {
+      // Chofer
+      myTrips: [] as Trip[],
+      trip: null as Trip | null,
+      // Backoffice
+      trips: [] as Trip[],
+      loading: false,
+      error: false,
+      search: null as string | null,
+      filterStatus: null as string | null,
+      filterFrom: from as string | null,
+      filterTo: to as string | null,
     pagination: {
       totalItems: 0,
       itemCount: 0,
@@ -25,7 +33,8 @@ export const useTripStore = defineStore("trip", {
     truckOptions: [] as Truck[],
     trailerOptions: [] as Trailer[],
     driverOptions: [] as Driver[],
-  }),
+    };
+  },
 
   actions: {
     // ───────── Chofer ─────────
@@ -70,6 +79,8 @@ export const useTripStore = defineStore("trip", {
             limit: this.pagination.itemsPerPage,
             search: this.search || undefined,
             status: this.filterStatus || undefined,
+            from: this.filterFrom || undefined,
+            to: this.filterTo || undefined,
           },
         })
         .then((resp) => {

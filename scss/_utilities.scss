@@ -1,0 +1,39 @@
+// Utilidades compartidas por varias páginas (antes duplicadas en <style scoped>).
+
+// Tarjeta con barra de acento a la izquierda y realce al pasar el mouse. El color
+// de la barra se pasa por la variable CSS `--accent`. La usan las bandejas tipo
+// lista: alertas, vencimientos de documentos y próximos mantenimientos.
+.accent-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--accent, #9e9e9e);
+  }
+
+  &:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  // Estado atenuado (ej. una alerta ya resuelta).
+  &--resolved {
+    opacity: 0.72;
+
+    &::before {
+      background: #fff;
+    }
+  }
+}
+
+// Permite que un hijo flex se encoja y active el text-truncate del contenido.
+.min-w-0 {
+  min-width: 0;
+}

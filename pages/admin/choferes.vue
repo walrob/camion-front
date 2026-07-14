@@ -9,6 +9,7 @@ import {
   useFleetStatus,
 } from "~/composables/useFleetStatus";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
+import TablePagination from "~/components/shared/TablePagination.vue";
 import DriverFormDialog from "~/components/driver/DriverFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Driver } from "~/types/fleet";
@@ -154,15 +155,11 @@ onMounted(() => driverStore.getDrivers());
       </template>
     </ResponsiveTable>
 
-    <div v-if="pagination.totalPages > 1" class="d-flex justify-center mt-3">
-      <v-pagination
-        :model-value="pagination.currentPage"
-        :length="pagination.totalPages"
-        density="comfortable"
-        :total-visible="6"
-        @update:model-value="changePage"
-      />
-    </div>
+    <TablePagination
+      :page="pagination.currentPage"
+      :length="pagination.totalPages"
+      @change="changePage"
+    />
 
     <DriverFormDialog
       v-model="dialog"

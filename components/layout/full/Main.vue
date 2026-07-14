@@ -8,12 +8,30 @@ const { smAndDown, smAndUp, lgAndUp } = useDisplay();
 const sidebarMenu = shallowRef(sidebarItems);
 
 const sDrawer = ref(false);
+// En pantallas grandes el sidebar es fijo pero se puede ocultar/mostrar.
+// La preferencia se recuerda entre sesiones.
+const desktopOpen = ref(true);
+onMounted(() => {
+  const saved = localStorage.getItem("sidebarOpen");
+  if (saved !== null) desktopOpen.value = saved === "true";
+});
+watch(desktopOpen, (val) => {
+  localStorage.setItem("sidebarOpen", String(val));
+});
+
 const drawerModel = computed({
-  get: () => (lgAndUp.value ? true : sDrawer.value),
+  get: () => (lgAndUp.value ? desktopOpen.value : sDrawer.value),
   set: (val: boolean) => {
-    if (!lgAndUp.value) sDrawer.value = val;
+    if (lgAndUp.value) desktopOpen.value = val;
+    else sDrawer.value = val;
   },
 });
+
+// Alterna el menú según el tamaño de pantalla.
+const toggleSidebar = () => {
+  if (lgAndUp.value) desktopOpen.value = !desktopOpen.value;
+  else sDrawer.value = !sDrawer.value;
+};
 
 const theme = useTheme();
 const { $api } = useNuxtApp();
@@ -89,7 +107,7 @@ const props = defineProps({
   <v-navigation-drawer
     v-model="drawerModel"
     left
-    :permanent="lgAndUp"
+    :permanent="lgAndUp && desktopOpen"
     elevation="0"
     app
     class="leftSidebar"
@@ -137,12 +155,12 @@ const props = defineProps({
     <div class="d-flex align-center justify-space-between w-100">
       <div class="d-flex align-center">
         <v-btn
-          class="hidden-lg-and-up ms-md-3 ms-sm-5 ms-3 text-muted"
+          class="ms-md-3 ms-sm-5 ms-3 text-muted"
           icon
           variant="flat"
           size="small"
-          aria-label="Abrir menú"
-          @click="sDrawer = !sDrawer"
+          :aria-label="drawerModel ? 'Ocultar menú' : 'Mostrar menú'"
+          @click="toggleSidebar"
         >
           <Menu2Icon size="20" stroke-width="1.5" />
         </v-btn>

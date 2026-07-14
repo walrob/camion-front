@@ -3,6 +3,7 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useSettlementStore } from "~/stores/settlement";
+import TablePagination from "~/components/shared/TablePagination.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Settlement } from "~/types/trip";
 
@@ -38,7 +39,7 @@ const headers = [
   { title: "Acciones", value: "actions" },
 ];
 
-const money = (n?: number) => `$ ${Number(n ?? 0).toFixed(2)}`;
+const { moneyFixed: money } = useFormatters();
 const statusOf = (v: string) =>
   statusOptions.find((s) => s.value === v) ?? { label: v, color: "grey" };
 
@@ -149,15 +150,11 @@ onMounted(() => settlementStore.getSettlements());
       </template>
     </ResponsiveTable>
 
-    <div v-if="pagination.totalPages > 1" class="d-flex justify-center mt-3">
-      <v-pagination
-        :model-value="pagination.currentPage"
-        :length="pagination.totalPages"
-        density="comfortable"
-        :total-visible="6"
-        @update:model-value="changePage"
-      />
-    </div>
+    <TablePagination
+      :page="pagination.currentPage"
+      :length="pagination.totalPages"
+      @change="changePage"
+    />
 
     <!-- Diálogo generar -->
     <v-dialog v-model="genDialog" max-width="520">

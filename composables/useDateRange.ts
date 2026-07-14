@@ -12,3 +12,17 @@ export const lastNDaysRange = (days = 30): { from: string; to: string } => {
   from.setDate(from.getDate() - days);
   return { from: toISODate(from), to: toISODate(to) };
 };
+
+// Rango centrado en hoy: `before` días hacia atrás y `after` días hacia adelante.
+// Útil para listas por fecha planificada (ej. viajes), donde interesa ver tanto
+// lo reciente como lo próximo a ocurrir.
+export const dayOffsetRange = (
+  before: number,
+  after: number,
+): { from: string; to: string } => {
+  const from = new Date();
+  from.setDate(from.getDate() - before);
+  const to = new Date();
+  to.setDate(to.getDate() + after);
+  return { from: toISODate(from), to: toISODate(to) };
+};

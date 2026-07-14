@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
+import ReportFilters from "~/components/shared/ReportFilters.vue";
+import ChartCard from "~/components/dashboard/ChartCard.vue";
+import ChartDetailDialog from "~/components/dashboard/ChartDetailDialog.vue";
 import { onMounted, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useIndicatorStore } from "~/stores/indicator";
-
-// ApexCharts diferido: se carga en un chunk aparte solo al renderizar el gráfico.
-const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 definePageMeta({
   layout: "admin",
@@ -18,11 +18,8 @@ const store = useIndicatorStore();
 const { summary, loading, truckOptions, driverOptions, fleetOptions } =
   storeToRefs(store);
 
-// Colores de gráficos: paleta suave y armónica del tema (igual que el dashboard).
-const { chartHex: hex } = useChartColors();
-
-const money = (n?: number) => `$ ${Number(n ?? 0).toLocaleString("es-AR")}`;
-const num = (n?: number) => Number(n ?? 0).toLocaleString("es-AR");
+const { money, num } = useFormatters();
+const { barOptions } = useBarChart();
 
 const kpis = computed(() => {
   const s = summary.value;
@@ -71,29 +68,6 @@ const kpis = computed(() => {
       tone: "primary",
     },
   ];
-});
-
-// Eje compacto en miles de pesos ("$250k") para evitar montos con muchos ceros.
-const moneyK = (v: any) => {
-  const n = Number(v) || 0;
-  return `$${(n / 1000).toLocaleString("es-AR", { maximumFractionDigits: 1 })}k`;
-};
-
-const barOptions = (color: string, categories: string[], asMoney = false) => ({
-  chart: {
-    type: "bar" as const,
-    fontFamily: "inherit",
-    toolbar: { show: false },
-  },
-  xaxis: {
-    categories,
-    labels: asMoney ? { formatter: moneyK } : {},
-  },
-  colors: [hex(color)],
-  plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: "60%" } },
-  dataLabels: { enabled: false },
-  grid: { borderColor: "rgba(0,0,0,0.06)" },
-  tooltip: asMoney ? { y: { formatter: (v: number) => money(v) } } : {},
 });
 
 const barByTruck = computed(() => {
@@ -175,61 +149,15 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
-    <!-- Filtros -->
-    <v-card border flat rounded="lg" class="pa-3 mb-4">
-      <v-row dense align="center">
-        <v-col cols="12" sm="6" md="2">
-          <v-select
-            v-model="store.filters.fleetId"
-            :items="fleetOptions"
-            item-title="name"
-            item-value="id"
-            label="Flota"
-            clearable
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="3">
-          <v-select
-            v-model="store.filters.truckId"
-            :items="truckOptions"
-            item-value="id"
-            :item-title="(t: any) => t.plate"
-            label="Camión"
-            clearable
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="3">
-          <v-select
-            v-model="store.filters.driverId"
-            :items="driverOptions"
-            item-value="id"
-            :item-title="(d: any) => driverName(d)"
-            label="Chofer"
-            clearable
-          />
-        </v-col>
-        <v-col cols="6" sm="3" md="2">
-          <v-text-field
-            v-model="store.filters.from"
-            label="Desde"
-            type="date"
-          />
-        </v-col>
-        <v-col cols="6" sm="3" md="2">
-          <v-text-field v-model="store.filters.to" label="Hasta" type="date" />
-        </v-col>
-        <v-col cols="12" class="d-flex justify-end">
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-filter-check-outline"
-            :loading="loading"
-            @click="store.getSummary()"
-          >
-            Aplicar
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
+    <ReportFilters
+      :filters="store.filters"
+      :truck-options="truckOptions"
+      :driver-options="driverOptions"
+      :fleet-options="fleetOptions"
+      :loading="loading"
+      show-fleet
+      @apply="store.getSummary()"
+    />
 
     <!-- Carga inicial -->
     <div v-if="loading && !summary" class="d-flex justify-center my-8">
@@ -252,115 +180,38 @@ onMounted(async () => {
       <!-- Gráficos -->
       <v-row dense>
         <v-col cols="12" md="6">
-          <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="d-flex align-center mb-2">
-              <div class="text-subtitle-2 font-weight-bold">
-                Gasto por camión
-                <span
-                  class="text-caption text-medium-emphasis font-weight-regular"
-                  >(Top 10 · en miles $)</span
-                >
-              </div>
-              <v-spacer />
-              <v-btn
-                v-if="barByTruck.series[0].data.length >= 10"
-                size="small"
-                variant="text"
-                color="primary"
-                append-icon="mdi-arrow-expand"
-                @click="openDetail('truck')"
-              >
-                Ver todos
-              </v-btn>
-            </div>
-            <ClientOnly>
-              <VueApexCharts
-                v-if="barByTruck.series[0].data.length"
-                type="bar"
-                height="300"
-                :options="barByTruck.options"
-                :series="barByTruck.series"
-              />
-              <p v-else class="text-caption text-medium-emphasis">
-                Sin datos en el período.
-              </p>
-            </ClientOnly>
-          </v-card>
+          <ChartCard
+            title="Gasto por camión"
+            caption="(Top 10 · en miles $)"
+            :series="barByTruck.series"
+            :options="barByTruck.options"
+            :show-all="barByTruck.series[0].data.length >= 10"
+            @see-all="openDetail('truck')"
+          />
         </v-col>
         <v-col cols="12" md="6">
-          <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="d-flex align-center mb-2">
-              <div class="text-subtitle-2 font-weight-bold">
-                Gasto por chofer
-                <span
-                  class="text-caption text-medium-emphasis font-weight-regular"
-                  >(Top 10 · en miles $)</span
-                >
-              </div>
-              <v-spacer />
-              <v-btn
-                v-if="barByDriver.series[0].data.length >= 10"
-                size="small"
-                variant="text"
-                color="success"
-                append-icon="mdi-arrow-expand"
-                @click="openDetail('driver')"
-              >
-                Ver todos
-              </v-btn>
-            </div>
-            <ClientOnly>
-              <VueApexCharts
-                v-if="barByDriver.series[0].data.length"
-                type="bar"
-                height="300"
-                :options="barByDriver.options"
-                :series="barByDriver.series"
-              />
-              <p v-else class="text-caption text-medium-emphasis">
-                Sin datos en el período.
-              </p>
-            </ClientOnly>
-          </v-card>
+          <ChartCard
+            title="Gasto por chofer"
+            caption="(Top 10 · en miles $)"
+            see-all-color="success"
+            :series="barByDriver.series"
+            :options="barByDriver.options"
+            :show-all="barByDriver.series[0].data.length >= 10"
+            @see-all="openDetail('driver')"
+          />
         </v-col>
       </v-row>
     </template>
 
     <!-- Modal: detalle completo de gastos (todos los ítems del filtro) -->
-    <v-dialog v-model="detailOpen" max-width="920" scrollable>
-      <v-card rounded="lg">
-        <v-card-title class="d-flex align-center pe-2">
-          <span class="text-subtitle-1 font-weight-bold">
-            {{ detailTitle }}
-            <span class="text-caption text-medium-emphasis font-weight-regular">
-              (todos · en miles $)
-            </span>
-          </span>
-          <v-spacer />
-          <v-btn icon="mdi-close" variant="text" @click="detailOpen = false" />
-        </v-card-title>
-        <v-divider />
-        <v-card-text style="max-height: 70vh">
-          <div
-            v-if="store.detailLoading"
-            class="d-flex justify-center align-center"
-            style="min-height: 240px"
-          >
-            <v-progress-circular indeterminate color="primary" />
-          </div>
-          <ClientOnly v-else-if="detailChart.series[0].data.length">
-            <VueApexCharts
-              type="bar"
-              :height="detailHeight"
-              :options="detailChart.options"
-              :series="detailChart.series"
-            />
-          </ClientOnly>
-          <p v-else class="text-caption text-medium-emphasis py-8 text-center">
-            Sin datos en el período.
-          </p>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <ChartDetailDialog
+      v-model="detailOpen"
+      :title="detailTitle"
+      caption="(todos · en miles $)"
+      :series="detailChart.series"
+      :options="detailChart.options"
+      :height="detailHeight"
+      :loading="store.detailLoading"
+    />
   </div>
 </template>

@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import ResponsiveTable from "~/components/ResponsiveTable.vue";
+import ReportFilters from "~/components/shared/ReportFilters.vue";
 import OeaDetailDialog from "~/components/oea/OeaDetailDialog.vue";
 import { useOeaStore } from "~/stores/oea";
 import { useOea, oeaResultOptions } from "~/composables/useOea";
@@ -16,6 +17,7 @@ useHead({ title: "Planillas OEA" });
 const store = useOeaStore();
 const { list, meta, loading } = storeToRefs(store);
 const { oeaResult } = useOea();
+const { fmtDate } = useFormatters();
 
 const truckOptions = ref<any[]>([]);
 const driverOptions = ref<any[]>([]);
@@ -32,9 +34,6 @@ const headers = [
   { title: "Resultado", value: "result" },
   { title: "", value: "actions" },
 ];
-
-const fmtDate = (d?: string | null) =>
-  d ? new Date(d).toLocaleDateString("es-AR") : "-";
 
 const openDetail = (id: string) => {
   detailId.value = id;
@@ -65,29 +64,14 @@ onMounted(async () => {
       subtitle="Control de seguridad y auditoría de camiones (Operador Económico Autorizado)"
     />
 
-    <!-- Filtros -->
-    <v-card border flat rounded="lg" class="pa-3 mb-4">
-      <v-row dense align="center">
-        <v-col cols="12" sm="6" md="3">
-          <v-select
-            v-model="store.filters.truckId"
-            :items="truckOptions"
-            item-value="id"
-            :item-title="(t: any) => t.plate"
-            label="Camión"
-            clearable
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="3">
-          <v-select
-            v-model="store.filters.driverId"
-            :items="driverOptions"
-            item-value="id"
-            :item-title="(d: any) => driverName(d)"
-            label="Chofer"
-            clearable
-          />
-        </v-col>
+    <ReportFilters
+      :filters="store.filters"
+      :truck-options="truckOptions"
+      :driver-options="driverOptions"
+      :loading="loading"
+      @apply="apply"
+    >
+      <template #extra>
         <v-col cols="12" sm="6" md="2">
           <v-select
             v-model="store.filters.result"
@@ -98,24 +82,8 @@ onMounted(async () => {
             clearable
           />
         </v-col>
-        <v-col cols="6" sm="3" md="2">
-          <v-text-field v-model="store.filters.from" label="Desde" type="date" />
-        </v-col>
-        <v-col cols="6" sm="3" md="2">
-          <v-text-field v-model="store.filters.to" label="Hasta" type="date" />
-        </v-col>
-        <v-col cols="12" class="d-flex justify-end">
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-filter-check-outline"
-            :loading="loading"
-            @click="apply"
-          >
-            Aplicar
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
+      </template>
+    </ReportFilters>
 
     <ResponsiveTable
       :headers="headers"

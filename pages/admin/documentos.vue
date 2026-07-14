@@ -227,7 +227,7 @@ onMounted(async () => {
           border
           flat
           rounded="lg"
-          class="mb-3 alert-card"
+          class="mb-3 accent-card"
           :style="`--accent: ${statusHex(d.status)}`"
         >
           <div class="d-flex align-center ga-3 pa-3">
@@ -332,27 +332,3 @@ onMounted(async () => {
     />
   </div>
 </template>
-
-<style scoped>
-.alert-card {
-  position: relative;
-  overflow: hidden;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-.alert-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--accent, #9e9e9e);
-}
-.alert-card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-.min-w-0 {
-  min-width: 0;
-}
-</style>
