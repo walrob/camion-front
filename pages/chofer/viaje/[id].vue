@@ -23,6 +23,14 @@ const { entries, summary, loading } = storeToRefs(tripLogStore);
 const { tripStatus, expenseType } = useTripStatus();
 
 useHead({ title: "Viaje" });
+// El título llega con el fetch, por eso va como getter: el hero se actualiza solo.
+useDriverPage(() => ({
+  title: trip.value?.code || "Viaje",
+  subtitle: trip.value
+    ? `${trip.value.origin} → ${trip.value.destination}`
+    : undefined,
+  back: "/chofer",
+}));
 
 const expenseDialog = ref(false);
 const odoDialog = ref(false);
@@ -64,36 +72,37 @@ onMounted(reload);
 
 <template>
   <div>
-    <div class="d-flex align-center ga-2 mb-3">
-      <v-btn
-        icon="mdi-arrow-left"
-        aria-label="Volver"
-        variant="text"
-        to="/chofer"
-      />
-      <h1 class="text-h6 font-weight-bold">{{ trip?.code || "Viaje" }}</h1>
-      <v-spacer />
+    <Teleport defer to="#driver-hero-actions">
       <v-chip
         v-if="trip"
         :color="tripStatus(trip.status).color"
         size="small"
+        variant="flat"
         label
       >
         {{ tripStatus(trip.status).label }}
       </v-chip>
-    </div>
+    </Teleport>
 
-    <v-card v-if="trip" rounded="lg" elevation="2" class="mb-4">
+    <v-card v-if="trip" rounded="lg" border flat class="mb-4">
       <v-card-text>
-        <div class="text-body-2">
-          <v-icon size="16">mdi-map-marker-path</v-icon>
-          {{ trip.origin }} → {{ trip.destination }}
-        </div>
-        <div class="text-caption text-medium-emphasis">
-          {{ trip.truck?.plate }}
-          <span v-if="trip.cargoDescription">
-            · {{ trip.cargoDescription }}</span
+        <!-- La ruta ya la muestra el hero: acá van los datos del camión y la carga. -->
+        <div class="d-flex align-center ga-2 flex-wrap">
+          <v-chip
+            v-if="trip.truck?.plate"
+            size="small"
+            variant="tonal"
+            color="primary"
+            prepend-icon="mdi-truck-outline"
           >
+            {{ trip.truck.plate }}
+          </v-chip>
+          <span
+            v-if="trip.cargoDescription"
+            class="text-caption text-medium-emphasis"
+          >
+            {{ trip.cargoDescription }}
+          </span>
         </div>
 
         <div class="d-flex ga-2 mt-3 flex-wrap">
@@ -164,10 +173,11 @@ onMounted(reload);
         v-for="e in entries"
         :key="e.id"
         rounded="lg"
-        elevation="2"
+        border
+        flat
         class="mb-2"
       >
-        <v-card-text class="py-2 d-flex align-center ga-3">
+        <v-card-text class="py-3 d-flex align-center ga-3">
           <v-avatar
             :color="expenseType(e.type).color"
             size="36"
@@ -212,7 +222,7 @@ onMounted(reload);
       position="fixed"
       location="bottom end"
       class="ma-4"
-      style="bottom: 80px"
+      style="bottom: calc(88px + env(safe-area-inset-bottom, 0px))"
       @click="expenseDialog = true"
     />
 

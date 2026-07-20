@@ -3,45 +3,54 @@ import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useIncidentStore } from "~/stores/incident";
 import { useIncidentStatus } from "~/composables/useIncidentStatus";
+import EmptyState from "~/components/shared/EmptyState.vue";
 
 definePageMeta({ layout: "driver" });
 useHead({ title: "Mis incidentes" });
+useDriverPage({ title: "Mis incidentes" });
 
 const incidentStore = useIncidentStore();
 const { myIncidents, loading } = storeToRefs(incidentStore);
 const { incidentType, incidentStatus } = useIncidentStatus();
 
-const fmt = (d?: string) => (d ? new Date(d).toLocaleString() : "");
+const { fmtDateTime: fmt } = useFormatters();
 
 onMounted(() => incidentStore.getMyIncidents());
 </script>
 
 <template>
   <div>
-    <div class="d-flex align-center mb-3">
-      <h1 class="text-h6 font-weight-bold">Mis incidentes</h1>
-      <v-spacer />
-      <v-btn color="error" prepend-icon="mdi-plus" to="/chofer/incidente/nuevo">
+    <Teleport defer to="#driver-hero-actions">
+      <v-btn
+        color="white"
+        variant="flat"
+        class="text-error"
+        prepend-icon="mdi-plus"
+        to="/chofer/incidente/nuevo"
+      >
         Reportar
       </v-btn>
-    </div>
+    </Teleport>
 
     <div v-if="loading" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
     <template v-else>
-      <p v-if="!myIncidents.length" class="text-body-2 text-medium-emphasis">
-        No reportaste incidentes.
-      </p>
+      <EmptyState
+        v-if="!myIncidents.length"
+        icon="mdi-shield-check-outline"
+        text="No reportaste incidentes."
+      />
       <v-card
         v-for="i in myIncidents"
         :key="i.id"
         rounded="lg"
-        elevation="2"
-        class="mb-2"
+        border
+        flat
+        class="mb-3"
       >
-        <v-card-text class="py-2 d-flex align-center ga-3">
+        <v-card-text class="py-3 d-flex align-center ga-3">
           <v-avatar
             :color="incidentType(i.type).color"
             size="40"

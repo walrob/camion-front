@@ -5,12 +5,23 @@
         border-bottom: 1px solid rgb(var(--v-border-color)) !important;
     }
 
+    // Encabezado en versalitas sobre fondo gris: jerarquiza la tabla y hace que
+    // los datos —no los rótulos— sean lo primero que se lee.
     th {
         font-weight: 700 !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgb(var(--v-theme-textSecondary)) !important;
+        background-color: rgb(var(--v-theme-grey100)) !important;
     }
 
     td {
         color: rgb(var(--v-theme-textSecondary)) !important;
+    }
+
+    tbody tr {
+        transition: background-color 0.18s ease;
     }
 
     tr:hover {
@@ -24,6 +35,28 @@
             padding: 0 6px !important;
         }
     }
+}
+
+// --- La tabla como superficie --------------------------------------------
+// En la mayoría de las pantallas el data-table va directo sobre el lienzo gris.
+// Le damos el mismo marco que a las cards para que no quede "flotando" sin
+// bordes; si ya está dentro de una card, el marco lo pone la card.
+.v-data-table {
+    border: 1px solid rgb(var(--v-theme-borderColor));
+    border-radius: $border-radius-root * 2;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+
+    // La última fila no lleva separador: el borde de la tabla ya cierra.
+    tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+}
+
+.v-card .v-data-table {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .v-data-table-footer {

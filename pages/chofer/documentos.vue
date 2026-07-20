@@ -4,9 +4,14 @@ import { storeToRefs } from "pinia";
 import { useDocumentStore } from "~/stores/document";
 import { useTripStore } from "~/stores/trip";
 import { useDocumentStatus } from "~/composables/useDocumentStatus";
+import EmptyState from "~/components/shared/EmptyState.vue";
 
 definePageMeta({ layout: "driver" });
 useHead({ title: "Documentos" });
+useDriverPage({
+  title: "Documentos",
+  subtitle: "Del camión, el acoplado y los tuyos",
+});
 
 const store = useDocumentStore();
 const tripStore = useTripStore();
@@ -35,26 +40,32 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1 class="text-h6 font-weight-bold mb-3">Documentos</h1>
-
     <div v-if="loading" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
     <template v-else>
-      <p v-if="!myDocuments.length" class="text-body-2 text-medium-emphasis">
-        No hay documentos disponibles.
-      </p>
+      <EmptyState
+        v-if="!myDocuments.length"
+        icon="mdi-file-document-outline"
+        text="No hay documentos disponibles."
+      />
       <v-card
         v-for="d in myDocuments"
         :key="d.id"
         rounded="lg"
-        elevation="2"
-        class="mb-3 alert-card"
+        border
+        flat
+        class="mb-3 accent-card"
         :style="`--accent: ${statusHex(d.status)}`"
       >
         <div class="d-flex align-center ga-3 pa-3">
-          <v-avatar rounded="lg" size="44">
+          <v-avatar
+            rounded="lg"
+            size="44"
+            :color="documentStatus(d.status).color"
+            variant="tonal"
+          >
             <v-icon :color="documentStatus(d.status).color" size="22"
               >mdi-file-document-outline</v-icon
             >
@@ -69,7 +80,7 @@ onMounted(async () => {
               <span>{{ ownerType(d.ownerType).label }}</span>
               <span>·</span>
               <v-icon size="14">mdi-calendar-clock</v-icon>
-              <span>Vence {{ d.expiryDate || "-" }}</span>
+              <span>Vence {{ formatDateLocal(d.expiryDate) || "-" }}</span>
             </div>
           </div>
           <v-chip
@@ -93,27 +104,3 @@ onMounted(async () => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.alert-card {
-  position: relative;
-  overflow: hidden;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-.alert-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--accent, #9e9e9e);
-}
-.alert-card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-.min-w-0 {
-  min-width: 0;
-}
-</style>

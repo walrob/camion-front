@@ -45,7 +45,9 @@ const conversations = computed(() => {
 const filteredConversations = computed(() => {
   const q = search.value.trim().toLowerCase();
   if (!q) return conversations.value;
-  return conversations.value.filter((c) => nameOf(c.userId).toLowerCase().includes(q));
+  return conversations.value.filter((c) =>
+    nameOf(c.userId).toLowerCase().includes(q),
+  );
 });
 
 const nameOf = (id: string) => userNames.value[id] || id.slice(0, 8);
@@ -57,15 +59,21 @@ const initials = (id: string) => {
 };
 
 // Color de avatar determinístico por usuario.
-const AVATAR_COLORS = ["primary", "secondary", "info", "success", "warning", "accent"];
+const AVATAR_COLORS = [
+  "primary",
+  "secondary",
+  "info",
+  "success",
+  "warning",
+  "accent",
+];
 const avatarColor = (id: string) => {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 };
 
-const timeOf = (d: string) =>
-  new Date(d).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+const timeOf = (d: string) => formatHourLocal(d);
 
 const dayLabel = (d: string) => {
   const date = new Date(d);
@@ -103,7 +111,10 @@ const openConversation = async (userId: string) => {
 
 const send = async () => {
   if (!text.value.trim() || !selectedUser.value) return;
-  const ok = await messageStore.send({ body: text.value, toUserId: selectedUser.value });
+  const ok = await messageStore.send({
+    body: text.value,
+    toUserId: selectedUser.value,
+  });
   if (ok) {
     text.value = "";
     scrollDown();
@@ -149,11 +160,17 @@ onBeforeUnmount(() => socket.disconnect());
 
 <template>
   <div>
-    <PageHeader title="Mensajes" subtitle="Comunicación con los choferes en ruta" />
+    <PageHeader
+      title="Mensajes"
+      subtitle="Comunicación con los choferes en ruta"
+    />
 
     <v-card border flat rounded="lg" class="chat-shell d-flex overflow-hidden">
       <!-- ───── Lista de conversaciones ───── -->
-      <div v-if="mdAndUp || !selectedUser" class="chat-aside d-flex flex-column">
+      <div
+        v-if="mdAndUp || !selectedUser"
+        class="chat-aside d-flex flex-column"
+      >
         <div class="pa-3">
           <v-text-field
             v-model="search"
@@ -179,17 +196,27 @@ onBeforeUnmount(() => socket.disconnect());
             >
               <template #prepend>
                 <v-avatar :color="avatarColor(c.userId)" size="42" class="mr-1">
-                  <span class="text-body-2 font-weight-bold">{{ initials(c.userId) }}</span>
+                  <span class="text-body-2 font-weight-bold">{{
+                    initials(c.userId)
+                  }}</span>
                 </v-avatar>
               </template>
 
-              <v-list-item-title class="font-weight-bold d-flex align-center justify-space-between">
+              <v-list-item-title
+                class="font-weight-bold d-flex align-center justify-space-between"
+              >
                 <span class="text-truncate">{{ nameOf(c.userId) }}</span>
-                <span class="text-caption text-medium-emphasis ml-2">{{ timeOf(c.last.createdAt) }}</span>
+                <span class="text-caption text-medium-emphasis ml-2">{{
+                  timeOf(c.last.createdAt)
+                }}</span>
               </v-list-item-title>
-              <v-list-item-subtitle class="d-flex align-center justify-space-between">
+              <v-list-item-subtitle
+                class="d-flex align-center justify-space-between"
+              >
                 <span class="text-truncate">{{ c.last.body }}</span>
-                <v-icon v-if="c.unread" size="12" color="primary" class="ml-2">mdi-circle</v-icon>
+                <v-icon v-if="c.unread" size="12" color="primary" class="ml-2"
+                  >mdi-circle</v-icon
+                >
               </v-list-item-subtitle>
             </v-list-item>
           </v-list>
@@ -198,7 +225,9 @@ onBeforeUnmount(() => socket.disconnect());
             v-if="!filteredConversations.length"
             class="text-center text-body-2 text-medium-emphasis py-10 px-4"
           >
-            <v-icon size="32" class="mb-2 d-block mx-auto">mdi-chat-outline</v-icon>
+            <v-icon size="32" class="mb-2 d-block mx-auto"
+              >mdi-chat-outline</v-icon
+            >
             Sin conversaciones
           </div>
         </div>
@@ -207,7 +236,10 @@ onBeforeUnmount(() => socket.disconnect());
       <v-divider v-if="mdAndUp" vertical />
 
       <!-- ───── Conversación ───── -->
-      <div v-if="mdAndUp || selectedUser" class="chat-main flex-grow-1 d-flex flex-column">
+      <div
+        v-if="mdAndUp || selectedUser"
+        class="chat-main flex-grow-1 d-flex flex-column"
+      >
         <!-- Encabezado -->
         <template v-if="selectedUser">
           <div class="d-flex align-center ga-2 pa-3">
@@ -220,7 +252,9 @@ onBeforeUnmount(() => socket.disconnect());
               @click="selectedUser = null"
             />
             <v-avatar :color="avatarColor(selectedUser)" size="38">
-              <span class="text-body-2 font-weight-bold">{{ initials(selectedUser) }}</span>
+              <span class="text-body-2 font-weight-bold">{{
+                initials(selectedUser)
+              }}</span>
             </v-avatar>
             <div class="font-weight-bold">{{ nameOf(selectedUser) }}</div>
           </div>
@@ -229,9 +263,14 @@ onBeforeUnmount(() => socket.disconnect());
 
         <!-- Mensajes -->
         <div ref="listRef" class="chat-body flex-grow-1 pa-4">
-          <div v-if="!selectedUser" class="chat-empty text-center text-medium-emphasis">
+          <div
+            v-if="!selectedUser"
+            class="chat-empty text-center text-medium-emphasis"
+          >
             <v-icon size="56" class="mb-3">mdi-forum-outline</v-icon>
-            <p class="text-body-1">Elegí una conversación para empezar a chatear.</p>
+            <p class="text-body-1">
+              Elegí una conversación para empezar a chatear.
+            </p>
           </div>
 
           <div v-else-if="loading && !messages.length" class="text-center pt-8">
@@ -254,7 +293,9 @@ onBeforeUnmount(() => socket.disconnect());
                   class="msg-bubble"
                   :class="m.fromUserId === myId ? 'msg-sent' : 'msg-recv'"
                 >
-                  <div class="text-body-2" style="white-space: pre-wrap">{{ m.body }}</div>
+                  <div class="text-body-2" style="white-space: pre-wrap">
+                    {{ m.body }}
+                  </div>
                   <div class="msg-meta">
                     <span>{{ timeOf(m.createdAt) }}</span>
                     <v-icon v-if="m.fromUserId === myId" size="14">
@@ -316,7 +357,8 @@ onBeforeUnmount(() => socket.disconnect());
 .chat-body {
   overflow-y: auto;
   background:
-    radial-gradient(rgba(var(--v-theme-primary), 0.04) 1px, transparent 1px) 0 0 / 22px 22px,
+    radial-gradient(rgba(var(--v-theme-primary), 0.04) 1px, transparent 1px) 0
+      0 / 22px 22px,
     rgb(var(--v-theme-grey100));
 }
 

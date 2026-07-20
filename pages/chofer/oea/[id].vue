@@ -11,6 +11,7 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 
 definePageMeta({ layout: "driver" });
 useHead({ title: "Planilla OEA" });
+useDriverPage({ title: "Planilla de control OEA", back: "/chofer/oea" });
 
 const route = useRoute();
 const router = useRouter();
@@ -98,11 +99,6 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/chofer/oea" />
-      <h1 class="text-h6 font-weight-bold">Planilla de control OEA</h1>
-    </div>
-
     <v-alert
       v-if="isSigned"
       type="success"
@@ -119,7 +115,7 @@ onMounted(async () => {
 
     <template v-else-if="current">
       <!-- Sección 1: datos del transporte y documentación -->
-      <v-card rounded="lg" elevation="2" class="mb-3">
+      <v-card rounded="lg" border flat class="mb-3">
         <v-card-text>
           <p class="text-subtitle-2 font-weight-bold mb-2">
             Transporte y documentación

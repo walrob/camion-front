@@ -49,6 +49,40 @@
   text-transform: capitalize;
   letter-spacing: $btn-letter-spacing;
 }
+
+//
+// Sombra tintada en los botones sólidos: el halo toma el color del propio botón
+// (no un gris neutro), que es lo que los hace ver "encendidos" sin subir la
+// saturación. Solo en variantes rellenas; text/tonal/outlined quedan planos.
+//
+.v-btn--variant-flat,
+.v-btn--variant-elevated {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  @each $tone in (primary, secondary, success, error, warning, info, accent) {
+    &.bg-#{$tone} {
+      box-shadow: 0 3px 8px -2px rgba(var(--v-theme-#{$tone}), 0.45);
+
+      &:hover {
+        box-shadow: 0 6px 16px -4px rgba(var(--v-theme-#{$tone}), 0.55);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  // Los botones-ícono redondos no llevan halo: son acciones secundarias.
+  &.v-btn--icon,
+  &.v-btn--icon:hover {
+    box-shadow: none;
+    transform: none;
+  }
+}
 .v-btn--icon.v-btn--density-default {
   width: calc(var(--v-btn-height) + 6px);
   height: calc(var(--v-btn-height) + 6px);

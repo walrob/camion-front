@@ -72,7 +72,7 @@ html {
 
 .v-alert {
     align-content: center;
-    border-radius: 0;
+    border-radius: $border-radius-root * 2;
 }
 
 .v-row--dense>.v-col,
@@ -138,8 +138,57 @@ html {
     font-weight: 600;
 }
 
+// El borde va por token para no quedar invisible sobre el tema oscuro.
 .v-btn-toggle {
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgb(var(--v-theme-borderColor)) !important;
+}
+
+// --- Superficies flotantes -----------------------------------------------
+// Menús, autocompletes y tooltips comparten el radio y la sombra difusa de las
+// cards, para que todo lo que "flota" pertenezca al mismo sistema.
+.v-overlay__content>.v-list,
+.v-overlay__content>.v-sheet {
+    border-radius: $border-radius-root * 2;
+    box-shadow: $shadow-lg !important;
+}
+
+.v-tooltip>.v-overlay__content {
+    border-radius: $border-radius-root;
+}
+
+// Las pestañas activas se marcan con una barra redondeada en vez de una línea
+// a tope: detalle pequeño, pero es lo que separa un panel cuidado de uno crudo.
+.v-tab .v-tab__slider {
+    border-radius: 3px 3px 0 0;
+    height: 3px;
+}
+
+// --- Scrollbar -----------------------------------------------------------
+// Barra fina y translúcida: quita el gris de sistema de las tablas y listas
+// largas sin ocultar la posición de scroll.
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--v-theme-textSecondary), 0.35) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--v-theme-textSecondary), 0.3);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+
+    &:hover {
+        background-color: rgba(var(--v-theme-textSecondary), 0.5);
+    }
 }
 
 // Accesibilidad: foco visible para navegación por teclado (no afecta al mouse).

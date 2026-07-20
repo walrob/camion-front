@@ -1,23 +1,37 @@
 <script setup lang="ts">
-// Modal "Ver todos": el mismo gráfico de barras del tablero pero con la lista
-// completa (según filtro) y alto dinámico. Soporta estado de carga propio para
-// los detalles que se piden al backend al abrir (ej. Indicadores).
+// Modal de gráfico ampliado. Sirve a los dos casos: el gráfico recortado que al
+// abrirse trae el conjunto completo desde el backend (por eso el `loading`
+// propio) y el que simplemente se ve más grande.
 const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
 
 const model = defineModel<boolean>({ default: false });
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title: string;
     caption?: string;
     series: any[];
     options: any;
+    /** Tipo de ApexCharts: bar, donut, line, area… */
+    type?: string;
     height?: number;
     loading?: boolean;
     emptyText?: string;
   }>(),
-  { height: 360, emptyText: "Sin datos en el período." },
+  {
+    type: "bar",
+    height: 360,
+    emptyText: "Sin datos en el período.",
+  },
 );
+
+// Las series vienen con dos formas según el tipo: `[{ data: [...] }]` en barras
+// y líneas, y un array plano de números en donut/pie/radial.
+const hasData = computed(() => {
+  const first = props.series?.[0];
+  if (first == null) return false;
+  return typeof first === "number" ? true : !!first?.data?.length;
+});
 </script>
 
 <template>
@@ -34,7 +48,12 @@ withDefaults(
           </span>
         </span>
         <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="model = false" />
+        <v-btn
+          icon="mdi-close"
+          aria-label="Cerrar"
+          variant="text"
+          @click="model = false"
+        />
       </v-card-title>
       <v-divider />
       <v-card-text style="max-height: 70vh">
@@ -45,9 +64,9 @@ withDefaults(
         >
           <v-progress-circular indeterminate color="primary" />
         </div>
-        <ClientOnly v-else-if="series[0]?.data?.length">
+        <ClientOnly v-else-if="hasData">
           <VueApexCharts
-            type="bar"
+            :type="type"
             :height="height"
             :options="options"
             :series="series"

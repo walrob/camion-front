@@ -41,6 +41,8 @@ const headers = [
   { title: "Acciones", value: "actions", sortable: false },
 ];
 
+const { fmtDate } = useFormatters();
+
 const isExpiringSoon = (date?: string) => {
   if (!date) return false;
   const diff = (new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
@@ -130,7 +132,7 @@ onMounted(() => driverStore.getDrivers());
               : ''
           "
         >
-          {{ item.licenseExpiry || "-" }}
+          {{ fmtDate(item.licenseExpiry) }}
         </span>
       </template>
       <template #item.status="{ item }">

@@ -33,8 +33,8 @@ const sections = computed(() => {
     .filter((s) => s.items.length);
 });
 
-const fmtDate = (d?: string | null) =>
-  d ? new Date(d).toLocaleString("es-AR") : "-";
+// Aquí se muestra el momento exacto de la inspección: fecha + hora.
+const { fmtDateTime: fmtDate } = useFormatters();
 
 const close = () => emit("update:modelValue", false);
 

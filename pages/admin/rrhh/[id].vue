@@ -66,7 +66,7 @@ const initials = computed(() => {
   return `${e.firstName?.[0] ?? ""}${e.lastName?.[0] ?? ""}`.toUpperCase();
 });
 
-const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString() : "-");
+const { fmtDate } = useFormatters();
 
 // Datos de contacto/legajo como items con ícono, para aprovechar el ancho.
 type InfoItem = {

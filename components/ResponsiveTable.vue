@@ -70,13 +70,28 @@
           <v-card-text>
             <!-- 👇 slot opcional para personalizar mobile -->
             <slot name="mobile-item" :item="item" :index="index">
+              <!--
+                Sin personalización, la tarjeta reusa los mismos slots de columna
+                que la tabla de escritorio (`item.<key>`). Así una fecha, un monto
+                o un chip se ven igual en las dos vistas: antes acá se imprimía el
+                valor crudo del backend (una fecha salía "2026-05-20").
+              -->
               <div
-                v-for="header in headers"
+                v-for="header in mobileHeaders"
                 :key="header.value"
                 class="flex justify-between border-b py-1 text-sm"
               >
                 <span class="font-weight-bold">{{ header.title }}: </span>
-                <span>{{ resolveValue(item, header.value) }}</span>
+                <span>
+                  <slot
+                    v-if="$slots[`item.${header.value}`]"
+                    :name="`item.${header.value}`"
+                    :item="item"
+                  />
+                  <template v-else>
+                    {{ resolveValue(item, header.value) }}
+                  </template>
+                </span>
               </div>
             </slot>
 
@@ -160,6 +175,12 @@ const onSortBy = (sortByArr: { key: string; order?: "asc" | "desc" }[]) => {
       : { key: null, order: null },
   );
 };
+
+// La columna de acciones se renderiza aparte al pie de la tarjeta: incluirla en
+// el listado de campos la duplicaría (y sin slots mostraba "Acciones: -").
+const mobileHeaders = computed(() =>
+  props.headers.filter((h) => h.value !== "actions"),
+);
 
 // Página actual (modo cliente). Se reinicia al cambiar el conjunto de datos.
 const page = ref(1);

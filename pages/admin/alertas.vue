@@ -20,7 +20,7 @@ const alertStore = useAlertStore();
 const { sorted, loading, activeCount } = storeToRefs(alertStore);
 const { alertLevel, alertStatus } = useAlertStatus();
 
-const fmt = (d?: string) => (d ? new Date(d).toLocaleString() : "");
+const { fmtDateTime: fmt } = useFormatters();
 const LEVEL_HEX: Record<string, string> = {
   red: "#F44336",
   orange: "#FF9800",

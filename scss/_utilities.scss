@@ -19,16 +19,17 @@
   }
 
   &:hover {
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    box-shadow: $shadow-lg;
     transform: translateY(-1px);
   }
 
-  // Estado atenuado (ej. una alerta ya resuelta).
+  // Estado atenuado (ej. una alerta ya resuelta): la barra se funde con la
+  // tarjeta. Va por token para no pintar blanco sobre el tema oscuro.
   &--resolved {
     opacity: 0.72;
 
     &::before {
-      background: #fff;
+      background: rgb(var(--v-theme-surface));
     }
   }
 }

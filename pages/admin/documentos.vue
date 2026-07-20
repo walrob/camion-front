@@ -19,6 +19,7 @@ definePageMeta({
 });
 useHead({ title: "Documentos" });
 
+const { fmtDate } = useFormatters();
 const store = useDocumentStore();
 const { documents, expiring, ownerOptions, loading } = storeToRefs(store);
 const {
@@ -185,6 +186,12 @@ onMounted(async () => {
           <template #item.category="{ item }">
             {{ documentCategory(item.category).label }}
           </template>
+          <template #item.issueDate="{ item }">
+            {{ fmtDate(item.issueDate) }}
+          </template>
+          <template #item.expiryDate="{ item }">
+            {{ fmtDate(item.expiryDate) }}
+          </template>
           <template #item.status="{ item }">
             <v-chip
               :color="documentStatus(item.status).color"
@@ -270,7 +277,7 @@ onMounted(async () => {
                 </span>
                 <span class="d-flex align-center ga-1">
                   <v-icon size="14">mdi-calendar-clock</v-icon>Vence
-                  {{ d.expiryDate || "-" }}
+                  {{ fmtDate(d.expiryDate) }}
                 </span>
               </div>
             </div>

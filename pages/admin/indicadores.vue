@@ -185,19 +185,19 @@ onMounted(async () => {
             caption="(Top 10 · en miles $)"
             :series="barByTruck.series"
             :options="barByTruck.options"
-            :show-all="barByTruck.series[0].data.length >= 10"
-            @see-all="openDetail('truck')"
+            :has-full-detail="barByTruck.series[0].data.length >= 10"
+            @expand-full="openDetail('truck')"
           />
         </v-col>
         <v-col cols="12" md="6">
           <ChartCard
             title="Gasto por chofer"
             caption="(Top 10 · en miles $)"
-            see-all-color="success"
+            expand-color="success"
             :series="barByDriver.series"
             :options="barByDriver.options"
-            :show-all="barByDriver.series[0].data.length >= 10"
-            @see-all="openDetail('driver')"
+            :has-full-detail="barByDriver.series[0].data.length >= 10"
+            @expand-full="openDetail('driver')"
           />
         </v-col>
       </v-row>

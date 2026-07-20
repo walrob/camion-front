@@ -7,6 +7,7 @@ import { useOea } from "~/composables/useOea";
 
 definePageMeta({ layout: "driver" });
 useHead({ title: "Planillas OEA" });
+useDriverPage({ title: "Planillas OEA", back: "/chofer" });
 
 const router = useRouter();
 const store = useOeaStore();
@@ -21,8 +22,7 @@ const activeTrip = computed(
     myTrips.value.find((t) => t.status === "assigned"),
 );
 
-const fmtDate = (d?: string | null) =>
-  d ? new Date(d).toLocaleDateString("es-AR") : "-";
+const { fmtDate } = useFormatters();
 
 const startNew = async () => {
   const trip = activeTrip.value;
@@ -46,10 +46,11 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="d-flex align-center justify-space-between mb-3">
-      <h1 class="text-h6 font-weight-bold">Planillas OEA</h1>
+    <Teleport defer to="#driver-hero-actions">
       <v-btn
-        color="primary"
+        color="white"
+        variant="flat"
+        class="text-primary"
         prepend-icon="mdi-clipboard-check-outline"
         :disabled="!activeTrip"
         :loading="saving"
@@ -57,7 +58,7 @@ onMounted(async () => {
       >
         Nueva
       </v-btn>
-    </div>
+    </Teleport>
 
     <v-alert
       v-if="!activeTrip"
@@ -82,7 +83,8 @@ onMounted(async () => {
         v-for="p in myList"
         :key="p.id"
         rounded="lg"
-        elevation="2"
+        border
+        flat
         class="mb-2"
         @click="router.push(`/chofer/oea/${p.id}`)"
       >

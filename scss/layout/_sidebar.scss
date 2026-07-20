@@ -60,9 +60,15 @@
         padding-inline-start: calc(12px + var(--indent-padding) / 10) !important;
 
         margin: 0 0 2px;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
 
-        &:hover {
+        // Sin estado activo, el hover deja un tinte de marca: da respuesta
+        // inmediata al recorrer el menú sin gritar como un bloque sólido.
+        &:hover:not(.v-list-item--active) {
             color: rgb(var(--v-theme-primary));
+            background-color: rgba(var(--v-theme-primary), 0.07);
         }
 
         .v-list-item__prepend {
@@ -85,10 +91,15 @@
     .v-list {
         color: rgb(var(--v-theme-textSecondary));
 
+        // Ítem activo: degradado de marca + halo del mismo color. Es el acento
+        // más vivo de la app y por eso está reservado a un único elemento.
         >.v-list-item.v-list-item--active,
         .v-list-item--active>.v-list-item__overlay {
-            background: rgb(var(--v-theme-primary));
+            background: linear-gradient(90deg,
+                    rgb(var(--v-theme-primary)) 0%,
+                    rgb(var(--v-theme-accent)) 100%);
             color: white !important;
+            box-shadow: 0 4px 12px -3px rgba(var(--v-theme-primary), 0.5);
         }
 
         >.v-list-group {
@@ -96,8 +107,11 @@
 
             >.v-list-item--active,
             >.v-list-item--active:hover {
-                background: rgb(var(--v-theme-primary));
+                background: linear-gradient(90deg,
+                        rgb(var(--v-theme-primary)) 0%,
+                        rgb(var(--v-theme-accent)) 100%);
                 color: white;
+                box-shadow: 0 4px 12px -3px rgba(var(--v-theme-primary), 0.5);
             }
 
             .v-list-group__items .v-list-item.v-list-item--active,

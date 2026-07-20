@@ -1,26 +1,67 @@
 <script setup lang="ts">
-// Card de gráfico de barras de los tableros: título + subtítulo opcional, botón
-// "Ver todos" opcional (para abrir el detalle completo) y el gráfico ApexCharts
-// —diferido y envuelto en <ClientOnly>— con su mensaje de "sin datos".
+// Card de gráfico de los tableros: título + subtítulo opcional, botón para
+// ampliar y el gráfico ApexCharts —diferido y envuelto en <ClientOnly>— con su
+// estado de "sin datos".
+//
+// Ampliar es una acción universal: cualquier gráfico se puede ver en grande.
+// Hay dos maneras de resolverla y la card elige sola:
+//
+//   · Con `has-full-detail`, el gráfico es un recorte (Top N) y el conjunto
+//     completo lo tiene el padre: la card emite `expandFull` y el padre abre su
+//     propio ChartDetailDialog con los datos que trae del backend.
+//   · Sin esa prop, la card abre un modal propio con su misma serie, solo que
+//     más grande. No requiere ninguna configuración en el padre.
+import { computed, ref } from "vue";
+import ChartDetailDialog from "./ChartDetailDialog.vue";
+import EmptyState from "~/components/shared/EmptyState.vue";
+
 const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title: string;
     /** Aclaración en gris junto al título, ej. "(Top 10 · en miles $)". */
     caption?: string;
     series: any[];
     options: any;
+    /** Tipo de ApexCharts: bar, donut, line, area… */
+    type?: string;
     height?: number | string;
-    /** Muestra el botón "Ver todos". */
-    showAll?: boolean;
-    seeAllColor?: string;
+    /** El padre tiene el conjunto completo y abre su propio modal al expandir. */
+    hasFullDetail?: boolean;
+    /** Color del botón de ampliar (para acompañar el color de la serie). */
+    expandColor?: string;
     emptyText?: string;
+    emptyIcon?: string;
+    /** Alto del gráfico dentro del modal propio. */
+    detailHeight?: number;
   }>(),
-  { height: 300, seeAllColor: "primary", emptyText: "Sin datos en el período." },
+  {
+    type: "bar",
+    height: 300,
+    expandColor: "primary",
+    emptyText: "Sin datos en el período.",
+    emptyIcon: "mdi-chart-box-outline",
+    detailHeight: 420,
+  },
 );
 
-defineEmits<{ seeAll: [] }>();
+const emit = defineEmits<{ expandFull: [] }>();
+
+// Las series vienen con dos formas según el tipo: `[{ data: [...] }]` en barras
+// y líneas, y un array plano de números en donut/pie/radial.
+const hasData = computed(() => {
+  const first = props.series?.[0];
+  if (first == null) return false;
+  return typeof first === "number" ? true : !!first?.data?.length;
+});
+
+const ownDetail = ref(false);
+
+const expand = () => {
+  if (props.hasFullDetail) emit("expandFull");
+  else ownDetail.value = true;
+};
 </script>
 
 <template>
@@ -36,26 +77,44 @@ defineEmits<{ seeAll: [] }>();
         </span>
       </div>
       <v-spacer />
+      <!--
+        El ícono se muestra siempre que haya algo que ampliar. Que el gráfico
+        esté recortado o no lo aclara el `caption` ("Top 10"), no este botón:
+        acá el significado es uno solo, "verlo en grande".
+      -->
       <v-btn
-        v-if="showAll"
+        v-if="hasData"
+        icon="mdi-arrow-expand"
+        aria-label="Ampliar gráfico"
         size="small"
         variant="text"
-        :color="seeAllColor"
-        append-icon="mdi-arrow-expand"
-        @click="$emit('seeAll')"
-      >
-        Ver todos
-      </v-btn>
+        :color="expandColor"
+        @click="expand"
+      />
     </div>
+
     <ClientOnly>
       <VueApexCharts
-        v-if="series[0]?.data?.length"
-        type="bar"
+        v-if="hasData"
+        :type="type"
         :height="height"
         :options="options"
         :series="series"
       />
-      <p v-else class="text-caption text-medium-emphasis">{{ emptyText }}</p>
+      <EmptyState v-else :icon="emptyIcon" :text="emptyText" />
     </ClientOnly>
+
+    <!-- Modal propio: solo cuando el detalle completo no lo maneja el padre. -->
+    <ChartDetailDialog
+      v-if="!hasFullDetail"
+      v-model="ownDetail"
+      :title="title"
+      :caption="caption"
+      :type="type"
+      :series="series"
+      :options="options"
+      :height="detailHeight"
+      :empty-text="emptyText"
+    />
   </v-card>
 </template>

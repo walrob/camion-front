@@ -33,7 +33,7 @@ watch(
 );
 
 const close = () => emit("update:modelValue", false);
-const fmt = (d?: string) => (d ? new Date(d).toLocaleString() : "");
+const { fmtDateTime: fmt } = useFormatters();
 const openUrl = (url: string) => window.open(url, "_blank");
 
 const doAssign = () => {

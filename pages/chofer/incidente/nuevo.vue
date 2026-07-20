@@ -10,6 +10,7 @@ import VoiceTextarea from "~/components/form/VoiceTextarea.vue";
 
 definePageMeta({ layout: "driver" });
 useHead({ title: "Reportar incidente" });
+useDriverPage({ title: "Reportar incidente", back: "/chofer/incidentes" });
 
 const router = useRouter();
 const tripStore = useTripStore();
@@ -86,16 +87,6 @@ onMounted(() => tripStore.getMyTrips());
 
 <template>
   <div>
-    <div class="d-flex align-center ga-2 mb-3">
-      <v-btn
-        icon="mdi-arrow-left"
-        aria-label="Volver"
-        variant="text"
-        to="/chofer/incidentes"
-      />
-      <h1 class="text-h6 font-weight-bold">Reportar incidente</h1>
-    </div>
-
     <p class="text-subtitle-2 font-weight-bold mb-2">Tipo</p>
     <div class="type-grid mb-4">
       <v-card

@@ -8,6 +8,7 @@ import FuelLoadDialog from "~/components/fuel/FuelLoadDialog.vue";
 
 definePageMeta({ layout: "driver" });
 useHead({ title: "Combustible" });
+useDriverPage({ title: "Combustible", back: "/chofer" });
 
 const store = useFuelStore();
 const tripStore = useTripStore();
@@ -25,9 +26,7 @@ const activeTrip = computed(
 );
 const activeTruckId = computed(() => activeTrip.value?.truckId ?? null);
 
-const money = (n?: number) => `$ ${Number(n ?? 0).toLocaleString("es-AR")}`;
-const fmtDate = (d?: string) =>
-  d ? new Date(d).toLocaleDateString("es-AR") : "-";
+const { money, fmtDate } = useFormatters();
 
 onMounted(async () => {
   await tripStore.getMyTrips();
@@ -37,17 +36,18 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="d-flex align-center justify-space-between mb-3">
-      <h1 class="text-h6 font-weight-bold">Combustible</h1>
+    <Teleport defer to="#driver-hero-actions">
       <v-btn
-        color="primary"
+        color="white"
+        variant="flat"
+        class="text-primary"
         prepend-icon="mdi-gas-station"
         :disabled="!activeTruckId"
         @click="dialog = true"
       >
         Cargar
       </v-btn>
-    </div>
+    </Teleport>
 
     <v-alert
       v-if="!activeTruckId"
@@ -72,7 +72,8 @@ onMounted(async () => {
         v-for="l in myLoads"
         :key="l.id"
         rounded="lg"
-        elevation="2"
+        border
+        flat
         class="mb-2"
       >
         <v-card-text class="py-2 d-flex align-center ga-3">

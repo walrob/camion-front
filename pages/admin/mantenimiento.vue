@@ -49,7 +49,7 @@ const truckPlans = computed(() =>
 
 const nextLabel = (p: any) =>
   p.triggerType === "date"
-    ? p.nextDueAt || "-"
+    ? fmtDate(p.nextDueAt)
     : p.nextDueKm != null
       ? `${p.nextDueKm} ${p.triggerType === "hours" ? "h" : "km"}`
       : "-";
@@ -78,7 +78,7 @@ const openEditOrder = (o: any) => {
   selectedOrder.value = o;
   orderDialog.value = true;
 };
-const { moneyFixed: money } = useFormatters();
+const { moneyFixed: money, fmtDate } = useFormatters();
 
 watch(truckId, (id) => {
   if (id) store.getOrders(id);
@@ -239,6 +239,7 @@ onMounted(async () => {
           all-items
           @retry="store.getOrders(truckId)"
         >
+          <template #item.date="{ item }">{{ fmtDate(item.date) }}</template>
           <template #item.cost="{ item }">{{ money(item.cost) }}</template>
           <template #item.status="{ item }">
             <v-chip :color="orderStatus(item.status).color" size="small" label>

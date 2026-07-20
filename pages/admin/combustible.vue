@@ -177,20 +177,20 @@ onMounted(async () => {
             caption="(Top 10)"
             :series="kmPerLiterByTruck.series"
             :options="kmPerLiterByTruck.options"
-            :show-all="kmRows.length > TOP"
+            :has-full-detail="kmRows.length > TOP"
             empty-text="Sin datos suficientes (se necesitan cargas con tanque lleno y odómetro)."
-            @see-all="openDetail('kmPerLiter')"
+            @expand-full="openDetail('kmPerLiter')"
           />
         </v-col>
         <v-col cols="12" md="6">
           <ChartCard
             title="Gasto por camión"
             caption="(Top 10 · en miles $)"
-            see-all-color="error"
+            expand-color="error"
             :series="costByTruck.series"
             :options="costByTruck.options"
-            :show-all="costRows.length > TOP"
-            @see-all="openDetail('cost')"
+            :has-full-detail="costRows.length > TOP"
+            @expand-full="openDetail('cost')"
           />
         </v-col>
       </v-row>

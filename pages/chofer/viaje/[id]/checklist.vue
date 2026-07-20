@@ -17,6 +17,8 @@ const route = useRoute();
 const router = useRouter();
 const id = route.params.id as string;
 
+useDriverPage({ title: "Checklist pre-viaje", back: `/chofer/viaje/${id}` });
+
 const tripStore = useTripStore();
 const checklistStore = useChecklistStore();
 const general = useGeneralStore();
@@ -52,11 +54,6 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="d-flex align-center ga-2 mb-3">
-      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" :to="`/chofer/viaje/${id}`" />
-      <h1 class="text-h6 font-weight-bold">Checklist pre-viaje</h1>
-    </div>
-
     <v-alert
       v-if="isApproved"
       type="success"

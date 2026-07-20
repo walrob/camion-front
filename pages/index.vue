@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, computed, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
-// ApexCharts diferido: se carga en un chunk aparte solo al renderizar el gráfico.
-const VueApexCharts = defineAsyncComponent(() => import("vue3-apexcharts"));
 import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
+import ChartCard from "~/components/dashboard/ChartCard.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
 import { useDashboardStore } from "~/stores/dashboard";
 import { truckStatusOptions } from "~/composables/useFleetStatus";
@@ -258,44 +257,29 @@ onBeforeUnmount(() => {
 
         <!-- Flota por estado -->
         <v-col cols="12" md="4">
-          <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-2">
-              Flota por estado
-            </div>
-            <ClientOnly>
-              <VueApexCharts
-                v-if="truckChart.series.length"
-                type="donut"
-                height="260"
-                :options="truckChart.options"
-                :series="truckChart.series"
-              />
-              <EmptyState v-else text="Sin datos." />
-            </ClientOnly>
-          </v-card>
+          <ChartCard
+            title="Flota por estado"
+            type="donut"
+            :height="260"
+            :series="truckChart.series"
+            :options="truckChart.options"
+            empty-text="Sin datos."
+            empty-icon="mdi-truck-outline"
+          />
         </v-col>
 
         <!-- Alertas por nivel -->
         <v-col cols="12" md="4">
-          <v-card border flat rounded="lg" class="pa-4 h-100">
-            <div class="text-subtitle-2 font-weight-bold mb-2">
-              Alertas por nivel
-            </div>
-            <ClientOnly>
-              <VueApexCharts
-                v-if="alertChart.series.length"
-                type="donut"
-                height="260"
-                :options="alertChart.options"
-                :series="alertChart.series"
-              />
-              <EmptyState
-                v-else
-                icon="mdi-check-circle-outline"
-                text="Sin alertas activas."
-              />
-            </ClientOnly>
-          </v-card>
+          <ChartCard
+            title="Alertas por nivel"
+            type="donut"
+            :height="260"
+            :series="alertChart.series"
+            :options="alertChart.options"
+            expand-color="warning"
+            empty-text="Sin alertas activas."
+            empty-icon="mdi-check-circle-outline"
+          />
         </v-col>
       </v-row>
 

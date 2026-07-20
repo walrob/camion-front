@@ -23,6 +23,8 @@ export type ThemeTypes = {
         inputBorder?: string;
         containerBg?: string;
         surface?: string;
+        /** Lienzo de la página: gris muy suave para que las cards blancas destaquen. */
+        background?: string;
         'on-surface-variant'?: string;
         grey100?: string;
         grey200?: string;

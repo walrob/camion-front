@@ -10,6 +10,10 @@ const FleetLight: ThemeTypes = {
     "hover-table": "#f8fafc",
     "border-color": "#e2e8f0",
     "carousel-control-size": 10,
+    // Sombras propias: difusas y de baja opacidad (nunca el negro duro de MD).
+    "shadow-key-umbra-opacity": 0.04,
+    "shadow-key-penumbra-opacity": 0.03,
+    "shadow-key-ambient-opacity": 0.02,
   },
   colors: {
     primary: "#2563EB",
@@ -33,6 +37,9 @@ const FleetLight: ThemeTypes = {
     containerBg: "#ffffff",
     hoverColor: "#F1F5F9",
     surface: "#ffffff",
+    // Lienzo gris azulado: separa la página de las cards blancas y le da
+    // profundidad al layout sin recurrir a sombras fuertes.
+    background: "#F4F6FB",
     "on-surface-variant": "#ffffff",
     grey100: "#F8FAFC",
     grey200: "#F1F5F9",

@@ -49,3 +49,29 @@
         border: 1px solid rgb(var(--v-theme-primary));
     }
 }
+
+// --- Profundidad ---------------------------------------------------------
+// Las cards de contenido se usan como `border flat`: el borde define el límite
+// y esta sombra difusa las despega del lienzo gris. Juntas dan relieve sin el
+// "drop shadow" duro de Material.
+.v-card--variant-flat,
+.v-card--variant-elevated {
+    box-shadow: $shadow-sm;
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease,
+        border-color 0.25s ease;
+}
+
+// Las cards clickeables (`:to` / `@click` con ripple) responden al hover: es el
+// único movimiento de la interfaz y señala que son navegables.
+.v-card--link:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+    border-color: rgba(var(--v-theme-primary), 0.35);
+}
+
+// En overlays la sombra la pone el propio overlay; evitamos duplicarla.
+.v-overlay__content>.v-card {
+    box-shadow: $shadow-lg;
+}

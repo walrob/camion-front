@@ -31,6 +31,8 @@ const FleetDark: ThemeTypes = {
     containerBg: "#0F172A",
     hoverColor: "#1E293B",
     surface: "#1E293B",
+    // El lienzo va más oscuro que `surface`: las cards quedan "elevadas".
+    background: "#0B1220",
     "on-surface-variant": "#1E293B",
     grey100: "#1E293B",
     grey200: "#152032",

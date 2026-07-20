@@ -1,3 +1,21 @@
+// La barra superior comparte el blanco de las cards, así que necesita un borde
+// inferior para separarse del lienzo. Al hacer scroll Vuetify le suma elevación
+// (`scroll-behavior="elevate"`) y ahí el borde se apaga para no duplicar el corte.
+.v-app-bar.v-toolbar {
+    border-bottom: 1px solid rgb(var(--v-theme-borderColor));
+    backdrop-filter: saturate(1.4) blur(6px);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+
+    &.v-toolbar--flat {
+        box-shadow: none;
+    }
+
+    &:not(.v-toolbar--flat) {
+        border-bottom-color: transparent;
+        box-shadow: $shadow-md;
+    }
+}
+
 .profileBtn {
     margin: 0 35px 0 10px !important;
 

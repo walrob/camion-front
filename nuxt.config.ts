@@ -30,7 +30,8 @@ export default defineNuxtConfig({
           content: "Sistema de gestión de flota de camiones",
         },
         { name: "author", content: "NorthAr Consulting" },
-        { name: "theme-color", content: "#5D87FF" },
+        // Debe seguir a `primary` de FleetLight (theme/LightTheme.ts).
+        { name: "theme-color", content: "#2563EB" },
       ],
       link: [{ rel: "manifest", href: "/site.webmanifest" }],
     },
