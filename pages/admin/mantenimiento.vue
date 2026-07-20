@@ -33,14 +33,14 @@ const planHeaders = [
   { title: "Disparador", value: "triggerType" },
   { title: "Próximo", value: "next" },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 const orderHeaders = [
   { title: "Fecha", value: "date" },
   { title: "Descripción", value: "description" },
   { title: "Costo", value: "cost" },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const truckPlans = computed(() =>

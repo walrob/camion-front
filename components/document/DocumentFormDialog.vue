@@ -10,7 +10,7 @@ import FormDialog from "~/components/shared/FormDialog.vue";
 const props = defineProps<{
   modelValue: boolean;
   ownerType: string;
-  ownerId: string;
+  ownerId: string | null;
 }>();
 const emit = defineEmits(["update:modelValue", "saved"]);
 

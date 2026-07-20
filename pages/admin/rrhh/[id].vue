@@ -41,7 +41,7 @@ const certHeaders = [
   { title: "N°", value: "number" },
   { title: "Vence", value: "expiryDate" },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const assignmentHeaders = [
@@ -49,7 +49,7 @@ const assignmentHeaders = [
   { title: "Desde", value: "assignedAt" },
   { title: "Hasta", value: "unassignedAt" },
   { title: "Principal", value: "isPrimary" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const currentAssignment = computed(() =>

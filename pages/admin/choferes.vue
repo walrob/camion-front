@@ -38,7 +38,7 @@ const headers = [
   { title: "Vence", value: "licenseExpiry" },
   { title: "Teléfono", value: "employee.phone" },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const isExpiringSoon = (date?: string) => {
@@ -117,7 +117,9 @@ onMounted(() => driverStore.getDrivers());
       :loading="loading"
       :error="driverStore.error"
       all-items
+      sort-server
       @retry="driverStore.getDrivers()"
+      @sort="driverStore.setSort"
     >
       <template #item.driverName="{ item }">{{ driverName(item) }}</template>
       <template #item.licenseExpiry="{ item }">

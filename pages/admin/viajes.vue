@@ -36,7 +36,7 @@ const headers = [
   { title: "Camión", value: "truck.plate" },
   { title: "Chofer", value: "driverName", sortable: false },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const openNew = () => {
@@ -136,7 +136,9 @@ onMounted(() => tripStore.getTrips());
       :loading="loading"
       :error="tripStore.error"
       all-items
+      sort-server
       @retry="tripStore.getTrips()"
+      @sort="tripStore.setSort"
     >
       <template #item.driverName="{ item }">{{
         driverName(item.driver)

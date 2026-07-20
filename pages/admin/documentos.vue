@@ -38,7 +38,7 @@ const headers = [
   { title: "Emisión", value: "issueDate" },
   { title: "Vencimiento", value: "expiryDate" },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const STATUS_HEX: Record<string, string> = {

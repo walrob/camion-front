@@ -32,6 +32,7 @@
         :items-per-page="allItems ? -1 : itemsPerPage"
         hide-default-footer
         v-bind="$attrs"
+        @update:sort-by="onSortBy"
       >
         <!-- 🔁 Forward de todos los slots (permite item.*, bottom, etc.) -->
         <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
@@ -119,7 +120,7 @@ import EmptyState from "~/components/shared/EmptyState.vue";
 import ErrorState from "~/components/shared/ErrorState.vue";
 const { smAndUp } = useDisplay();
 
-defineEmits(["retry"]);
+const emit = defineEmits(["retry", "sort"]);
 
 interface Header {
   title: string;
@@ -140,7 +141,25 @@ const props = defineProps({
   itemsPerPage: { type: Number, default: 10 },
   error: { type: Boolean, default: false },
   errorText: { type: String, default: "Ocurrió un error al obtener los datos." },
+  // Delega el ordenamiento al servidor: al clickear una columna emite `sort` con
+  // { key, order } y el padre recarga pidiendo ese orden. Se usa en las tablas
+  // paginadas por servidor (donde ordenar solo en cliente reordenaría la página
+  // visible). En las tablas que cargan todo, se omite y v-data-table ordena solo.
+  sortServer: { type: Boolean, default: false },
 });
+
+// v-data-table emite un arreglo de descriptores; tomamos el primero (orden simple)
+// y lo propagamos. Un arreglo vacío = se quitó el orden (vuelve al default del back).
+const onSortBy = (sortByArr: { key: string; order?: "asc" | "desc" }[]) => {
+  if (!props.sortServer) return;
+  const first = sortByArr?.[0];
+  emit(
+    "sort",
+    first
+      ? { key: first.key, order: first.order ?? "asc" }
+      : { key: null, order: null },
+  );
+};
 
 // Página actual (modo cliente). Se reinicia al cambiar el conjunto de datos.
 const page = ref(1);

@@ -47,6 +47,8 @@ export const useOeaStore = defineStore("oea", {
       myList: [] as OeaInspection[],
       loading: false,
       saving: false,
+      sortBy: null as string | null,
+      sortOrder: null as "asc" | "desc" | null,
       filters: {
         truckId: null as string | null,
         driverId: null as string | null,
@@ -70,6 +72,14 @@ export const useOeaStore = defineStore("oea", {
       return p;
     },
 
+    // Orden por columna (server-side): guarda el criterio y recarga la 1ª página.
+    // `key` nulo = se quitó el orden (vuelve al default del back).
+    setSort(sort: { key: string | null; order: "asc" | "desc" | null }) {
+      this.sortBy = sort.key;
+      this.sortOrder = sort.order;
+      this.getList(1);
+    },
+
     // ───────── Backoffice ─────────
     async getList(page = 1) {
       const { $api } = useNuxtApp();
@@ -77,8 +87,12 @@ export const useOeaStore = defineStore("oea", {
       this.loading = true;
       try {
         const resp = await $api.get("oea/", {
-          params: this.cleanParams({ page }),
-          // params: this.cleanParams({ page, limit: 20 }),
+          params: this.cleanParams({
+            page,
+            ...(this.sortBy
+              ? { sortBy: this.sortBy, order: this.sortOrder }
+              : {}),
+          }),
         });
         this.list = resp.data.items;
         this.meta = resp.data.meta;

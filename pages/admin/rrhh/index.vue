@@ -39,7 +39,7 @@ const headers = [
   { title: "DNI/CUIL", value: "documentId" },
   { title: "Puesto", value: "position" },
   { title: "Estado", value: "employmentStatus" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const openNew = () => {
@@ -121,7 +121,9 @@ onMounted(() => hrStore.getEmployees());
       :loading="loading"
       :error="hrStore.error"
       all-items
+      sort-server
       @retry="hrStore.getEmployees()"
+      @sort="hrStore.setSort"
     >
       <template #item.position="{ item }">
         <v-chip :color="position(item.position).color" size="small" label>

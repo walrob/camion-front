@@ -22,6 +22,8 @@ export const useTripStore = defineStore("trip", {
       filterStatus: null as string | null,
       filterFrom: from as string | null,
       filterTo: to as string | null,
+      sortBy: null as string | null,
+      sortOrder: null as "asc" | "desc" | null,
     pagination: {
       totalItems: 0,
       itemCount: 0,
@@ -81,6 +83,8 @@ export const useTripStore = defineStore("trip", {
             status: this.filterStatus || undefined,
             from: this.filterFrom || undefined,
             to: this.filterTo || undefined,
+            sortBy: this.sortBy || undefined,
+            order: this.sortOrder || undefined,
           },
         })
         .then((resp) => {
@@ -92,6 +96,15 @@ export const useTripStore = defineStore("trip", {
           general.setErrorSnackbar(e);
         })
         .finally(() => (this.loading = false));
+    },
+
+    // Orden por columna (server-side): guarda el criterio y recarga desde la
+    // primera página. `key` nulo = se quitó el orden (vuelve al default del back).
+    setSort(sort: { key: string | null; order: "asc" | "desc" | null }) {
+      this.sortBy = sort.key;
+      this.sortOrder = sort.order;
+      this.pagination.currentPage = 1;
+      this.getTrips();
     },
 
     async createTrip(payload: Partial<Trip>) {

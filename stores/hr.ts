@@ -17,6 +17,8 @@ export const useHrStore = defineStore("hr", {
     search: null as string | null,
     filterPosition: null as string | null,
     filterStatus: null as string | null,
+    sortBy: null as string | null,
+    sortOrder: null as "asc" | "desc" | null,
     pagination: {
       totalItems: 0,
       itemCount: 0,
@@ -41,6 +43,8 @@ export const useHrStore = defineStore("hr", {
             search: this.search || undefined,
             position: this.filterPosition || undefined,
             employmentStatus: this.filterStatus || undefined,
+            sortBy: this.sortBy || undefined,
+            order: this.sortOrder || undefined,
           },
         })
         .then((resp) => {
@@ -52,6 +56,15 @@ export const useHrStore = defineStore("hr", {
           general.setErrorSnackbar(e);
         })
         .finally(() => (this.loading = false));
+    },
+
+    // Orden por columna (server-side): guarda el criterio y recarga desde la
+    // primera página. `key` nulo = se quitó el orden (vuelve al default del back).
+    setSort(sort: { key: string | null; order: "asc" | "desc" | null }) {
+      this.sortBy = sort.key;
+      this.sortOrder = sort.order;
+      this.pagination.currentPage = 1;
+      this.getEmployees();
     },
 
     async getEmployee(id: string) {

@@ -36,7 +36,7 @@ const headers = [
   { title: "Adelantos", value: "totalAdvances" },
   { title: "Neto", value: "netToSettle" },
   { title: "Estado", value: "status" },
-  { title: "Acciones", value: "actions" },
+  { title: "Acciones", value: "actions", sortable: false },
 ];
 
 const { moneyFixed: money } = useFormatters();
@@ -111,7 +111,9 @@ onMounted(() => settlementStore.getSettlements());
       :loading="loading"
       :error="settlementStore.error"
       all-items
+      sort-server
       @retry="settlementStore.getSettlements()"
+      @sort="settlementStore.setSort"
     >
       <template #item.driverName="{ item }">{{
         driverName(item.trip?.driver)

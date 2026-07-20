@@ -32,7 +32,7 @@ const headers = [
   { title: "Chofer", value: "driverName", sortable: false },
   { title: "Viaje", value: "tripNumber" },
   { title: "Resultado", value: "result" },
-  { title: "", value: "actions" },
+  { title: "", value: "actions", sortable: false },
 ];
 
 const openDetail = (id: string) => {
@@ -43,6 +43,13 @@ const openDetail = (id: string) => {
 const apply = () => {
   page.value = 1;
   store.getList(1);
+};
+
+// El orden (server-side) recarga desde la primera página; sincronizamos el
+// control de paginación local.
+const onSort = (sort: { key: string | null; order: "asc" | "desc" | null }) => {
+  page.value = 1;
+  store.setSort(sort);
 };
 
 onMounted(async () => {
@@ -90,7 +97,9 @@ onMounted(async () => {
       :items="list"
       :loading="loading"
       all-items
+      sort-server
       no-data-text="No hay planillas registradas"
+      @sort="onSort"
     >
       <template #item.driverName="{ item }">{{ driverName(item.driver) }}</template>
       <template #item.inspectedAt="{ item }">{{ fmtDate(item.inspectedAt) }}</template>
