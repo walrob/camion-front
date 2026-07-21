@@ -15,6 +15,7 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue", "saved"]);
 
 const r = useValidations();
+const { moneyFixed: money } = useFormatters();
 const fuelStore = useFuelStore();
 const { getPosition } = useGeolocation();
 
@@ -140,7 +141,7 @@ const submit = async () => {
             density="compact"
             class="mb-3"
           >
-            Total estimado: $ {{ estimatedTotal.toLocaleString("es-AR") }}
+            Total estimado: {{ money(estimatedTotal) }}
           </v-alert>
 
           <v-text-field

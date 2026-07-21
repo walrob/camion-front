@@ -68,7 +68,7 @@ const alertChart = computed(() => {
   };
 });
 
-const money = (n?: number) => `$ ${Number(n ?? 0).toLocaleString("es-AR")}`;
+const { money } = useFormatters();
 const sevCount = (v: string) => overview.value?.incidents?.bySeverity?.[v] ?? 0;
 
 // KPIs con drill-down a la sección correspondiente.

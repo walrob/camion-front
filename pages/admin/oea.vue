@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import ResponsiveTable from "~/components/ResponsiveTable.vue";
 import ReportFilters from "~/components/shared/ReportFilters.vue";
+import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import OeaDetailDialog from "~/components/oea/OeaDetailDialog.vue";
 import { useOeaStore } from "~/stores/oea";
 import { useOea, oeaResultOptions } from "~/composables/useOea";
@@ -78,6 +79,12 @@ onMounted(async () => {
       @apply="apply"
     >
       <template #extra>
+        <VoiceTextField
+          v-model="store.filters.search"
+          label="Buscar patente / chofer / viaje"
+          clearable
+          style="min-width: 240px; max-width: 300px"
+        />
         <v-select
           v-model="store.filters.result"
           :items="oeaResultOptions"

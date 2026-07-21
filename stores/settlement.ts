@@ -5,9 +5,10 @@ import type { Settlement } from "~/types/trip";
 export const useSettlementStore = defineStore("settlement", {
   state: () => ({
     settlements: [] as Settlement[],
-    finishedTrips: [] as any[],
+    pendingTrips: [] as any[],
     loading: false,
     error: false,
+    search: "",
     filterStatus: null as string | null,
     sortBy: null as string | null,
     sortOrder: null as "asc" | "desc" | null,
@@ -31,6 +32,7 @@ export const useSettlementStore = defineStore("settlement", {
           params: {
             page: this.pagination.currentPage,
             limit: this.pagination.itemsPerPage,
+            search: this.search || undefined,
             status: this.filterStatus || undefined,
             sortBy: this.sortBy || undefined,
             order: this.sortOrder || undefined,
@@ -56,12 +58,15 @@ export const useSettlementStore = defineStore("settlement", {
       this.getSettlements();
     },
 
-    async loadFinishedTrips() {
+    // Viajes que se pueden rendir por primera vez: finalizados y sin
+    // liquidación. El filtro lo hace el back (los ya rendidos están en la tabla
+    // de esta misma pantalla; recalcularlos es una acción sobre esa fila).
+    async loadPendingTrips() {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       return await $api
-        .get("trips/", { params: { status: "finished", limit: 100 } })
-        .then((resp) => (this.finishedTrips = resp.data.items))
+        .get("settlements/pending-trips/")
+        .then((resp) => (this.pendingTrips = resp.data))
         .catch((e) => general.setErrorSnackbar(e));
     },
 

@@ -42,7 +42,7 @@ const canEdit = computed(
   () =>
     trip.value?.status === "assigned" || trip.value?.status === "in_progress",
 );
-const money = (n?: number) => `$ ${Number(n ?? 0).toFixed(2)}`;
+const { moneyFixed: money } = useFormatters();
 
 const openStart = () => {
   odoMode.value = "start";

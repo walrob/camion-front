@@ -1,16 +1,20 @@
 // Formateadores de presentación compartidos por las páginas (montos, cantidades,
 // fechas). Centraliza las variantes que antes se copiaban inline en cada página:
-//  - money:      monto con separador de miles es-AR y sin decimales ("$ 1.234")
-//  - moneyFixed: monto con dos decimales ("$ 1234.00") — usado en rendiciones/OT
+//  - money:      monto ARS sin decimales ("$ 1.234")
+//  - moneyFixed: monto ARS con dos decimales ("$ 1.234,50") — rendiciones/OT
 //  - moneyK:     eje compacto en miles ("$250k") para gráficos con montos grandes
 //  - num:        cantidad con separador es-AR; "s/d" cuando el valor es nulo
 //  - fmtDate:     fecha corta ("20/05/2026"); "-" cuando no hay valor
 //  - fmtDateTime: fecha corta + hora ("20/05/2026 14:35")
+//
+// Todo lo que sea plata sale de acá, siempre en formato argentino: miles con
+// punto y decimales con coma. Delegan en formatCurrency*ARS (composables/
+// functions.ts), que usa Intl con currency ARS; no usar `toFixed`, que imprime
+// el punto decimal inglés ("$ 1234.00").
 export const useFormatters = () => {
-  const money = (n?: number | null) =>
-    `$ ${Number(n ?? 0).toLocaleString("es-AR")}`;
+  const money = (n?: number | null) => formatCurrencySmallARS(Number(n ?? 0));
 
-  const moneyFixed = (n?: number | null) => `$ ${Number(n ?? 0).toFixed(2)}`;
+  const moneyFixed = (n?: number | null) => formatCurrencyARS(Number(n ?? 0));
 
   const moneyK = (v: unknown) => {
     const n = Number(v) || 0;

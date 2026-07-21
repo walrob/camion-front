@@ -50,6 +50,7 @@ export const useOeaStore = defineStore("oea", {
       sortBy: null as string | null,
       sortOrder: null as "asc" | "desc" | null,
       filters: {
+        search: "" as string,
         truckId: null as string | null,
         driverId: null as string | null,
         result: null as string | null,

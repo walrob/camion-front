@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import PageHeader from "~/components/shared/PageHeader.vue";
-import { ref, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
+import { useDebounceFn } from "@vueuse/core";
 import { useSettlementStore } from "~/stores/settlement";
+import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Settlement } from "~/types/trip";
@@ -15,7 +17,7 @@ definePageMeta({
 useHead({ title: "Rendiciones" });
 
 const settlementStore = useSettlementStore();
-const { settlements, finishedTrips, loading, pagination } =
+const { settlements, pendingTrips, loading, pagination } =
   storeToRefs(settlementStore);
 
 const genDialog = ref(false);
@@ -39,13 +41,84 @@ const headers = [
   { title: "Acciones", value: "actions", sortable: false },
 ];
 
-const { moneyFixed: money } = useFormatters();
+const { moneyFixed: money, fmtDate } = useFormatters();
 const statusOf = (v: string) =>
   statusOptions.find((s) => s.value === v) ?? { label: v, color: "grey" };
 
+// ── Diálogo "Generar rendición" ──────────────────────────────────────────────
+// Solo viajes finalizados que todavía no tienen rendición: si el viaje ya está
+// en la tabla de abajo, no se "genera" de nuevo, se recalcula desde su fila.
+//
+// Chofer y camión no consultan al backend: se derivan de los viajes pendientes
+// ya cargados, así solo se ofrecen valores que tienen al menos un viaje para
+// rendir (una lista completa de choferes dejaría elegir uno sin resultados).
+const genDriver = ref<string | null>(null);
+const genTruck = ref<string | null>(null);
+
+const uniqueBy = <T,>(rows: T[], key: (r: T) => string | undefined) => {
+  const map = new Map<string, T>();
+  rows.forEach((r) => {
+    const k = key(r);
+    if (k && !map.has(k)) map.set(k, r);
+  });
+  return [...map.values()];
+};
+
+const genDriverOptions = computed(() =>
+  uniqueBy(pendingTrips.value, (t: any) => t.driver?.id)
+    .map((t: any) => ({ id: t.driver.id, label: driverName(t.driver) }))
+    .sort((a, b) => a.label.localeCompare(b.label)),
+);
+
+const genTruckOptions = computed(() =>
+  uniqueBy(pendingTrips.value, (t: any) => t.truck?.id)
+    .map((t: any) => ({ id: t.truck.id, label: t.truck.plate }))
+    .sort((a, b) => a.label.localeCompare(b.label)),
+);
+
+const genTripOptions = computed(() =>
+  pendingTrips.value
+    .filter(
+      (t: any) =>
+        (!genDriver.value || t.driver?.id === genDriver.value) &&
+        (!genTruck.value || t.truck?.id === genTruck.value),
+    )
+    .map((t: any) => ({
+      id: t.id,
+      label: t.code,
+      subtitle: [
+        `${t.origin} → ${t.destination}`,
+        t.truck?.plate,
+        fmtDate(t.plannedStartAt),
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    })),
+);
+
+// El código solo no alcanza para reconocer el viaje: la segunda línea muestra
+// recorrido, patente y fecha.
+const tripItemProps = (item: any) => ({
+  title: item.label,
+  subtitle: item.subtitle,
+});
+
+// Si al filtrar el viaje elegido ya no está en la lista, se deselecciona: si no,
+// el botón "Generar" quedaría habilitado con algo que no se ve.
+watch([genDriver, genTruck], () => {
+  if (
+    selectedTrip.value &&
+    !genTripOptions.value.some((t) => t.id === selectedTrip.value)
+  ) {
+    selectedTrip.value = "";
+  }
+});
+
 const openGenerate = async () => {
   selectedTrip.value = "";
-  await settlementStore.loadFinishedTrips();
+  genDriver.value = null;
+  genTruck.value = null;
+  await settlementStore.loadPendingTrips();
   genDialog.value = true;
 };
 const doGenerate = async () => {
@@ -55,6 +128,15 @@ const doGenerate = async () => {
   generating.value = false;
   if (ok) genDialog.value = false;
 };
+// Recalcular una rendición ya existente: mismo endpoint que "Generar", que para
+// un viaje ya rendido actualiza totales y rehace el PDF. Solo en borrador.
+const recalculating = ref<string | null>(null);
+const recalculate = async (s: Settlement) => {
+  recalculating.value = s.id;
+  await settlementStore.generate(s.tripId);
+  recalculating.value = null;
+};
+
 const askClose = (s: Settlement) => {
   toClose.value = s;
   confirm.value = true;
@@ -64,6 +146,13 @@ const onConfirmClose = async (payload: { resp: boolean }) => {
     await settlementStore.close(toClose.value.id);
   toClose.value = null;
 };
+// Al buscar volvemos a la primera página: la anterior puede no existir con el
+// nuevo resultado.
+const onSearch = useDebounceFn(() => {
+  pagination.value.currentPage = 1;
+  settlementStore.getSettlements();
+}, 350);
+
 const changePage = (page: number) => {
   pagination.value.currentPage = page;
   settlementStore.getSettlements();
@@ -90,6 +179,16 @@ onMounted(() => settlementStore.getSettlements());
     </PageHeader>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
+      <VoiceTextField
+        v-model="settlementStore.search"
+        label="Buscar viaje / chofer"
+        variant="outlined"
+        density="compact"
+        hide-details
+        clearable
+        style="min-width: 240px; max-width: 360px"
+        @update:model-value="onSearch"
+      />
       <v-select
         v-model="settlementStore.filterStatus"
         :items="statusOptions"
@@ -132,23 +231,61 @@ onMounted(() => settlementStore.getSettlements());
           {{ statusOf(item.status).label }}
         </v-chip>
       </template>
+      <!--
+        El PDF siempre se puede ver: si la rendición todavía no tiene uno, el
+        back lo arma en el momento. Recalcular solo tiene sentido en borrador
+        (el back rechaza las cerradas) y es lo que corresponde cuando el chofer
+        cargó gastos después de generarla.
+      -->
       <template #item.actions="{ item }">
-        <v-btn
-          icon="mdi-file-pdf-box"
-          aria-label="Ver PDF"
-          size="small"
-          variant="text"
-          color="error"
-          @click="settlementStore.openPdf(item.id)"
-        />
-        <v-btn
+        <v-tooltip text="Ver PDF" location="top">
+          <template #activator="{ props: tp }">
+            <v-btn
+              v-bind="tp"
+              icon="mdi-file-pdf-box"
+              aria-label="Ver PDF"
+              size="small"
+              variant="text"
+              color="error"
+              @click="settlementStore.openPdf(item.id)"
+            />
+          </template>
+        </v-tooltip>
+        <v-tooltip
           v-if="item.status === 'draft'"
-          icon="mdi-lock-check"
-          size="small"
-          variant="text"
-          color="success"
-          @click="askClose(item)"
-        />
+          text="Recalcular con los gastos actuales"
+          location="top"
+        >
+          <template #activator="{ props: tp }">
+            <v-btn
+              v-bind="tp"
+              icon="mdi-refresh"
+              aria-label="Recalcular"
+              size="small"
+              variant="text"
+              color="warning"
+              :loading="recalculating === item.id"
+              @click="recalculate(item)"
+            />
+          </template>
+        </v-tooltip>
+        <v-tooltip
+          v-if="item.status === 'draft'"
+          text="Cerrar rendición"
+          location="top"
+        >
+          <template #activator="{ props: tp }">
+            <v-btn
+              v-bind="tp"
+              icon="mdi-lock-check"
+              aria-label="Cerrar rendición"
+              size="small"
+              variant="text"
+              color="success"
+              @click="askClose(item)"
+            />
+          </template>
+        </v-tooltip>
       </template>
     </ResponsiveTable>
 
@@ -165,17 +302,49 @@ onMounted(() => settlementStore.getSettlements());
           >Generar rendición</v-card-title
         >
         <v-card-text>
-          <v-select
-            v-model="selectedTrip"
-            :items="finishedTrips"
+          <!--
+            Elegir el viaje de una sola lista era imposible cuando hay muchos:
+            el chofer y el camión son los datos con los que uno lo recuerda, así
+            que van primero y van achicando la lista de viajes. Son opcionales:
+            si ya sabés el código, escribilo directo en el último campo.
+          -->
+          <v-autocomplete
+            v-model="genDriver"
+            :items="genDriverOptions"
+            item-title="label"
             item-value="id"
-            :item-title="
-              (t: any) => `${t.code} · ${t.origin} → ${t.destination}`
-            "
-            label="Viaje finalizado"
-            variant="outlined"
+            label="Chofer (opcional)"
             density="comfortable"
+            clearable
+            no-data-text="Sin choferes con viajes finalizados"
+            class="mb-3"
           />
+          <v-autocomplete
+            v-model="genTruck"
+            :items="genTruckOptions"
+            item-title="label"
+            item-value="id"
+            label="Camión (opcional)"
+            density="comfortable"
+            clearable
+            no-data-text="Sin camiones con viajes finalizados"
+            class="mb-3"
+          />
+          <v-autocomplete
+            v-model="selectedTrip"
+            :items="genTripOptions"
+            item-title="label"
+            item-value="id"
+            :item-props="tripItemProps"
+            label="Viaje finalizado"
+            density="comfortable"
+            clearable
+            no-data-text="Ningún viaje coincide con ese chofer y camión"
+          />
+          <p class="text-caption text-medium-emphasis mt-1 mb-0">
+            {{ genTripOptions.length }}
+            {{ genTripOptions.length === 1 ? "viaje" : "viajes" }} para rendir
+          </p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
