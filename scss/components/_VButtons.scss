@@ -46,7 +46,11 @@
 }
 
 .v-btn {
-  text-transform: capitalize;
+  // `capitalize` ponía en mayúscula la primera letra de CADA palabra, así que
+  // "Cerrar y firmar" se leía "Cerrar Y Firmar". Los labels ya están escritos en
+  // sentence-case (mayúscula inicial y nada más), que es como deben mostrarse:
+  // `none` respeta ese texto tal cual. Evita tener que salpicar `text-none`.
+  text-transform: none;
   letter-spacing: $btn-letter-spacing;
 }
 

@@ -74,6 +74,7 @@ onBeforeUnmount(() => observer?.disconnect());
       <v-main class="driver-main">
         <!-- Hero: degradado de marca a todo el ancho, del que cuelga la hoja -->
         <header ref="heroRef" class="driver-hero">
+          <div class="driver-shell">
           <div class="d-flex align-center ga-2 mb-4">
             <span class="driver-hero__logo">
               <LayoutFullLogoHorizontal :height="24" />
@@ -128,10 +129,11 @@ onBeforeUnmount(() => observer?.disconnect());
             <!-- Destino de las acciones que teletransporta cada pantalla -->
             <div id="driver-hero-actions" class="d-flex align-center ga-2" />
           </div>
+          </div>
         </header>
 
         <!-- Hoja de contenido: sube sobre el degradado y redondea el corte -->
-        <div class="driver-sheet">
+        <div class="driver-sheet driver-shell">
           <NuxtPage />
         </div>
       </v-main>
@@ -165,6 +167,22 @@ onBeforeUnmount(() => observer?.disconnect());
 </template>
 
 <style scoped lang="scss">
+// La app del chofer se diseña para el teléfono, pero también se usa desde una
+// tablet apoyada en la cabina o desde una PC en la oficina. En vez de estirar
+// todo a lo ancho —líneas de texto larguísimas y tarjetas deformadas—, el
+// contenido se limita a una columna centrada: el degradado sigue llegando a los
+// bordes, lo que se acota es lo que se lee. Debajo de 960px no cambia nada.
+$driver-column: 720px;
+
+.driver-shell {
+  width: 100%;
+
+  @media (min-width: 960px) {
+    max-width: $driver-column;
+    margin-inline: auto;
+  }
+}
+
 // El degradado llega hasta el borde superior (incluida la zona del notch en PWA
 // instalada), por eso el padding usa el safe-area en vez de un valor fijo.
 .driver-hero {
@@ -231,6 +249,18 @@ onBeforeUnmount(() => observer?.disconnect());
   border-radius: 24px 24px 0 0;
   background: rgb(var(--v-theme-background));
   min-height: 60vh;
+
+  // En pantalla grande la hoja deja de ser "el resto de la pantalla" y pasa a
+  // leerse como una tarjeta: redondeada en las cuatro esquinas, con borde y aire
+  // abajo para que no quede pegada a la barra de navegación. El padding vertical
+  // no se toca: el alto del chat (pages/chofer/mensajes.vue) se calcula a partir
+  // de él.
+  @media (min-width: 960px) {
+    padding-inline: 24px;
+    border-radius: 24px;
+    border: 1px solid rgb(var(--v-theme-borderColor));
+    margin-bottom: 24px;
+  }
 }
 
 // El layout de admin le da a `.v-main` un margen lateral global (scss/layout/
@@ -247,6 +277,16 @@ onBeforeUnmount(() => observer?.disconnect());
 .driver-nav {
   border-top: 1px solid rgb(var(--v-theme-borderColor));
   box-shadow: 0 -2px 12px rgba(16, 30, 65, 0.06);
+
+  // La barra sigue ocupando el ancho completo (es lo que la ancla al pie), pero
+  // sus cuatro destinos se agrupan en la misma columna que el contenido: cuatro
+  // botones repartidos en 1920px quedaban perdidos en las esquinas.
+  :deep(.v-bottom-navigation__content) {
+    @media (min-width: 960px) {
+      max-width: $driver-column;
+      margin-inline: auto;
+    }
+  }
 
   :deep(.v-btn) {
     // El destino activo se marca con una píldora tintada detrás del ícono: se

@@ -26,7 +26,7 @@ const activeTrip = computed(
 );
 const activeTruckId = computed(() => activeTrip.value?.truckId ?? null);
 
-const { money, fmtDate } = useFormatters();
+const { money, num, fmtDate } = useFormatters();
 
 onMounted(async () => {
   await tripStore.getMyTrips();
@@ -82,14 +82,14 @@ onMounted(async () => {
           </v-icon>
           <div class="flex-grow-1">
             <div class="font-weight-bold">
-              {{ Number(l.liters).toLocaleString("es-AR") }} L
+              {{ num(l.liters) }} L
               <span class="text-medium-emphasis font-weight-regular">
                 · {{ money(l.totalAmount) }}
               </span>
             </div>
             <div class="text-caption text-medium-emphasis">
               {{ l.truck?.plate || "-" }} · {{ fmtDate(l.occurredAt) }}
-              <span v-if="l.odometerKm"> · {{ l.odometerKm.toLocaleString("es-AR") }} km</span>
+              <span v-if="l.odometerKm"> · {{ num(l.odometerKm) }} km</span>
             </div>
           </div>
           <v-chip v-if="l.fullTank" size="x-small" color="primary" label>

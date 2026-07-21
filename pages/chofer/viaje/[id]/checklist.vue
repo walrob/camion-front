@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useTripStore } from "~/stores/trip";
 import { useChecklistStore } from "~/stores/checklist";
@@ -27,6 +27,13 @@ const { checklist, loading, saving, isApproved } = storeToRefs(checklistStore);
 
 const pad = ref<InstanceType<typeof SignaturePad> | null>(null);
 const hasSignature = ref(false);
+
+const items = computed(() => checklist.value?.items ?? []);
+const total = computed(() => items.value.length || 1);
+const reviewed = computed(
+  () => items.value.filter((i) => i.status === "ok" || i.status === "fail").length,
+);
+const failed = computed(() => items.value.filter((i) => i.status === "fail").length);
 
 const onSign = async () => {
   if (!pad.value?.isDirty()) {
@@ -69,6 +76,39 @@ onMounted(async () => {
     </div>
 
     <template v-else-if="checklist">
+      <!--
+        Todos los ítems nacen en "N/A" (es el default de la entidad en el back),
+        así que sin este resumen el checklist se ve igual recién abierto que
+        contestado y se puede firmar sin haber mirado nada. La barra cuenta solo
+        lo que el chofer marcó como OK o Falla.
+      -->
+      <v-card
+        v-if="!isApproved"
+        border
+        flat
+        rounded="lg"
+        class="pa-3 mb-3"
+      >
+        <div class="d-flex align-center ga-2 mb-2">
+          <span class="text-body-2 font-weight-bold">
+            {{ reviewed }} de {{ total }} revisados
+          </span>
+          <v-spacer />
+          <v-chip v-if="failed" color="error" size="small" variant="tonal">
+            {{ failed }} {{ failed === 1 ? "falla" : "fallas" }}
+          </v-chip>
+        </div>
+        <v-progress-linear
+          :model-value="(reviewed / total) * 100"
+          :color="failed ? 'error' : 'success'"
+          height="8"
+          rounded
+        />
+        <p class="text-caption text-medium-emphasis mt-2 mb-0">
+          Los ítems empiezan en N/A. Marcá OK o Falla en los que revises.
+        </p>
+      </v-card>
+
       <ChecklistItemRow
         v-for="item in checklist.items"
         :key="item.id"

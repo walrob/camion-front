@@ -52,7 +52,8 @@ const sections = computed(() => {
 
 const saveHeader = async () => {
   const payload: Record<string, any> = { ...header.value };
-  if (payload.cargoWeightKg) payload.cargoWeightKg = Number(payload.cargoWeightKg);
+  if (payload.cargoWeightKg)
+    payload.cargoWeightKg = Number(payload.cargoWeightKg);
   Object.keys(payload).forEach((k) => {
     if (payload[k] === "" || payload[k] == null) delete payload[k];
   });
@@ -62,7 +63,10 @@ const saveHeader = async () => {
 
 const onSign = async () => {
   if (!pad.value?.isDirty()) {
-    general.setSnackbar({ color: "warning", message: "Firmá antes de cerrar." });
+    general.setSnackbar({
+      color: "warning",
+      message: "Firmá antes de cerrar.",
+    });
     return;
   }
   await saveHeader();
@@ -219,7 +223,9 @@ onMounted(async () => {
 
       <!-- Secciones 2 y 3: inspección física y dispositivos de seguridad -->
       <template v-for="sec in sections" :key="sec.key">
-        <p class="text-subtitle-2 font-weight-bold mt-3 mb-1">{{ sec.label }}</p>
+        <p class="text-subtitle-2 font-weight-bold mt-3 mb-1">
+          {{ sec.label }}
+        </p>
         <OeaItemRow
           v-for="item in sec.items"
           :key="item.id"
@@ -230,15 +236,16 @@ onMounted(async () => {
 
       <!-- Firma -->
       <template v-if="!isSigned">
-        <p class="text-subtitle-2 font-weight-bold mt-4 mb-1">Firma del chofer</p>
+        <p class="text-subtitle-2 font-weight-bold mt-4 mb-1">
+          Firma del chofer
+        </p>
         <SignaturePad ref="pad" />
         <v-btn
           color="primary"
           block
           size="large"
-          class="mt-4"
+          class="mt-4 text-none"
           :loading="saving"
-          prepend-icon="mdi-check-decagram"
           @click="onSign"
         >
           Cerrar y firmar

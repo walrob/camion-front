@@ -12,6 +12,13 @@ const status = ref(props.item.status);
 const notes = ref(props.item.notes ?? "");
 const photoLoaded = ref(false);
 
+// Ícono por estado para la botonera (el composable solo trae label y color).
+const statusIcon: Record<string, string> = {
+  ok: "mdi-check",
+  observed: "mdi-alert",
+  na: "mdi-minus",
+};
+
 const onStatus = (val: string) => {
   status.value = val;
   oeaStore.updateItem(props.item.id, { status: val });
@@ -30,39 +37,60 @@ const onPhoto = async (e: Event) => {
 </script>
 
 <template>
-  <v-card variant="outlined" class="mb-2">
-    <v-card-text class="py-2">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <span class="font-weight-bold">{{ item.label }}</span>
-        <v-chip v-if="photoLoaded" size="x-small" color="success" prepend-icon="mdi-camera">
+  <v-card
+    border
+    flat
+    rounded="lg"
+    class="mb-3 oea-item"
+    :class="`oea-item--${status}`"
+  >
+    <v-card-text class="pa-4">
+      <div class="d-flex align-center ga-2 mb-3">
+        <span class="text-subtitle-1 font-weight-bold">{{ item.label }}</span>
+        <v-spacer />
+        <v-chip
+          v-if="photoLoaded"
+          size="small"
+          color="success"
+          variant="tonal"
+          prepend-icon="mdi-camera-check"
+        >
           Foto
         </v-chip>
       </div>
 
-      <v-btn-toggle
-        :model-value="status"
-        density="comfortable"
-        divided
-        :disabled="disabled"
-        @update:model-value="onStatus"
+      <!--
+        Botonera separada (no v-btn-toggle): pegados, un roce en la cabina
+        cambia la respuesta de al lado. Van a un tercio del ancho cada uno.
+      -->
+      <div
+        class="d-flex ga-2"
+        role="group"
+        :aria-label="`Estado de ${item.label}`"
       >
         <v-btn
           v-for="o in oeaItemStatusOptions"
           :key="o.value"
-          :value="o.value"
+          :disabled="disabled"
           :color="status === o.value ? o.color : undefined"
+          :variant="status === o.value ? 'flat' : 'outlined'"
+          :aria-pressed="status === o.value"
+          :prepend-icon="status === o.value ? statusIcon[o.value] : undefined"
           size="small"
+          class="oea-item__status"
+          rounded="lg"
+          @click="onStatus(o.value)"
         >
           {{ o.label }}
         </v-btn>
-      </v-btn-toggle>
+      </div>
 
-      <div class="d-flex ga-2 align-center mt-2">
+      <div class="d-flex ga-2 align-center mt-3">
         <VoiceTextField
           v-model="notes"
-          label="Observaciones"
+          :label="status === 'observed' ? 'Detallá la observación' : 'Observaciones'"
           variant="outlined"
-          density="compact"
+          density="comfortable"
           hide-details
           class="flex-grow-1"
           :readonly="disabled"
@@ -73,7 +101,8 @@ const onPhoto = async (e: Event) => {
           icon="mdi-camera"
           aria-label="Tomar foto"
           variant="tonal"
-          size="small"
+          :color="photoLoaded ? 'success' : undefined"
+          class="oea-item__photo"
           @click="($refs.fileInput as HTMLInputElement).click()"
         />
         <input
@@ -88,3 +117,29 @@ const onPhoto = async (e: Event) => {
     </v-card-text>
   </v-card>
 </template>
+
+<style scoped>
+/* Franja lateral: de un vistazo se ve qué quedó observado bajando por la lista. */
+.oea-item {
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-left-color: transparent;
+}
+.oea-item--ok {
+  border-left-color: rgb(var(--v-theme-success));
+}
+.oea-item--observed {
+  border-left-color: rgb(var(--v-theme-warning));
+}
+
+.oea-item__status {
+  flex: 1 1 0;
+  min-height: 40px;
+  min-width: 0;
+}
+
+.oea-item__photo {
+  width: 40px;
+  height: 40px;
+}
+</style>
