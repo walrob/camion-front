@@ -181,6 +181,8 @@ onMounted(async () => {
           :loading="loading"
           :error="store.error"
           all-items
+          searchable
+          search-label="Buscar número / categoría"
           @retry="store.getDocuments()"
         >
           <template #item.category="{ item }">

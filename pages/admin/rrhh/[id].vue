@@ -205,7 +205,13 @@ onMounted(() => hrStore.getEmployee(id));
               Nuevo permiso
             </v-btn>
           </div>
-          <ResponsiveTable :headers="certHeaders" :items="certifications" all-items>
+          <ResponsiveTable
+            :headers="certHeaders"
+            :items="certifications"
+            all-items
+            searchable
+            search-label="Buscar certificación"
+          >
             <template #item.type="{ item }">
               {{ certificationType(item.type).label }}
             </template>
@@ -249,7 +255,13 @@ onMounted(() => hrStore.getEmployee(id));
           </v-card>
 
           <p class="text-subtitle-2 font-weight-bold mb-2">Historial</p>
-          <ResponsiveTable :headers="assignmentHeaders" :items="assignments" all-items>
+          <ResponsiveTable
+            :headers="assignmentHeaders"
+            :items="assignments"
+            all-items
+            searchable
+            search-label="Buscar camión"
+          >
             <template #item.assignedAt="{ item }">
               {{ fmtDate(item.assignedAt) }}
             </template>

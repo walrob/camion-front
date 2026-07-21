@@ -168,6 +168,8 @@ onMounted(async () => {
           :loading="loading"
           :error="store.error"
           all-items
+          searchable
+          search-label="Buscar plan / camión"
           @retry="store.getPlans()"
         >
           <template #item.triggerType="{ item }">
@@ -237,6 +239,8 @@ onMounted(async () => {
           :loading="loading"
           :error="store.error"
           all-items
+          searchable
+          search-label="Buscar descripción"
           @retry="store.getOrders(truckId)"
         >
           <template #item.date="{ item }">{{ fmtDate(item.date) }}</template>

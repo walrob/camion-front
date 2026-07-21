@@ -1,5 +1,20 @@
 <template>
   <div>
+    <!--
+      Buscador propio de la tabla (opt-in con `searchable`). Filtra en cliente
+      sobre el conjunto ya cargado, así que solo se usa en las tablas que traen
+      todo; las paginadas por servidor traen su propio buscador desde la página,
+      que consulta al back.
+    -->
+    <div v-if="searchable" class="d-flex flex-wrap ga-2 align-center mb-4">
+      <VoiceTextField
+        v-model="search"
+        :label="searchLabel"
+        clearable
+        style="min-width: 240px; max-width: 360px"
+      />
+    </div>
+
     <!-- ⚠️ Estado de error con reintento (prioritario si no hay datos) -->
     <ErrorState
       v-if="error && !items.length && !loading"
@@ -23,8 +38,8 @@
       -->
       <v-data-table
         v-else
-        :headers="headers"
-        :items="items"
+        :headers="tableHeaders"
+        :items="filteredItems"
         :loading="loading"
         :fixed-header="fixedHeader"
         :no-data-text="noDataText"
@@ -60,7 +75,7 @@
         />
       </template>
 
-      <template v-else-if="items && items.length">
+      <template v-else-if="filteredItems.length">
         <v-card
           v-for="(item, index) in pagedItems"
           :key="item.id || index"
@@ -133,6 +148,7 @@ import { ref, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
 import EmptyState from "~/components/shared/EmptyState.vue";
 import ErrorState from "~/components/shared/ErrorState.vue";
+import VoiceTextField from "~/components/form/VoiceTextField.vue";
 const { smAndUp } = useDisplay();
 
 const emit = defineEmits(["retry", "sort"]);
@@ -141,6 +157,8 @@ interface Header {
   title: string;
   value: string;
   minWidth?: string;
+  /** Por defecto ordena; se pone en `false` en columnas calculadas o de acciones. */
+  sortable?: boolean;
 }
 
 const props = defineProps({
@@ -161,6 +179,10 @@ const props = defineProps({
   // paginadas por servidor (donde ordenar solo en cliente reordenaría la página
   // visible). En las tablas que cargan todo, se omite y v-data-table ordena solo.
   sortServer: { type: Boolean, default: false },
+  // Muestra el buscador propio de la tabla (filtra en cliente sobre `items`).
+  // No usarlo en tablas paginadas por servidor: filtraría solo la página visible.
+  searchable: { type: Boolean, default: false },
+  searchLabel: { type: String, default: "Buscar" },
 });
 
 // v-data-table emite un arreglo de descriptores; tomamos el primero (orden simple)
@@ -176,6 +198,20 @@ const onSortBy = (sortByArr: { key: string; order?: "asc" | "desc" }[]) => {
   );
 };
 
+// Las páginas declaran las columnas con `value` (el formato viejo de Vuetify 2).
+// Vuetify 3 identifica la columna por `key` y, cuando falta, deja `sortable` en
+// false —por eso ninguna tabla ordenaba—. Acá se completa `key` a partir de
+// `value` y se ordena por defecto: la excepción son "acciones" y lo que la
+// página marque explícitamente (columnas armadas en el template, que el back no
+// sabe ordenar).
+const tableHeaders = computed(() =>
+  props.headers.map((h) => ({
+    ...h,
+    key: (h as any).key ?? h.value,
+    sortable: h.sortable ?? h.value !== "actions",
+  })),
+);
+
 // La columna de acciones se renderiza aparte al pie de la tarjeta: incluirla en
 // el listado de campos la duplicaría (y sin slots mostraba "Acciones: -").
 const mobileHeaders = computed(() =>
@@ -185,29 +221,47 @@ const mobileHeaders = computed(() =>
 // Página actual (modo cliente). Se reinicia al cambiar el conjunto de datos.
 const page = ref(1);
 
+// Búsqueda en cliente: compara el texto contra el valor crudo de cada columna
+// (sin la de acciones), ignorando mayúsculas y tildes —"camion" encuentra
+// "Camión"—. Se busca sobre todos los ítems, no sobre la página visible.
+const search = ref("");
+
+const normalize = (v: unknown) =>
+  String(v ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+
+const filteredItems = computed(() => {
+  const q = normalize(props.searchable ? search.value : "").trim();
+  if (!q) return props.items;
+  return props.items.filter((item) =>
+    mobileHeaders.value.some((h) =>
+      normalize(resolveValue(item, h.value)).includes(q),
+    ),
+  );
+});
+
 const pageCount = computed(() =>
   props.allItems
     ? 1
-    : Math.max(1, Math.ceil((props.items?.length ?? 0) / props.itemsPerPage)),
+    : Math.max(1, Math.ceil(filteredItems.value.length / props.itemsPerPage)),
 );
 
 // Slice de la página actual para la vista mobile (el v-data-table pagina solo).
 const pagedItems = computed(() =>
   props.allItems
-    ? props.items
-    : props.items.slice(
+    ? filteredItems.value
+    : filteredItems.value.slice(
         (page.value - 1) * props.itemsPerPage,
         page.value * props.itemsPerPage,
       ),
 );
 
-// Al filtrar/recargar cambia la cantidad de ítems: volver a la primera página.
-watch(
-  () => props.items,
-  () => {
-    page.value = 1;
-  },
-);
+// Al filtrar/recargar/buscar cambia la cantidad de ítems: volver a la primera página.
+watch([() => props.items, search], () => {
+  page.value = 1;
+});
 
 const resolveValue = (obj: any, path: string) => {
   return path.split(".").reduce((o, key) => o?.[key], obj) ?? "-";

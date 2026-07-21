@@ -201,6 +201,8 @@ onMounted(async () => {
           :headers="truckHeaders"
           :items="report.byTruck"
           :items-per-page="10"
+          searchable
+          search-label="Buscar camión"
           no-data-text="Sin cargas en el período"
         >
           <template #item.totalLiters="{ item }">{{ num(item.totalLiters) }}</template>
@@ -223,6 +225,8 @@ onMounted(async () => {
           :headers="driverHeaders"
           :items="report.byDriver"
           :items-per-page="10"
+          searchable
+          search-label="Buscar chofer"
           no-data-text="Sin cargas en el período"
         >
           <template #item.totalLiters="{ item }">{{ num(item.totalLiters) }}</template>
