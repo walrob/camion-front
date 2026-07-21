@@ -154,7 +154,6 @@ onMounted(async () => {
       :truck-options="truckOptions"
       :driver-options="driverOptions"
       :fleet-options="fleetOptions"
-      :loading="loading"
       show-fleet
       @apply="store.getSummary()"
     />

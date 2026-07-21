@@ -75,20 +75,18 @@ onMounted(async () => {
       :filters="store.filters"
       :truck-options="truckOptions"
       :driver-options="driverOptions"
-      :loading="loading"
       @apply="apply"
     >
       <template #extra>
-        <v-col cols="12" sm="6" md="2">
-          <v-select
-            v-model="store.filters.result"
-            :items="oeaResultOptions"
-            item-title="label"
-            item-value="value"
-            label="Resultado"
-            clearable
-          />
-        </v-col>
+        <v-select
+          v-model="store.filters.result"
+          :items="oeaResultOptions"
+          item-title="label"
+          item-value="value"
+          label="Resultado"
+          clearable
+          style="min-width: 160px; max-width: 200px"
+        />
       </template>
     </ReportFilters>
 

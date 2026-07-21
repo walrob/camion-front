@@ -59,7 +59,7 @@ const dataRows = computed(() => {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="640" scrollable @update:model-value="close">
+  <v-dialog :model-value="modelValue" max-width="1040" scrollable @update:model-value="close">
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between">
         <span class="text-h6 font-weight-bold">Planilla OEA</span>
@@ -78,49 +78,66 @@ const dataRows = computed(() => {
           <v-progress-circular indeterminate color="primary" />
         </div>
 
-        <template v-else-if="current">
-          <v-table density="compact" class="mb-3">
-            <tbody>
-              <tr v-for="row in dataRows" :key="row.label">
-                <td class="text-medium-emphasis">{{ row.label }}</td>
-                <td class="font-weight-medium">{{ row.value }}</td>
-              </tr>
-            </tbody>
-          </v-table>
-
-          <template v-for="sec in sections" :key="sec.key">
-            <p class="text-subtitle-2 font-weight-bold mt-2 mb-1">{{ sec.label }}</p>
-            <v-list density="compact" class="py-0">
-              <v-list-item
-                v-for="item in sec.items"
-                :key="item.id"
-                class="px-0"
+        <!--
+          En md+ la planilla se abre en dos columnas: a la izquierda los datos
+          del viaje, a la derecha los ítems inspeccionados. Así entra completa
+          sin scroll; en mobile las columnas se apilan como antes.
+        -->
+        <v-row v-else-if="current" dense>
+          <v-col cols="12" md="5">
+            <v-sheet border rounded="lg" class="pa-3">
+              <div class="text-subtitle-2 font-weight-bold mb-2">Datos del viaje</div>
+              <div
+                v-for="row in dataRows"
+                :key="row.label"
+                class="d-flex align-start justify-space-between ga-3 py-1 oea-data-row"
               >
-                <template #title>
-                  <span class="text-body-2">{{ item.label }}</span>
-                </template>
-                <template #subtitle>
-                  <span v-if="item.notes" class="text-caption">{{ item.notes }}</span>
-                </template>
-                <template #append>
-                  <v-chip :color="oeaItemStatus(item.status).color" size="x-small" label>
-                    {{ oeaItemStatus(item.status).label }}
-                  </v-chip>
-                </template>
-              </v-list-item>
-            </v-list>
-          </template>
+                <span class="text-caption text-medium-emphasis">{{ row.label }}</span>
+                <span class="text-body-2 font-weight-medium text-end">{{ row.value }}</span>
+              </div>
+            </v-sheet>
+          </v-col>
 
-          <v-alert
-            v-if="current.notes"
-            type="info"
-            variant="tonal"
-            density="compact"
-            class="mt-3"
-          >
-            {{ current.notes }}
-          </v-alert>
-        </template>
+          <v-col cols="12" md="7">
+            <v-sheet
+              v-for="sec in sections"
+              :key="sec.key"
+              border
+              rounded="lg"
+              class="pa-3 mb-2"
+            >
+              <div class="text-subtitle-2 font-weight-bold mb-1">{{ sec.label }}</div>
+              <v-list density="compact" class="py-0 bg-transparent">
+                <v-list-item
+                  v-for="item in sec.items"
+                  :key="item.id"
+                  class="px-0"
+                >
+                  <template #title>
+                    <span class="text-body-2">{{ item.label }}</span>
+                  </template>
+                  <template #subtitle>
+                    <span v-if="item.notes" class="text-caption">{{ item.notes }}</span>
+                  </template>
+                  <template #append>
+                    <v-chip :color="oeaItemStatus(item.status).color" size="x-small" label>
+                      {{ oeaItemStatus(item.status).label }}
+                    </v-chip>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </v-sheet>
+
+            <v-alert
+              v-if="current.notes"
+              type="info"
+              variant="tonal"
+              density="compact"
+            >
+              {{ current.notes }}
+            </v-alert>
+          </v-col>
+        </v-row>
       </v-card-text>
 
       <v-card-actions>
@@ -130,3 +147,10 @@ const dataRows = computed(() => {
     </v-card>
   </v-dialog>
 </template>
+
+<style scoped>
+/* Línea suave entre datos, más liviana que la grilla de una v-table. */
+.oea-data-row + .oea-data-row {
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+}
+</style>

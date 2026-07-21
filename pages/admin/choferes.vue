@@ -88,7 +88,7 @@ onMounted(() => driverStore.getDrivers());
       </template>
     </PageHeader>
 
-    <div class="d-flex flex-wrap ga-2 align-center mb-3">
+    <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <VoiceTextField
         v-model="driverStore.search"
         label="Buscar nombre / licencia"

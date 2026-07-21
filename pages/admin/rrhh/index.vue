@@ -77,7 +77,7 @@ onMounted(() => hrStore.getEmployees());
       </template>
     </PageHeader>
 
-    <div class="d-flex flex-wrap ga-2 align-center mb-3">
+    <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <VoiceTextField
         v-model="hrStore.search"
         label="Buscar nombre / DNI"

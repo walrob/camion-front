@@ -128,7 +128,7 @@ onMounted(async () => {
     <v-window v-model="tab">
       <!-- GESTOR -->
       <v-window-item value="manager">
-        <div class="d-flex flex-wrap ga-2 align-center mb-3">
+        <div class="d-flex flex-wrap ga-2 align-center mb-4">
           <v-select
             v-model="store.ownerType"
             :items="ownerTypeOptions"

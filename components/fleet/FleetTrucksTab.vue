@@ -67,7 +67,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="d-flex flex-wrap ga-2 align-center mb-3">
+    <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <VoiceTextField
         v-model="fleetStore.searchTrucks"
         label="Buscar patente / marca"
