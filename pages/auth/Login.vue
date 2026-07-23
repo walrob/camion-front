@@ -98,6 +98,8 @@ const password = ref("");
 const showPass = ref(false);
 const loading = ref(false);
 
+// Las cuentas demo (solo lectura) entran por acá como cualquier otra: el
+// middleware global encamina según el rol que devuelve el backend.
 const handleLogin = async () => {
   const { valid } = await formRef.value?.validate();
   if (!valid) return;

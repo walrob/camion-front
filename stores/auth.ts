@@ -24,6 +24,8 @@ export const useAuthStore = defineStore('auth', {
     isDriver: (state) => state.user?.role === Role.DRIVER,
     isHr: (state) => state.user?.role === Role.HR,
     isAuditor: (state) => state.user?.role === Role.AUDITOR,
+    /** Cuenta demo de solo lectura: no puede modificar datos (lo bloquea el backend). */
+    isDemo: (state) => !!state.user?.isDemo,
   },
 
   actions: {

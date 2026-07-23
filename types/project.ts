@@ -5,6 +5,8 @@ export interface User {
   role: string
   avatar?: string
   isTemplateDark?: boolean
+  /** Cuenta demo de solo lectura (ver/descargar; el backend bloquea escrituras). */
+  isDemo?: boolean
 }
 
 export interface UserProfile {
