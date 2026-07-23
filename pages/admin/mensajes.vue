@@ -3,10 +3,15 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted, onBeforeUnmount, computed, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import { useDisplay } from "vuetify";
-import { useMessageStore, type Message } from "~/stores/message";
+import {
+  useMessageStore,
+  type Message,
+  type MessageParty,
+} from "~/stores/message";
 import { useAuthStore } from "~/stores/auth";
 import { useMessageSocket } from "~/composables/useMessageSocket";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
+import { roleOptions } from "~/composables/useHrStatus";
 
 definePageMeta({
   layout: "admin",
@@ -21,10 +26,68 @@ const { mdAndUp } = useDisplay();
 
 const myId = computed(() => authStore.user?.id);
 const selectedUser = ref<string | null>(null);
-const userNames = ref<Record<string, string>>({});
+const users = ref<any[]>([]);
 const text = ref("");
 const search = ref("");
 const listRef = ref<HTMLElement | null>(null);
+
+// Alta de conversación: destinatarios posibles (todos menos yo mismo).
+const newDialog = ref(false);
+const userSearch = ref("");
+// v-chip-group con `filter` deja el valor en undefined al deseleccionar.
+const roleFilter = ref<string | undefined>(undefined);
+// El padrón completo se trae una sola vez, al abrir el diálogo por primera vez.
+const rosterLoaded = ref(false);
+const rosterLoading = ref(false);
+
+/**
+ * Directorio de interlocutores. Se arma con lo que la API embebe en cada
+ * mensaje (`fromUser`/`toUser` de la bandeja y de la conversación abierta), y
+ * se completa con el padrón cuando éste se carga para el selector.
+ */
+const directory = computed<Record<string, MessageParty>>(() => {
+  const map: Record<string, MessageParty> = {};
+  const add = (p?: MessageParty) => {
+    if (p?.id) map[p.id] = p;
+  };
+  for (const m of inbox.value) {
+    add(m.fromUser);
+    add(m.toUser);
+  }
+  for (const m of messages.value) {
+    add(m.fromUser);
+    add(m.toUser);
+  }
+  for (const u of users.value) {
+    map[u.id] = { id: u.id, name: u.name, role: u.role };
+  }
+  return map;
+});
+
+const roleLabel = (role?: string) =>
+  roleOptions.find((o) => o.value === role)?.label ?? role ?? "";
+
+/** Solo los roles que efectivamente existen entre los destinatarios. */
+const rolesPresent = computed(() => {
+  const present = new Set(
+    users.value.filter((u) => u.id !== myId.value).map((u) => u.role),
+  );
+  return roleOptions.filter((o) => present.has(o.value));
+});
+
+const selectableUsers = computed(() => {
+  const q = userSearch.value.trim().toLowerCase();
+  return users.value
+    .filter((u) => u.id !== myId.value)
+    .filter((u) => !roleFilter.value || u.role === roleFilter.value)
+    .filter(
+      (u) =>
+        !q ||
+        u.name?.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q),
+    )
+    .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+});
 
 // Conversaciones a partir de la bandeja, agrupadas por interlocutor. El "otro"
 // es el destinatario si el mensaje lo envié yo, o el remitente si lo recibí.
@@ -35,11 +98,20 @@ const conversations = computed(() => {
     if (!otherId) continue; // mensajes a un rol (sin destinatario puntual)
     if (!map.has(otherId)) map.set(otherId, m);
   }
-  return Array.from(map.entries()).map(([userId, last]) => ({
+  const list = Array.from(map.entries()).map(([userId, last]) => ({
     userId,
-    last,
+    last: last as Message | null,
     unread: !!(last.toUserId === myId.value && !last.readAt),
   }));
+
+  // Un destinatario recién elegido en "Nuevo mensaje" todavía no tiene mensajes,
+  // así que no aparece en la bandeja: lo agregamos arriba para que la
+  // conversación abierta se vea reflejada en la lista.
+  const sel = selectedUser.value;
+  if (sel && !list.some((c) => c.userId === sel)) {
+    list.unshift({ userId: sel, last: null, unread: false });
+  }
+  return list;
 });
 
 const filteredConversations = computed(() => {
@@ -50,7 +122,9 @@ const filteredConversations = computed(() => {
   );
 });
 
-const nameOf = (id: string) => userNames.value[id] || id.slice(0, 8);
+const nameOf = (id: string) => directory.value[id]?.name || id.slice(0, 8);
+
+const roleOf = (id: string) => directory.value[id]?.role;
 
 const initials = (id: string) => {
   const n = nameOf(id).trim();
@@ -106,6 +180,10 @@ const scrollDown = () =>
 const openConversation = async (userId: string) => {
   selectedUser.value = userId;
   await messageStore.getConversation(userId);
+  // Conversación sin mensajes (recién iniciada o abierta por deep link
+  // `?user=<id>`): el nombre no viene embebido en ningún mensaje, así que en
+  // ese único caso recurrimos al padrón.
+  if (!directory.value[userId]) await ensureRoster();
   scrollDown();
 };
 
@@ -122,16 +200,37 @@ const send = async () => {
   }
 };
 
-const loadUsers = async () => {
+/**
+ * Padrón de usuarios. Solo hace falta para elegir un destinatario nuevo: los
+ * nombres de las conversaciones existentes ya vienen embebidos en los mensajes.
+ * Se trae una sola vez, on-demand.
+ */
+const ensureRoster = async () => {
+  if (rosterLoaded.value || rosterLoading.value) return;
   const { $api } = useNuxtApp();
+  rosterLoading.value = true;
   try {
-    const resp = await $api.get("users/", { params: { limit: 100 } });
-    const map: Record<string, string> = {};
-    (resp.data.items || []).forEach((u: any) => (map[u.id] = u.name));
-    userNames.value = map;
+    const resp = await $api.get("users/", { params: { limit: 500 } });
+    users.value = resp.data.items || [];
+    rosterLoaded.value = true;
   } catch {
-    /* noop */
+    /* se reintenta la próxima vez que se abra el selector */
+  } finally {
+    rosterLoading.value = false;
   }
+};
+
+const openNewDialog = async () => {
+  newDialog.value = true;
+  await ensureRoster();
+};
+
+/** Abre (o crea) la conversación con el destinatario elegido. */
+const startConversation = async (userId: string) => {
+  newDialog.value = false;
+  userSearch.value = "";
+  roleFilter.value = undefined;
+  await openConversation(userId);
 };
 
 const socket = useMessageSocket((m) => {
@@ -148,7 +247,7 @@ const socket = useMessageSocket((m) => {
 const route = useRoute();
 
 onMounted(async () => {
-  await Promise.all([messageStore.getInbox(), loadUsers()]);
+  await messageStore.getInbox();
   socket.connect();
   // Permite abrir/iniciar una conversación directo desde otra pantalla
   // (ej. "Enviar mensaje" al chofer desde Vencimientos): /admin/mensajes?user=<id>
@@ -163,7 +262,14 @@ onBeforeUnmount(() => socket.disconnect());
     <PageHeader
       title="Mensajes"
       subtitle="Comunicación con los choferes en ruta"
-    />
+    >
+      <template #actions>
+        <v-btn color="primary" flat @click="openNewDialog">
+          <v-icon start>mdi-message-plus-outline</v-icon>
+          Nuevo mensaje
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <v-card border flat rounded="lg" class="chat-shell d-flex overflow-hidden">
       <!-- ───── Lista de conversaciones ───── -->
@@ -206,14 +312,19 @@ onBeforeUnmount(() => socket.disconnect());
                 class="font-weight-bold d-flex align-center justify-space-between"
               >
                 <span class="text-truncate">{{ nameOf(c.userId) }}</span>
-                <span class="text-caption text-medium-emphasis ml-2">{{
-                  timeOf(c.last.createdAt)
-                }}</span>
+                <span
+                  v-if="c.last"
+                  class="text-caption text-medium-emphasis ml-2"
+                  >{{ timeOf(c.last.createdAt) }}</span
+                >
               </v-list-item-title>
               <v-list-item-subtitle
                 class="d-flex align-center justify-space-between"
               >
-                <span class="text-truncate">{{ c.last.body }}</span>
+                <span v-if="c.last" class="text-truncate">{{ c.last.body }}</span>
+                <span v-else class="text-truncate font-italic"
+                  >Conversación nueva</span
+                >
                 <v-icon v-if="c.unread" size="12" color="primary" class="ml-2"
                   >mdi-circle</v-icon
                 >
@@ -229,6 +340,16 @@ onBeforeUnmount(() => socket.disconnect());
               >mdi-chat-outline</v-icon
             >
             Sin conversaciones
+            <div class="mt-3">
+              <v-btn
+                variant="tonal"
+                color="primary"
+                size="small"
+                @click="openNewDialog"
+              >
+                Nuevo mensaje
+              </v-btn>
+            </div>
           </div>
         </div>
       </div>
@@ -256,7 +377,17 @@ onBeforeUnmount(() => socket.disconnect());
                 initials(selectedUser)
               }}</span>
             </v-avatar>
-            <div class="font-weight-bold">{{ nameOf(selectedUser) }}</div>
+            <div style="min-width: 0">
+              <div class="font-weight-bold text-truncate">
+                {{ nameOf(selectedUser) }}
+              </div>
+              <div
+                v-if="roleOf(selectedUser)"
+                class="text-caption text-medium-emphasis"
+              >
+                {{ roleLabel(roleOf(selectedUser)) }}
+              </div>
+            </div>
           </div>
           <v-divider />
         </template>
@@ -268,9 +399,13 @@ onBeforeUnmount(() => socket.disconnect());
             class="chat-empty text-center text-medium-emphasis"
           >
             <v-icon size="56" class="mb-3">mdi-forum-outline</v-icon>
-            <p class="text-body-1">
+            <p class="text-body-1 mb-4">
               Elegí una conversación para empezar a chatear.
             </p>
+            <v-btn variant="tonal" color="primary" @click="openNewDialog">
+              <v-icon start>mdi-message-plus-outline</v-icon>
+              Nuevo mensaje
+            </v-btn>
           </div>
 
           <div v-else-if="loading && !messages.length" class="text-center pt-8">
@@ -334,6 +469,92 @@ onBeforeUnmount(() => socket.disconnect());
         </div>
       </div>
     </v-card>
+
+    <!-- ───── Nuevo mensaje: elegir destinatario ───── -->
+    <v-dialog v-model="newDialog" max-width="520" scrollable>
+      <v-card rounded="lg">
+        <v-card-title class="text-h6 font-weight-bold py-4">
+          Nuevo mensaje
+        </v-card-title>
+        <v-divider />
+
+        <div class="pa-3">
+          <v-text-field
+            v-model="userSearch"
+            placeholder="Buscar por nombre o email"
+            prepend-inner-icon="mdi-magnify"
+            variant="solo-filled"
+            flat
+            density="compact"
+            hide-details
+            rounded="lg"
+            autofocus
+          />
+          <v-chip-group
+            v-model="roleFilter"
+            selected-class="text-primary"
+            class="mt-2"
+          >
+            <v-chip
+              v-for="r in rolesPresent"
+              :key="r.value"
+              :value="r.value"
+              size="small"
+              variant="tonal"
+              filter
+            >
+              {{ r.label }}
+            </v-chip>
+          </v-chip-group>
+        </div>
+        <v-divider />
+
+        <v-card-text class="pa-0" style="max-height: 50vh">
+          <div v-if="rosterLoading" class="text-center py-10">
+            <v-progress-circular indeterminate color="primary" />
+          </div>
+
+          <v-list v-else-if="selectableUsers.length" class="py-0" nav>
+            <v-list-item
+              v-for="u in selectableUsers"
+              :key="u.id"
+              class="px-3 py-2"
+              @click="startConversation(u.id)"
+            >
+              <template #prepend>
+                <v-avatar :color="avatarColor(u.id)" size="40" class="mr-1">
+                  <span class="text-body-2 font-weight-bold">{{
+                    initials(u.id)
+                  }}</span>
+                </v-avatar>
+              </template>
+              <v-list-item-title class="font-weight-bold">
+                {{ u.name }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                {{ roleLabel(u.role) }}
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+
+          <div
+            v-else
+            class="text-center text-body-2 text-medium-emphasis py-10 px-4"
+          >
+            <v-icon size="32" class="mb-2 d-block mx-auto"
+              >mdi-account-search-outline</v-icon
+            >
+            Sin resultados
+          </div>
+        </v-card-text>
+
+        <v-divider />
+        <v-card-actions class="px-4 py-3">
+          <v-spacer />
+          <v-btn variant="text" @click="newDialog = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 

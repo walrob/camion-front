@@ -1,6 +1,13 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
 
+/** Interlocutor embebido por la API (solo id/name/role). */
+export interface MessageParty {
+  id: string;
+  name: string;
+  role: string;
+}
+
 export interface Message {
   id: string;
   createdAt: string;
@@ -10,6 +17,13 @@ export interface Message {
   toRole?: string;
   body: string;
   readAt?: string | null;
+  /**
+   * Remitente/destinatario resueltos por el backend, para no tener que traerse
+   * el padrón de usuarios solo para mostrar nombres. Ausentes en el eco por
+   * WebSocket y en la respuesta del POST (ahí el emisor ya se conoce).
+   */
+  fromUser?: MessageParty;
+  toUser?: MessageParty;
 }
 
 export const useMessageStore = defineStore("message", {
