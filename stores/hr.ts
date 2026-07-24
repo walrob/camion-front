@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
-import type { Employee, Certification, TruckAssignment } from "~/types/hr";
+import type {
+  Employee,
+  Certification,
+  TruckAssignment,
+  EmploymentMovement,
+} from "~/types/hr";
 import type { Truck } from "~/types/fleet";
 
 export const useHrStore = defineStore("hr", {
@@ -9,6 +14,10 @@ export const useHrStore = defineStore("hr", {
     employee: null as Employee | null,
     certifications: [] as Certification[],
     assignments: [] as TruckAssignment[],
+    movements: [] as EmploymentMovement[],
+    // Licencias/suspensiones vigentes hoy (tablero "Fuera de servicio hoy").
+    activeMovements: [] as EmploymentMovement[],
+    loadingActive: false,
     truckOptions: [] as Truck[],
 
     loading: false,
@@ -77,6 +86,7 @@ export const useHrStore = defineStore("hr", {
           this.employee = resp.data;
           this.certifications = resp.data.certifications ?? [];
           this.assignments = resp.data.assignments ?? [];
+          this.movements = resp.data.movements ?? [];
           return resp.data;
         })
         .catch((e) => general.setErrorSnackbar(e))
@@ -164,6 +174,77 @@ export const useHrStore = defineStore("hr", {
         "Asignación finalizada",
         () => this.getEmployee(employeeId),
       );
+    },
+
+    // ───────── Historial laboral (movimientos) ─────────
+    // El detalle del empleado ya trae `movements[]`, pero este método permite
+    // refrescar solo el historial sin recargar todo el legajo.
+    async getEmployeeMovements(employeeId: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      return await $api
+        .get(`hr/employees/${employeeId}/movements/`)
+        .then((resp) => (this.movements = resp.data))
+        .catch((e) => general.setErrorSnackbar(e));
+    },
+
+    async createMovement(payload: Partial<EmploymentMovement>) {
+      return this.mutate(
+        "post",
+        "hr/movements/",
+        payload,
+        "Movimiento registrado",
+        () => this.getEmployee(payload.employeeId as string),
+        true,
+      );
+    },
+
+    async updateMovement(
+      id: string,
+      employeeId: string,
+      payload: Partial<EmploymentMovement>,
+    ) {
+      return this.mutate(
+        "patch",
+        `hr/movements/${id}/`,
+        payload,
+        "Movimiento actualizado",
+        () => this.getEmployee(employeeId),
+        true,
+      );
+    },
+
+    // Cierra hoy un período abierto (reincorporación anticipada). Sin body.
+    async closeMovement(id: string, employeeId: string) {
+      return this.mutate(
+        "patch",
+        `hr/movements/${id}/close/`,
+        null,
+        "Período cerrado",
+        () => this.getEmployee(employeeId),
+      );
+    },
+
+    async deleteMovement(id: string, employeeId: string) {
+      return this.mutate(
+        "delete",
+        `hr/movements/${id}/`,
+        null,
+        "Movimiento eliminado",
+        () => this.getEmployee(employeeId),
+      );
+    },
+
+    // Licencias y suspensiones vigentes hoy, con el empleado embebido.
+    async getActiveMovements() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      this.loadingActive = true;
+      return await $api
+        .get("hr/movements/active/")
+        .then((resp) => (this.activeMovements = resp.data))
+        .catch((e) => general.setErrorSnackbar(e))
+        .finally(() => (this.loadingActive = false));
     },
 
     async getTruckOptions() {

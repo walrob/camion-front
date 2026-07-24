@@ -52,7 +52,7 @@ onBeforeUnmount(() => clearTimeout(timer));
       clearable
       style="min-width: 160px; max-width: 200px"
     />
-    <v-select
+    <v-autocomplete
       v-model="filters.truckId"
       :items="truckOptions"
       item-value="id"
@@ -61,7 +61,7 @@ onBeforeUnmount(() => clearTimeout(timer));
       clearable
       style="min-width: 160px; max-width: 200px"
     />
-    <v-select
+    <v-autocomplete
       v-model="filters.driverId"
       :items="driverOptions"
       item-value="id"

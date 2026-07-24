@@ -3,11 +3,18 @@ import { ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useHrStore } from "~/stores/hr";
 import { useHrStatus } from "~/composables/useHrStatus";
+import { useAuth } from "~/composables/useAuth";
 import EmployeeFormDialog from "~/components/hr/EmployeeFormDialog.vue";
 import CertificationFormDialog from "~/components/hr/CertificationFormDialog.vue";
 import AssignTruckDialog from "~/components/hr/AssignTruckDialog.vue";
+import EmploymentMovementFormDialog from "~/components/hr/EmploymentMovementFormDialog.vue";
+import EmptyState from "~/components/shared/EmptyState.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
-import type { Certification, TruckAssignment } from "~/types/hr";
+import type {
+  Certification,
+  TruckAssignment,
+  EmploymentMovement,
+} from "~/types/hr";
 
 definePageMeta({
   layout: "admin",
@@ -18,10 +25,20 @@ const route = useRoute();
 const id = route.params.id as string;
 
 const hrStore = useHrStore();
-const { employee, certifications, assignments, loadingDetail } =
+const { employee, certifications, assignments, movements, loadingDetail } =
   storeToRefs(hrStore);
-const { position, employmentStatus, certificationType, certificationStatus } =
-  useHrStatus();
+const {
+  position,
+  employmentStatus,
+  certificationType,
+  certificationStatus,
+  movementType,
+  leaveType,
+} = useHrStatus();
+
+// Solo admin y RRHH pueden dar de alta/editar/cerrar/eliminar movimientos.
+const { isAdmin, isHr } = useAuth();
+const canEditHr = computed(() => isAdmin || isHr);
 
 useHead({ title: "Legajo" });
 
@@ -32,6 +49,8 @@ const editEmployee = ref(false);
 const certDialog = ref(false);
 const selectedCert = ref<Certification | null>(null);
 const assignDialog = ref(false);
+const movementDialog = ref(false);
+const selectedMovement = ref<EmploymentMovement | null>(null);
 const confirm = ref(false);
 const confirmAction = ref<(() => Promise<any>) | null>(null);
 const confirmText = ref("");
@@ -54,6 +73,11 @@ const assignmentHeaders = [
 
 const currentAssignment = computed(() =>
   assignments.value.find((a) => !a.unassignedAt && a.isPrimary),
+);
+
+// Historial del más reciente al más viejo (por fecha de inicio del movimiento).
+const sortedMovements = computed(() =>
+  [...movements.value].sort((a, b) => b.startDate.localeCompare(a.startDate)),
 );
 
 const fullName = computed(() =>
@@ -110,6 +134,29 @@ const askUnassign = (a: TruckAssignment) => {
   confirmAction.value = () => hrStore.unassign(a.id, id);
   confirm.value = true;
 };
+
+// ── Movimientos del historial laboral ──
+const openNewMovement = () => {
+  selectedMovement.value = null;
+  movementDialog.value = true;
+};
+const openEditMovement = (m: EmploymentMovement) => {
+  selectedMovement.value = m;
+  movementDialog.value = true;
+};
+const askCloseMovement = (m: EmploymentMovement) => {
+  confirmText.value = "¿Cerrar este período hoy (reincorporación anticipada)?";
+  confirmAction.value = () => hrStore.closeMovement(m.id, id);
+  confirm.value = true;
+};
+const askDeleteMovement = (m: EmploymentMovement) => {
+  confirmText.value = "¿Eliminar este movimiento del historial?";
+  confirmAction.value = () => hrStore.deleteMovement(m.id, id);
+  confirm.value = true;
+};
+// Un período está "abierto" (en curso) si es licencia/suspensión sin fecha de fin.
+const isOpenPeriod = (m: EmploymentMovement) =>
+  (m.type === "leave" || m.type === "suspension") && !m.endDate;
 const onConfirm = async (payload: { resp: boolean }) => {
   if (payload.resp && confirmAction.value) await confirmAction.value();
   confirmAction.value = null;
@@ -140,6 +187,7 @@ onMounted(() => hrStore.getEmployee(id));
     <template v-else-if="employee">
       <v-tabs v-model="tab" color="primary" class="mb-4">
         <v-tab value="data">Datos</v-tab>
+        <v-tab value="movements">Historial laboral</v-tab>
         <v-tab value="certs">Permisos</v-tab>
         <v-tab value="assign">Asignación</v-tab>
       </v-tabs>
@@ -195,6 +243,129 @@ onMounted(() => hrStore.getEmployee(id));
               </v-col>
             </v-row>
           </v-card>
+        </v-window-item>
+
+        <!-- HISTORIAL LABORAL -->
+        <v-window-item value="movements">
+          <div class="d-flex align-center mb-3">
+            <p class="text-body-2 text-medium-emphasis mb-0">
+              El estado laboral se controla desde acá: cada movimiento recalcula
+              el estado del legajo.
+            </p>
+            <v-spacer />
+            <v-btn
+              v-if="canEditHr"
+              color="primary"
+              prepend-icon="mdi-plus"
+              @click="openNewMovement"
+            >
+              Nuevo movimiento
+            </v-btn>
+          </div>
+
+          <EmptyState
+            v-if="!sortedMovements.length"
+            icon="mdi-history"
+            text="Sin movimientos registrados."
+          />
+
+          <v-timeline
+            v-else
+            side="end"
+            align="start"
+            density="compact"
+            truncate-line="both"
+          >
+            <v-timeline-item
+              v-for="m in sortedMovements"
+              :key="m.id"
+              :dot-color="movementType(m.type).color"
+              size="small"
+            >
+              <template #icon>
+                <v-icon size="16" color="white">{{
+                  (movementType(m.type) as any).icon || "mdi-circle-medium"
+                }}</v-icon>
+              </template>
+
+              <v-card border flat rounded="lg" class="mb-1">
+                <div class="pa-3">
+                  <div class="d-flex align-center ga-2 flex-wrap">
+                    <v-chip
+                      :color="movementType(m.type).color"
+                      size="small"
+                      label
+                    >
+                      {{ movementType(m.type).label }}
+                    </v-chip>
+                    <v-chip
+                      v-if="m.type === 'leave'"
+                      size="small"
+                      label
+                      variant="tonal"
+                      :color="leaveType(m.leaveType || 'other').color"
+                    >
+                      {{ leaveType(m.leaveType || "other").label }}
+                    </v-chip>
+                    <v-chip
+                      v-if="isOpenPeriod(m)"
+                      size="small"
+                      label
+                      variant="tonal"
+                      color="warning"
+                    >
+                      <v-icon start size="12">mdi-progress-clock</v-icon>
+                      En curso
+                    </v-chip>
+                    <v-spacer />
+                    <template v-if="canEditHr">
+                      <v-btn
+                        v-if="isOpenPeriod(m)"
+                        icon="mdi-calendar-check"
+                        aria-label="Cerrar período"
+                        size="small"
+                        variant="text"
+                        color="success"
+                        @click="askCloseMovement(m)"
+                      />
+                      <v-btn
+                        icon="mdi-pencil"
+                        aria-label="Editar"
+                        size="small"
+                        variant="text"
+                        @click="openEditMovement(m)"
+                      />
+                      <v-btn
+                        icon="mdi-delete"
+                        aria-label="Eliminar"
+                        size="small"
+                        variant="text"
+                        color="error"
+                        @click="askDeleteMovement(m)"
+                      />
+                    </template>
+                  </div>
+
+                  <div class="text-body-2 mt-2">
+                    <v-icon size="14" class="me-1"
+                      >mdi-calendar-range-outline</v-icon
+                    >
+                    {{ fmtDate(m.startDate) }}
+                    <template v-if="m.type === 'leave' || m.type === 'suspension'">
+                      →
+                      {{ m.endDate ? fmtDate(m.endDate) : "en curso" }}
+                    </template>
+                  </div>
+                  <div
+                    v-if="m.reason"
+                    class="text-body-2 text-medium-emphasis mt-1"
+                  >
+                    {{ m.reason }}
+                  </div>
+                </div>
+              </v-card>
+            </v-timeline-item>
+          </v-timeline>
         </v-window-item>
 
         <!-- PERMISOS -->
@@ -295,6 +466,11 @@ onMounted(() => hrStore.getEmployee(id));
       :certification="selectedCert"
     />
     <AssignTruckDialog v-model="assignDialog" :employee-id="id" />
+    <EmploymentMovementFormDialog
+      v-model="movementDialog"
+      :employee-id="id"
+      :movement="selectedMovement"
+    />
     <ModalConfirm
       v-model="confirm"
       title="Confirmar"

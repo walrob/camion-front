@@ -3,9 +3,9 @@ import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import {
   positionOptions,
-  employmentStatusOptions,
   roleOptions,
   roleForPosition,
+  useHrStatus,
 } from "~/composables/useHrStatus";
 import { useHrStore } from "~/stores/hr";
 import { useGeneralStore } from "~/stores/general";
@@ -26,6 +26,7 @@ const r = useValidations();
 const hrStore = useHrStore();
 const general = useGeneralStore();
 const formErrors = useFormErrors();
+const { employmentStatus } = useHrStatus();
 
 const formRef = ref();
 const valid = ref(true);
@@ -38,7 +39,6 @@ const emptyForm = (): Partial<Employee> => ({
   lastName: "",
   documentId: "",
   position: "driver",
-  employmentStatus: "active",
   birthDate: "",
   hireDate: "",
   phone: "",
@@ -75,11 +75,18 @@ const submit = async () => {
   saving.value = true;
 
   const payload = { ...form.value } as any;
-  ["birthDate", "hireDate", "terminationDate"].forEach((k) => {
+  // Estado laboral y baja son derivados del historial: el backend los descarta.
+  // La fecha de ingreso solo se acepta en el alta (genera el movimiento `hire`);
+  // en edición se corrige editando ese movimiento desde el historial.
+  delete payload.employmentStatus;
+  delete payload.terminationDate;
+  if (isEdit.value) delete payload.hireDate;
+  ["birthDate", "hireDate"].forEach((k) => {
     if (!payload[k]) delete payload[k];
   });
   delete payload.certifications;
   delete payload.assignments;
+  delete payload.movements;
 
   // Datos de cuenta: solo en alta y si se activó el toggle. Nunca en edición.
   if (!isEdit.value && createAccount.value) {
@@ -177,21 +184,41 @@ const submit = async () => {
             />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-select
-              v-model="form.employmentStatus"
-              :items="employmentStatusOptions"
-              item-title="label"
-              item-value="value"
-              label="Estado laboral"
-            />
-          </v-col>
-          <v-col cols="12" sm="6">
             <v-text-field
               v-model="form.hireDate"
               :error-messages="formErrors.messages('hireDate')"
-              label="Fecha de ingreso"
+              :label="isEdit ? 'Fecha de ingreso' : 'Fecha de ingreso *'"
               type="date"
+              :rules="isEdit ? [] : [r.isRequired]"
+              :readonly="isEdit"
+              :hint="
+                isEdit
+                  ? 'Para corregirla, editá el movimiento de ingreso en el historial.'
+                  : 'Abre el historial laboral con el movimiento de ingreso.'
+              "
+              persistent-hint
             />
+          </v-col>
+          <!-- Estado laboral: derivado del historial, solo lectura. -->
+          <v-col v-if="isEdit" cols="12" sm="6" class="d-flex align-center">
+            <div>
+              <div class="text-caption text-medium-emphasis mb-1 d-flex align-center ga-1">
+                Estado laboral
+                <v-icon size="14">mdi-information-outline</v-icon>
+                <v-tooltip activator="parent" location="top" max-width="260">
+                  El estado se controla desde el historial laboral del legajo,
+                  no se edita a mano.
+                </v-tooltip>
+              </div>
+              <v-chip
+                :color="employmentStatus(employee?.employmentStatus).color"
+                size="small"
+                label
+              >
+                <v-icon start size="14">mdi-circle-medium</v-icon>
+                {{ employmentStatus(employee?.employmentStatus).label }}
+              </v-chip>
+            </div>
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field

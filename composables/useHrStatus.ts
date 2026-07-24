@@ -42,6 +42,29 @@ export const employmentStatusOptions: StatusOption[] = [
   { value: "terminated", label: "Baja", color: "grey" },
 ];
 
+// Movimientos del historial laboral. `icon` para la línea de tiempo del legajo.
+export const movementTypeOptions: (StatusOption & { icon: string })[] = [
+  { value: "hire", label: "Ingreso", color: "success", icon: "mdi-account-plus-outline" },
+  { value: "leave", label: "Licencia", color: "warning", icon: "mdi-beach" },
+  { value: "suspension", label: "Suspensión", color: "error", icon: "mdi-account-cancel-outline" },
+  { value: "reinstatement", label: "Reincorporación", color: "info", icon: "mdi-account-check-outline" },
+  { value: "termination", label: "Baja", color: "grey", icon: "mdi-account-off-outline" },
+];
+
+// Tipos que llevan período (startDate + endDate opcional). El resto son puntuales.
+export const PERIOD_MOVEMENT_TYPES: string[] = ["leave", "suspension"];
+
+export const leaveTypeOptions: StatusOption[] = [
+  { value: "vacation", label: "Vacaciones", color: "info" },
+  { value: "sick", label: "Enfermedad", color: "warning" },
+  { value: "work_accident", label: "Accidente laboral", color: "error" },
+  { value: "parental", label: "Licencia parental", color: "secondary" },
+  { value: "unpaid", label: "Sin goce de sueldo", color: "grey" },
+  { value: "study", label: "Estudio", color: "info" },
+  { value: "bereavement", label: "Fallecimiento familiar", color: "grey" },
+  { value: "other", label: "Otra", color: "grey" },
+];
+
 export const certificationTypeOptions: StatusOption[] = [
   { value: "driving_license", label: "Carnet de conducir", color: "primary" },
   { value: "professional_license", label: "Licencia profesional (LiNTI)", color: "primary" },
@@ -67,12 +90,16 @@ export const useHrStatus = () => {
   return {
     positionOptions,
     employmentStatusOptions,
+    movementTypeOptions,
+    leaveTypeOptions,
     certificationTypeOptions,
     certificationStatusOptions,
     roleOptions,
     roleForPosition,
     position: (v?: string) => find(positionOptions, v),
     employmentStatus: (v?: string) => find(employmentStatusOptions, v),
+    movementType: (v?: string) => find(movementTypeOptions, v),
+    leaveType: (v?: string) => find(leaveTypeOptions, v),
     certificationType: (v?: string) => find(certificationTypeOptions, v),
     certificationStatus: (v?: string) => find(certificationStatusOptions, v),
   };

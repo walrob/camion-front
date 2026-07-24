@@ -95,7 +95,7 @@ const submit = async () => {
     <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
       <v-row dense>
         <v-col cols="12">
-          <v-select
+          <v-autocomplete
             v-model="form.truckId"
             :error-messages="formErrors.messages('truckId')"
             :items="truckOptions"

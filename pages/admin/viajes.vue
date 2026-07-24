@@ -18,8 +18,9 @@ definePageMeta({
 
 useHead({ title: "Viajes" });
 
+const route = useRoute();
 const tripStore = useTripStore();
-const { trips, loading, pagination } = storeToRefs(tripStore);
+const { trips, loading, pagination, driverOptions } = storeToRefs(tripStore);
 const { tripStatus } = useTripStatus();
 const onSearch = useDebounceFn(() => tripStore.getTrips(), 350);
 
@@ -72,7 +73,22 @@ const reload = () => {
   tripStore.getTrips();
 };
 
-onMounted(() => tripStore.getTrips());
+onMounted(async () => {
+  // Choferes para el filtro. Además, permitimos llegar acá con el chofer ya
+  // preseleccionado desde RRHH (?driverId= directo, o ?employeeId= a resolver
+  // contra el legajo del chofer).
+  if (!driverOptions.value.length) await tripStore.loadFormOptions();
+
+  const { driverId, employeeId } = route.query;
+  if (typeof driverId === "string") {
+    tripStore.filterDriver = driverId;
+  } else if (typeof employeeId === "string") {
+    const match = driverOptions.value.find((d) => d.employeeId === employeeId);
+    if (match) tripStore.filterDriver = match.id;
+  }
+
+  tripStore.getTrips();
+});
 </script>
 
 <template>
@@ -106,6 +122,19 @@ onMounted(() => tripStore.getTrips());
         clearable
         hide-details
         style="max-width: 200px"
+        @update:model-value="reload"
+      />
+      <v-autocomplete
+        v-model="tripStore.filterDriver"
+        :items="driverOptions"
+        item-value="id"
+        :item-title="(d: any) => driverName(d)"
+        label="Chofer"
+        variant="outlined"
+        density="compact"
+        clearable
+        hide-details
+        style="min-width: 200px; max-width: 240px"
         @update:model-value="reload"
       />
       <v-text-field

@@ -76,6 +76,7 @@ const SOURCE_ROUTE: Record<string, string> = {
   document: "/admin/documentos",
   truck_idle: "/admin/flota",
   expense: "/admin/liquidaciones",
+  employment: "/admin/rrhh",
 };
 
 const openAlert = (alert: Alert) => {

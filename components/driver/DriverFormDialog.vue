@@ -123,7 +123,7 @@ const submit = async () => {
             <v-text-field
               v-else
               :model-value="props.driver?.employee
-                ? `${props.driver.employee.firstName} ${props.driver.employee.lastName}`
+                ? `${props.driver.employee.firstName} ${props.driver.employee.lastName} — ${props.driver.employee.documentId}`
                 : '-'"
               label="Empleado"
               readonly

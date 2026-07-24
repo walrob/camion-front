@@ -210,7 +210,7 @@ onMounted(async () => {
       <!-- ÓRDENES -->
       <v-window-item value="orders">
         <div class="d-flex flex-wrap ga-2 align-center mb-4">
-          <v-select
+          <v-autocomplete
             v-model="truckId"
             :items="truckOptions"
             item-value="id"

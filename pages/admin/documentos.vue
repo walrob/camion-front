@@ -8,6 +8,7 @@ import {
   documentCategoryOptions,
   useDocumentStatus,
 } from "~/composables/useDocumentStatus";
+import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import DocumentFormDialog from "~/components/document/DocumentFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
@@ -32,6 +33,35 @@ const tab = ref("manager");
 const dialog = ref(false);
 const confirm = ref(false);
 const toDelete = ref<any | null>(null);
+
+// Filtros client-side de la pestaña Vencimientos (la lista ya viene completa).
+const expSearch = ref("");
+const expStatus = ref<string | null>(null);
+const expOwnerType = ref<string | null>(null);
+// Solo "por vencer" y "vencido" aplican a esta bandeja.
+const expStatusOptions = [
+  { value: "expiring", label: "Por vencer" },
+  { value: "expired", label: "Vencido" },
+];
+
+const filteredExpiring = computed(() => {
+  const q = expSearch.value.trim().toLowerCase();
+  return expiring.value.filter((d) => {
+    if (expStatus.value && d.status !== expStatus.value) return false;
+    if (expOwnerType.value && d.ownerType !== expOwnerType.value) return false;
+    if (!q) return true;
+    const haystack = [
+      documentCategory(d.category).label,
+      d.owner?.label,
+      d.owner?.sublabel,
+      d.number,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(q);
+  });
+});
 
 const headers = [
   { title: "Categoría", value: "category" },
@@ -225,13 +255,57 @@ onMounted(async () => {
 
       <!-- VENCIMIENTOS -->
       <v-window-item value="expiring">
+        <div
+          v-if="expiring.length"
+          class="d-flex flex-wrap ga-2 align-center mb-4"
+        >
+          <VoiceTextField
+            v-model="expSearch"
+            label="Buscar dueño / categoría / número"
+            variant="outlined"
+            density="compact"
+            hide-details
+            clearable
+            style="min-width: 240px; max-width: 360px"
+          />
+          <v-select
+            v-model="expStatus"
+            :items="expStatusOptions"
+            item-title="label"
+            item-value="value"
+            label="Estado"
+            variant="outlined"
+            density="compact"
+            clearable
+            hide-details
+            style="max-width: 180px"
+          />
+          <v-select
+            v-model="expOwnerType"
+            :items="ownerTypeOptions"
+            item-title="label"
+            item-value="value"
+            label="Entidad"
+            variant="outlined"
+            density="compact"
+            clearable
+            hide-details
+            style="max-width: 180px"
+          />
+        </div>
+
         <EmptyState
           v-if="!expiring.length"
           icon="mdi-check-circle-outline"
           text="No hay documentos por vencer ni vencidos."
         />
+        <EmptyState
+          v-else-if="!filteredExpiring.length"
+          icon="mdi-filter-off-outline"
+          text="Sin resultados para el filtro."
+        />
         <v-card
-          v-for="d in expiring"
+          v-for="d in filteredExpiring"
           :key="d.id"
           border
           flat

@@ -9,6 +9,7 @@ import {
   employmentStatusOptions,
   useHrStatus,
 } from "~/composables/useHrStatus";
+import type { EmploymentMovement } from "~/types/hr";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import EmployeeFormDialog from "~/components/hr/EmployeeFormDialog.vue";
@@ -24,9 +25,14 @@ useHead({ title: "RRHH" });
 
 const router = useRouter();
 const hrStore = useHrStore();
-const { employees, loading, pagination } = storeToRefs(hrStore);
-const { position, employmentStatus } = useHrStatus();
+const { employees, loading, pagination, activeMovements } =
+  storeToRefs(hrStore);
+const { position, employmentStatus, movementType, leaveType } = useHrStatus();
 const onSearch = useDebounceFn(() => hrStore.getEmployees(), 350);
+
+const { fmtDate } = useFormatters();
+const movementEmployeeName = (m: EmploymentMovement) =>
+  m.employee ? `${m.employee.lastName}, ${m.employee.firstName}` : "Empleado";
 
 const dialog = ref(false);
 const selected = ref<Employee | null>(null);
@@ -61,7 +67,10 @@ const changePage = (page: number) => {
   hrStore.getEmployees();
 };
 
-onMounted(() => hrStore.getEmployees());
+onMounted(() => {
+  hrStore.getEmployees();
+  hrStore.getActiveMovements();
+});
 </script>
 
 <template>
@@ -76,6 +85,49 @@ onMounted(() => hrStore.getEmployees());
         >
       </template>
     </PageHeader>
+
+    <!-- Fuera de servicio hoy: licencias y suspensiones vigentes. -->
+    <v-card
+      v-if="activeMovements.length"
+      border
+      flat
+      rounded="lg"
+      class="mb-4"
+    >
+      <div class="d-flex align-center ga-2 px-4 pt-3">
+        <v-icon color="warning" size="20">mdi-account-clock-outline</v-icon>
+        <span class="text-subtitle-2 font-weight-bold">
+          Fuera de servicio hoy
+        </span>
+        <v-chip size="x-small" color="warning" variant="tonal" label>
+          {{ activeMovements.length }}
+        </v-chip>
+      </div>
+      <v-list class="py-1 bg-transparent" density="compact">
+        <v-list-item
+          v-for="m in activeMovements"
+          :key="m.id"
+          :to="`/admin/rrhh/${m.employeeId}`"
+        >
+          <template #prepend>
+            <v-icon :color="movementType(m.type).color" size="18">
+              {{ (movementType(m.type) as any).icon || "mdi-circle-medium" }}
+            </v-icon>
+          </template>
+          <v-list-item-title class="text-body-2 font-weight-medium">
+            {{ movementEmployeeName(m) }}
+          </v-list-item-title>
+          <v-list-item-subtitle class="text-caption">
+            {{ movementType(m.type).label }}
+            <template v-if="m.type === 'leave'">
+              · {{ leaveType(m.leaveType || "other").label }}
+            </template>
+            ·
+            {{ m.endDate ? `hasta ${fmtDate(m.endDate)}` : "sin fecha de fin" }}
+          </v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
+    </v-card>
 
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <VoiceTextField
