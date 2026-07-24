@@ -292,6 +292,15 @@ onMounted(async () => {
             hide-details
             style="max-width: 180px"
           />
+          <v-spacer />
+          <v-btn
+            variant="tonal"
+            color="success"
+            prepend-icon="mdi-file-excel"
+            @click="store.exportExpiringXlsx()"
+          >
+            Excel
+          </v-btn>
         </div>
 
         <EmptyState

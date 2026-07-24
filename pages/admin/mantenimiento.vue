@@ -252,6 +252,14 @@ onMounted(async () => {
           </template>
           <template #item.actions="{ item }">
             <IconBtn
+              tooltip="Orden de trabajo (PDF)"
+              icon="mdi-file-pdf-box"
+              size="small"
+              variant="text"
+              color="error"
+              @click="store.openOrderPdf(item.id)"
+            />
+            <IconBtn
               tooltip="Editar orden"
               icon="mdi-pencil"
               size="small"

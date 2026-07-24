@@ -14,6 +14,23 @@ export const useMaintenanceStore = defineStore("maintenance", {
   }),
 
   actions: {
+    // Abre el PDF de la orden de trabajo en una pestaña nueva para ver/imprimir.
+    async openOrderPdf(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        const resp = await $api.get(`maintenance/orders/${id}/pdf/`, {
+          responseType: "blob",
+        });
+        const url = window.URL.createObjectURL(
+          new Blob([resp.data], { type: "application/pdf" }),
+        );
+        window.open(url, "_blank");
+      } catch (e) {
+        general.setErrorSnackbar(e);
+      }
+    },
+
     async getPlans() {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();

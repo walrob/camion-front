@@ -124,6 +124,53 @@ export const useTripStore = defineStore("trip", {
       );
     },
 
+    // Descarga el listado filtrado a Excel (mismos filtros que la tabla).
+    async exportXlsx() {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        const resp = await $api.get("trips/export/", {
+          params: {
+            search: this.search || undefined,
+            status: this.filterStatus || undefined,
+            driverId: this.filterDriver || undefined,
+            from: this.filterFrom || undefined,
+            to: this.filterTo || undefined,
+            sortBy: this.sortBy || undefined,
+            order: this.sortOrder || undefined,
+          },
+          responseType: "blob",
+        });
+        const url = window.URL.createObjectURL(new Blob([resp.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "viajes.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        general.setErrorSnackbar(e);
+      }
+    },
+
+    // Abre la hoja de ruta (PDF) del viaje en una pestaña nueva para ver/imprimir.
+    async openRouteSheet(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        const resp = await $api.get(`trips/${id}/route-sheet/`, {
+          responseType: "blob",
+        });
+        const url = window.URL.createObjectURL(
+          new Blob([resp.data], { type: "application/pdf" }),
+        );
+        window.open(url, "_blank");
+      } catch (e) {
+        general.setErrorSnackbar(e);
+      }
+    },
+
     async cancelTrip(id: string) {
       return this.action("post", `trips/${id}/cancel/`, null, "Viaje cancelado", () =>
         this.getTrips(),

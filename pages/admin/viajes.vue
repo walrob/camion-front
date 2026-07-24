@@ -95,6 +95,14 @@ onMounted(async () => {
   <div>
     <PageHeader title="Viajes" subtitle="Planificación y asignación de viajes">
       <template #actions>
+        <v-btn
+          variant="tonal"
+          color="success"
+          prepend-icon="mdi-file-excel"
+          :disabled="!trips.length"
+          @click="tripStore.exportXlsx()"
+          >Excel</v-btn
+        >
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
           >Nuevo viaje</v-btn
         >
@@ -178,6 +186,14 @@ onMounted(async () => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
+        <IconBtn
+          tooltip="Hoja de ruta (PDF)"
+          icon="mdi-map-marker-path"
+          size="small"
+          variant="text"
+          color="indigo"
+          @click="tripStore.openRouteSheet(item.id)"
+        />
         <IconBtn
           v-if="item.status === 'assigned'"
           tooltip="Editar viaje"
