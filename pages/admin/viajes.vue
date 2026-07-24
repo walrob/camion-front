@@ -178,25 +178,26 @@ onMounted(async () => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn
+        <IconBtn
           v-if="item.status === 'assigned'"
+          tooltip="Editar viaje"
           icon="mdi-pencil"
-          aria-label="Editar"
           size="small"
           variant="text"
           @click="openEdit(item)"
         />
-        <v-btn
+        <IconBtn
           v-if="item.status === 'assigned' || item.status === 'in_progress'"
+          tooltip="Cancelar viaje"
           icon="mdi-cancel"
           size="small"
           variant="text"
           color="warning"
           @click="askCancel(item)"
         />
-        <v-btn
+        <IconBtn
+          tooltip="Eliminar viaje"
           icon="mdi-delete"
-          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

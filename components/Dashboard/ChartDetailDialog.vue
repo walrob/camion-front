@@ -48,9 +48,9 @@ const hasData = computed(() => {
           </span>
         </span>
         <v-spacer />
-        <v-btn
+        <IconBtn
+          tooltip="Cerrar"
           icon="mdi-close"
-          aria-label="Cerrar"
           variant="text"
           @click="model = false"
         />

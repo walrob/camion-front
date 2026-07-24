@@ -364,12 +364,12 @@ onBeforeUnmount(() => socket.disconnect());
         <!-- Encabezado -->
         <template v-if="selectedUser">
           <div class="d-flex align-center ga-2 pa-3">
-            <v-btn
+            <IconBtn
               v-if="!mdAndUp"
+              tooltip="Volver"
               icon="mdi-arrow-left"
               variant="text"
               size="small"
-              aria-label="Volver"
               @click="selectedUser = null"
             />
             <v-avatar :color="avatarColor(selectedUser)" size="38">
@@ -457,12 +457,12 @@ onBeforeUnmount(() => socket.disconnect());
               class="flex-grow-1"
               @keyup.enter="send"
             />
-            <v-btn
+            <IconBtn
+              tooltip="Enviar mensaje"
               icon="mdi-send"
               color="primary"
               size="large"
               :disabled="!text.trim()"
-              aria-label="Enviar"
               @click="send"
             />
           </div>

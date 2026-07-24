@@ -97,10 +97,10 @@ const onPhoto = async (e: Event) => {
           :readonly="disabled"
           @blur="onNotesBlur"
         />
-        <v-btn
+        <IconBtn
           v-if="!disabled"
+          tooltip="Tomar foto"
           icon="mdi-camera"
-          aria-label="Tomar foto"
           variant="tonal"
           :color="photoLoaded ? 'success' : undefined"
           class="checklist-item__photo"

@@ -141,16 +141,16 @@ onMounted(() => driverStore.getDrivers());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn
+        <IconBtn
+          tooltip="Editar chofer"
           icon="mdi-pencil"
-          aria-label="Editar"
           size="small"
           variant="text"
           @click="openEdit(item)"
         />
-        <v-btn
+        <IconBtn
+          tooltip="Eliminar chofer"
           icon="mdi-delete"
-          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

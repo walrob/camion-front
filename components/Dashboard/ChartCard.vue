@@ -82,10 +82,10 @@ const expand = () => {
         esté recortado o no lo aclara el `caption` ("Top 10"), no este botón:
         acá el significado es uno solo, "verlo en grande".
       -->
-      <v-btn
+      <IconBtn
         v-if="hasData"
+        tooltip="Ampliar gráfico"
         icon="mdi-arrow-expand"
-        aria-label="Ampliar gráfico"
         size="small"
         variant="text"
         :color="expandColor"

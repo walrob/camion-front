@@ -113,13 +113,13 @@ const showHeader = (i: number) =>
       Ctrl K
     </v-chip>
   </v-btn>
-  <v-btn
+  <IconBtn
     v-else
+    tooltip="Buscar"
     icon="mdi-magnify"
     variant="text"
     size="small"
     class="ms-1"
-    aria-label="Buscar"
     @click="open = true"
   />
 

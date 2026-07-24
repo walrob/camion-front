@@ -94,9 +94,9 @@ onBeforeUnmount(() => socket.disconnect());
         class="flex-grow-1"
         @keyup.enter="send"
       />
-      <v-btn
+      <IconBtn
+        tooltip="Enviar mensaje"
         icon="mdi-send"
-        aria-label="Enviar"
         color="primary"
         @click="send"
       />

@@ -91,10 +91,10 @@ onMounted(async () => {
           >
             {{ documentStatus(d.status).label }}
           </v-chip>
-          <v-btn
+          <IconBtn
             v-if="d.fileKey"
+            tooltip="Ver archivo"
             icon="mdi-file-eye"
-            aria-label="Ver archivo"
             size="small"
             variant="text"
             @click="store.openFile(d.id)"

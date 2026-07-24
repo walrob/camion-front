@@ -188,16 +188,16 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn
+            <IconBtn
+              tooltip="Editar plan"
               icon="mdi-pencil"
-              aria-label="Editar"
               size="small"
               variant="text"
               @click="openEditPlan(item)"
             />
-            <v-btn
+            <IconBtn
+              tooltip="Eliminar plan"
               icon="mdi-delete"
-              aria-label="Eliminar"
               size="small"
               variant="text"
               color="error"
@@ -251,9 +251,9 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn
+            <IconBtn
+              tooltip="Editar orden"
               icon="mdi-pencil"
-              aria-label="Editar"
               size="small"
               variant="text"
               @click="openEditOrder(item)"

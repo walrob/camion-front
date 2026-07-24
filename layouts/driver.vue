@@ -121,11 +121,11 @@ onBeforeUnmount(() => observer?.disconnect());
           </div>
 
           <div class="d-flex align-center ga-2">
-            <v-btn
+            <IconBtn
               v-if="page.back"
+              tooltip="Volver"
               :to="page.back"
               icon="mdi-arrow-left"
-              aria-label="Volver"
               variant="text"
               color="white"
               class="ms-n2"

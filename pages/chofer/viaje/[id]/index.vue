@@ -199,10 +199,10 @@ onMounted(reload);
               <span v-if="e.notes">{{ e.notes }}</span>
             </div>
           </div>
-          <v-btn
+          <IconBtn
             v-if="canEdit"
+            tooltip="Eliminar gasto"
             icon="mdi-delete"
-            aria-label="Eliminar"
             size="x-small"
             variant="text"
             color="error"
@@ -213,10 +213,10 @@ onMounted(reload);
     </template>
 
     <!-- FAB para agregar gasto -->
-    <v-btn
+    <IconBtn
       v-if="canEdit"
+      tooltip="Agregar gasto o adelanto"
       icon="mdi-plus"
-      aria-label="Agregar"
       color="primary"
       size="large"
       position="fixed"

@@ -115,9 +115,9 @@ onMounted(async () => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn
+        <IconBtn
+          tooltip="Ver detalle"
           icon="mdi-eye"
-          aria-label="Ver detalle"
           size="small"
           variant="text"
           @click="openDetail(item.id)"

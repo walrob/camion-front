@@ -168,7 +168,7 @@ onMounted(() => hrStore.getEmployee(id));
 <template>
   <div>
     <div class="d-flex align-center ga-2 mb-4">
-      <v-btn icon="mdi-arrow-left" aria-label="Volver" variant="text" to="/admin/rrhh" />
+      <IconBtn tooltip="Volver" icon="mdi-arrow-left" variant="text" to="/admin/rrhh" />
       <h1 class="text-h5 font-weight-bold">{{ fullName || "Legajo" }}</h1>
       <v-spacer />
       <v-btn
@@ -319,25 +319,25 @@ onMounted(() => hrStore.getEmployee(id));
                     </v-chip>
                     <v-spacer />
                     <template v-if="canEditHr">
-                      <v-btn
+                      <IconBtn
                         v-if="isOpenPeriod(m)"
+                        tooltip="Cerrar período (reincorporar)"
                         icon="mdi-calendar-check"
-                        aria-label="Cerrar período"
                         size="small"
                         variant="text"
                         color="success"
                         @click="askCloseMovement(m)"
                       />
-                      <v-btn
+                      <IconBtn
+                        tooltip="Editar movimiento"
                         icon="mdi-pencil"
-                        aria-label="Editar"
                         size="small"
                         variant="text"
                         @click="openEditMovement(m)"
                       />
-                      <v-btn
+                      <IconBtn
+                        tooltip="Eliminar movimiento"
                         icon="mdi-delete"
-                        aria-label="Eliminar"
                         size="small"
                         variant="text"
                         color="error"
@@ -395,9 +395,10 @@ onMounted(() => hrStore.getEmployee(id));
               </v-chip>
             </template>
             <template #item.actions="{ item }">
-              <v-btn icon="mdi-pencil" aria-label="Editar" size="small" variant="text" @click="openEditCert(item)" />
-              <v-btn
-                icon="mdi-delete" aria-label="Eliminar"
+              <IconBtn tooltip="Editar permiso" icon="mdi-pencil" size="small" variant="text" @click="openEditCert(item)" />
+              <IconBtn
+                tooltip="Eliminar permiso"
+                icon="mdi-delete"
                 size="small"
                 variant="text"
                 color="error"
@@ -445,8 +446,9 @@ onMounted(() => hrStore.getEmployee(id));
               </v-chip>
             </template>
             <template #item.actions="{ item }">
-              <v-btn
+              <IconBtn
                 v-if="!item.unassignedAt"
+                tooltip="Finalizar asignación"
                 icon="mdi-link-off"
                 size="small"
                 variant="text"

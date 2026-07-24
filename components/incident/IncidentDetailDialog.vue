@@ -178,7 +178,7 @@ const sendComment = async () => {
             hide-details
             class="flex-grow-1"
           />
-          <v-btn icon="mdi-send" aria-label="Enviar" color="primary" variant="tonal" @click="sendComment" />
+          <IconBtn tooltip="Enviar comentario" icon="mdi-send" color="primary" variant="tonal" @click="sendComment" />
         </div>
       </v-card-text>
 

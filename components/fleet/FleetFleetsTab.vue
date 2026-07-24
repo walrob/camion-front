@@ -83,16 +83,16 @@ onMounted(() => fleetStore.getFleets());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn
+        <IconBtn
+          tooltip="Editar flota"
           icon="mdi-pencil"
-          aria-label="Editar"
           size="small"
           variant="text"
           @click="openEdit(item)"
         />
-        <v-btn
+        <IconBtn
+          tooltip="Eliminar flota"
           icon="mdi-delete"
-          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"

@@ -13,12 +13,12 @@
     @keydown.enter.prevent="resolver"
   >
     <template v-if="!readonly" #append-inner>
-      <v-btn
+      <IconBtn
+        tooltip="Seleccionar fecha"
         icon="mdi-calendar"
         size="x-small"
         variant="text"
         color="primary"
-        title="Seleccionar fecha"
         @click.stop="abrirCalendario"
       />
       <input

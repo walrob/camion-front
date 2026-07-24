@@ -234,16 +234,16 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
-            <v-btn
+            <IconBtn
+              tooltip="Ver archivo"
               icon="mdi-file-eye"
-              aria-label="Ver archivo"
               size="small"
               variant="text"
               @click="store.openFile(item.id)"
             />
-            <v-btn
+            <IconBtn
+              tooltip="Eliminar documento"
               icon="mdi-delete"
-              aria-label="Eliminar"
               size="small"
               variant="text"
               color="error"
@@ -368,27 +368,27 @@ onMounted(async () => {
                 {{ documentStatus(d.status).label }}
               </v-chip>
               <div class="d-flex ga-1">
-                <v-btn
+                <IconBtn
                   v-if="d.fileKey"
+                  tooltip="Ver archivo"
                   icon="mdi-file-eye"
-                  aria-label="Ver archivo"
                   size="small"
                   variant="text"
                   @click="store.openFile(d.id)"
                 />
-                <v-btn
+                <IconBtn
                   v-if="d.owner?.phone"
+                  tooltip="Enviar WhatsApp"
                   icon="mdi-whatsapp"
-                  aria-label="WhatsApp"
                   color="success"
                   size="small"
                   variant="text"
                   @click="openWhatsApp(d.owner.phone)"
                 />
-                <v-btn
+                <IconBtn
                   v-if="d.owner?.userId && canMessage"
+                  tooltip="Enviar mensaje"
                   icon="mdi-message-text-outline"
-                  aria-label="Enviar mensaje"
                   color="primary"
                   size="small"
                   variant="text"

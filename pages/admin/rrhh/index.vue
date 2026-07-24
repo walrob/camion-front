@@ -192,16 +192,16 @@ onMounted(() => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
-        <v-btn
+        <IconBtn
+          tooltip="Ver legajo"
           icon="mdi-eye"
-          aria-label="Ver"
           size="small"
           variant="text"
           @click="goDetail(item)"
         />
-        <v-btn
+        <IconBtn
+          tooltip="Eliminar empleado"
           icon="mdi-delete"
-          aria-label="Eliminar"
           size="small"
           variant="text"
           color="error"
