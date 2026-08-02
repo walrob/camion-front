@@ -36,6 +36,13 @@ const headers = [
   { title: "Acciones", value: "actions" },
 ];
 
+// Abre el Centro Documental ya filtrado por este camión.
+const openDocs = (truck: Truck) =>
+  navigateTo({
+    path: "/admin/documentos",
+    query: { ownerType: "truck", ownerId: truck.id },
+  });
+
 const openNew = () => {
   selected.value = null;
   dialog.value = true;
@@ -123,6 +130,14 @@ onMounted(() => {
         </v-chip>
       </template>
       <template #item.actions="{ item }">
+        <IconBtn
+          tooltip="Ver documentos (seguro, VTV, etc.)"
+          icon="mdi-file-document-multiple-outline"
+          size="small"
+          variant="text"
+          color="info"
+          @click="openDocs(item)"
+        />
         <IconBtn
           tooltip="Editar camión"
           icon="mdi-pencil"

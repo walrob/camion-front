@@ -122,18 +122,19 @@ export const useHrStore = defineStore("hr", {
     },
 
     // ───────── Certificaciones ─────────
-    async createCertification(payload: Partial<Certification>) {
+    // El payload es FormData (multipart): admite adjuntar el archivo del permiso.
+    async createCertification(payload: FormData, employeeId: string) {
       return this.mutate(
         "post",
         "hr/certifications/",
         payload,
         "Permiso agregado",
-        () => this.getEmployee(payload.employeeId as string),
+        () => this.getEmployee(employeeId),
         true,
       );
     },
 
-    async updateCertification(id: string, employeeId: string, payload: Partial<Certification>) {
+    async updateCertification(id: string, employeeId: string, payload: FormData) {
       return this.mutate(
         "patch",
         `hr/certifications/${id}/`,
@@ -152,6 +153,19 @@ export const useHrStore = defineStore("hr", {
         "Permiso eliminado",
         () => this.getEmployee(employeeId),
       );
+    },
+
+    // Abre el archivo adjunto del permiso (URL firmada temporal) en pestaña nueva.
+    async openCertFile(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        const resp = await $api.get(`hr/certifications/${id}/file/`);
+        if (resp.data?.url) window.open(resp.data.url, "_blank");
+        else general.setSnackbar({ color: "warning", message: "Sin archivo adjunto." });
+      } catch (e) {
+        general.setErrorSnackbar(e);
+      }
     },
 
     // ───────── Asignaciones ─────────
@@ -188,13 +202,18 @@ export const useHrStore = defineStore("hr", {
         .catch((e) => general.setErrorSnackbar(e));
     },
 
-    async createMovement(payload: Partial<EmploymentMovement>) {
+    // El payload va como FormData (multipart) si adjunta un respaldo, o como
+    // objeto JSON si no (para poder mandar `endDate: null` y reabrir un período).
+    async createMovement(
+      payload: FormData | Record<string, unknown>,
+      employeeId: string,
+    ) {
       return this.mutate(
         "post",
         "hr/movements/",
         payload,
         "Movimiento registrado",
-        () => this.getEmployee(payload.employeeId as string),
+        () => this.getEmployee(employeeId),
         true,
       );
     },
@@ -202,7 +221,7 @@ export const useHrStore = defineStore("hr", {
     async updateMovement(
       id: string,
       employeeId: string,
-      payload: Partial<EmploymentMovement>,
+      payload: FormData | Record<string, unknown>,
     ) {
       return this.mutate(
         "patch",
@@ -212,6 +231,19 @@ export const useHrStore = defineStore("hr", {
         () => this.getEmployee(employeeId),
         true,
       );
+    },
+
+    // Abre el adjunto respaldatorio del movimiento (URL firmada) en pestaña nueva.
+    async openMovementFile(id: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        const resp = await $api.get(`hr/movements/${id}/file/`);
+        if (resp.data?.url) window.open(resp.data.url, "_blank");
+        else general.setSnackbar({ color: "warning", message: "Sin archivo adjunto." });
+      } catch (e) {
+        general.setErrorSnackbar(e);
+      }
     },
 
     // Cierra hoy un período abierto (reincorporación anticipada). Sin body.

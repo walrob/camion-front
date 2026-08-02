@@ -114,9 +114,17 @@ const onConfirmDelete = async (payload: { resp: boolean }) => {
   toDelete.value = null;
 };
 
+const route = useRoute();
+// Bandera para que los watchers no interfieran mientras aplicamos la
+// preselección por query (?ownerType&ownerId) al entrar desde Flota.
+const applyingQuery = ref(false);
+
 watch(
   () => store.ownerType,
   async (t) => {
+    // Al preseleccionar desde otra pantalla (?ownerType&ownerId) no reseteamos
+    // el dueño elegido: eso lo maneja el flujo de query en onMounted.
+    if (applyingQuery.value) return;
     store.ownerId = null;
     await store.loadOwnerOptions(t);
     store.getDocuments();
@@ -124,12 +132,28 @@ watch(
 );
 watch(
   () => [store.ownerId, store.category],
-  () => store.getDocuments(),
+  () => {
+    if (applyingQuery.value) return;
+    store.getDocuments();
+  },
 );
 
 onMounted(async () => {
-  await store.loadOwnerOptions(store.ownerType);
-  store.getDocuments();
+  const qType = route.query.ownerType;
+  const qId = route.query.ownerId;
+
+  // Llegada desde Flota (u otra pantalla) con el dueño ya elegido.
+  if (typeof qType === "string") {
+    applyingQuery.value = true;
+    store.ownerType = qType;
+    await store.loadOwnerOptions(qType);
+    store.ownerId = typeof qId === "string" ? qId : null;
+    applyingQuery.value = false;
+    store.getDocuments();
+  } else {
+    await store.loadOwnerOptions(store.ownerType);
+    store.getDocuments();
+  }
   store.getExpiring();
 });
 </script>

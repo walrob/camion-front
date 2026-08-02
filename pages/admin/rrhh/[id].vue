@@ -318,6 +318,14 @@ onMounted(() => hrStore.getEmployee(id));
                       En curso
                     </v-chip>
                     <v-spacer />
+                    <IconBtn
+                      v-if="m.fileKey"
+                      tooltip="Ver respaldo"
+                      icon="mdi-file-eye"
+                      size="small"
+                      variant="text"
+                      @click="hrStore.openMovementFile(m.id)"
+                    />
                     <template v-if="canEditHr">
                       <IconBtn
                         v-if="isOpenPeriod(m)"
@@ -395,6 +403,14 @@ onMounted(() => hrStore.getEmployee(id));
               </v-chip>
             </template>
             <template #item.actions="{ item }">
+              <IconBtn
+                v-if="item.fileKey"
+                tooltip="Ver archivo"
+                icon="mdi-file-eye"
+                size="small"
+                variant="text"
+                @click="hrStore.openCertFile(item.id)"
+              />
               <IconBtn tooltip="Editar permiso" icon="mdi-pencil" size="small" variant="text" @click="openEditCert(item)" />
               <IconBtn
                 tooltip="Eliminar permiso"

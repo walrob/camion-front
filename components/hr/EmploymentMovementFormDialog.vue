@@ -31,11 +31,13 @@ const formErrors = useFormErrors();
 const formRef = ref();
 const valid = ref(true);
 const saving = ref(false);
+const file = ref<File | null>(null);
 // Mensaje de bloqueo del backend que no mapea a un campo puntual (Regla B:
 // viajes abiertos que se pisan con el período, u otra superposición).
 const blockMessage = ref<string | null>(null);
 
 const isEdit = computed(() => !!props.movement?.id);
+const hasFile = computed(() => !!props.movement?.fileKey);
 
 const emptyForm = (): Partial<EmploymentMovement> => ({
   type: "leave",
@@ -74,11 +76,26 @@ watch(
             notes: props.movement.notes ?? "",
           }
         : emptyForm();
+      file.value = null;
       formErrors.clear();
       blockMessage.value = null;
     }
   },
 );
+
+const onFile = (e: Event) => {
+  file.value = (e.target as HTMLInputElement).files?.[0] ?? null;
+};
+
+// Pasa el payload a multipart, omitiendo vacíos, y adjunta el archivo.
+const toFormData = (obj: Record<string, unknown>): FormData => {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(obj)) {
+    if (v !== undefined && v !== null && v !== "") fd.append(k, String(v));
+  }
+  if (file.value) fd.append("file", file.value);
+  return fd;
+};
 
 const close = () => emit("update:modelValue", false);
 
@@ -117,11 +134,19 @@ const submit = async () => {
   if (!payload.reason) delete payload.reason;
   if (!payload.notes) delete payload.notes;
 
+  // Con archivo va como multipart; sin archivo como JSON (para poder mandar
+  // `endDate: null` explícito y reabrir un período cerrado).
+  const body: FormData | Record<string, unknown> = file.value
+    ? toFormData(payload)
+    : payload;
+
   try {
     if (isEdit.value) {
-      await hrStore.updateMovement(props.movement!.id, props.employeeId, payload);
+      await hrStore.updateMovement(props.movement!.id, props.employeeId, body);
     } else {
-      await hrStore.createMovement({ ...payload, employeeId: props.employeeId });
+      if (body instanceof FormData) body.append("employeeId", props.employeeId);
+      else body.employeeId = props.employeeId;
+      await hrStore.createMovement(body, props.employeeId);
     }
     emit("saved");
     close();
@@ -223,6 +248,32 @@ const submit = async () => {
         </v-col>
         <v-col cols="12">
           <VoiceTextarea v-model="form.notes" label="Notas" rows="2" auto-grow />
+        </v-col>
+        <v-col cols="12">
+          <v-file-input
+            :label="hasFile ? 'Reemplazar respaldo (imagen o PDF)' : 'Respaldo (imagen o PDF)'"
+            prepend-icon=""
+            prepend-inner-icon="mdi-paperclip"
+            variant="outlined"
+            density="compact"
+            accept="image/*,application/pdf"
+            hide-details
+            @change="onFile"
+          />
+          <div v-if="hasFile" class="d-flex align-center ga-1 mt-2 text-caption">
+            <v-icon size="16" color="success">mdi-check-circle-outline</v-icon>
+            <span class="text-medium-emphasis">Tiene un respaldo cargado.</span>
+            <v-btn
+              variant="text"
+              size="x-small"
+              color="primary"
+              class="text-none"
+              prepend-icon="mdi-eye"
+              @click="hrStore.openMovementFile(props.movement!.id)"
+            >
+              Ver actual
+            </v-btn>
+          </div>
         </v-col>
       </v-row>
     </v-form>

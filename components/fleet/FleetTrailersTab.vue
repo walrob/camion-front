@@ -23,6 +23,13 @@ const selected = ref<Trailer | null>(null);
 const confirm = ref(false);
 const toDelete = ref<Trailer | null>(null);
 
+// Abre el Centro Documental ya filtrado por este acoplado.
+const openDocs = (trailer: Trailer) =>
+  navigateTo({
+    path: "/admin/documentos",
+    query: { ownerType: "trailer", ownerId: trailer.id },
+  });
+
 const headers = [
   { title: "Patente", value: "plate" },
   { title: "Tipo", value: "type" },
@@ -102,6 +109,14 @@ onMounted(() => fleetStore.getTrailers());
         </v-chip>
       </template>
       <template #item.actions="{ item }">
+        <IconBtn
+          tooltip="Ver documentos"
+          icon="mdi-file-document-multiple-outline"
+          size="small"
+          variant="text"
+          color="info"
+          @click="openDocs(item)"
+        />
         <IconBtn
           tooltip="Editar acoplado"
           icon="mdi-pencil"

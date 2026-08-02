@@ -62,7 +62,7 @@ El menú lateral está agrupado por dominio de uso diario:
 - **Documentos** — centro documental con vencimientos.
 
 **Personal**
-- **RRHH** — legajos, permisos y habilitaciones del personal.
+- **RRHH** — legajos, permisos/habilitaciones e **historial laboral** del personal.
 - **Choferes** — perfil operativo del chofer.
 
 **Administración**
@@ -80,12 +80,16 @@ Este es el circuito central del sistema, paso a paso.
 Antes de operar, deben existir los datos base. Los carga el backoffice:
 
 1. **Flota** (`Flota`): dar de alta camiones (patente, número interno, km actual) y
-   acoplados.
+   acoplados. Desde la tabla, el botón **Ver documentos** de cada unidad abre el
+   Centro Documental ya filtrado por ese camión/acoplado.
 2. **Personal** (`RRHH`): cargar el legajo del empleado (datos personales, DNI/CUIL)
-   y sus **permisos/habilitaciones** con fecha de vencimiento (carnet, LiNTI/CNRT,
-   psicofísico, carga peligrosa, etc.).
+   con su **fecha de ingreso** (obligatoria: abre el *historial laboral*) y sus
+   **permisos/habilitaciones** con fecha de vencimiento (carnet, LiNTI/CNRT,
+   psicofísico, carga peligrosa, etc.). En cada permiso se puede **adjuntar la imagen
+   o PDF del certificado** además de los datos y el vencimiento.
 3. **Choferes** (`Choferes`): habilitar al empleado como chofer (perfil operativo) y,
-   si corresponde, darle acceso a la app.
+   si corresponde, darle acceso a la app. Al elegir/editar el chofer se muestra el
+   **DNI** junto al nombre para distinguir homónimos, y se puede buscar por ese dato.
 
 ### Paso 1 — Dar de alta el viaje  → *Despachante / Admin*
 
@@ -99,6 +103,20 @@ En **Viajes** → botón **Nuevo viaje**. Se completa:
 
 El viaje queda en estado **Asignado** (`assigned`) y aparece automáticamente en la
 app del chofer asignado.
+
+> **Disponibilidad del chofer.** El sistema valida la situación del legajo del
+> chofer **en la fecha de inicio del viaje**:
+> - Si está **de licencia** en esa fecha, ofrece un aviso para **finalizar la
+>   licencia y asignar igual** (queda registrado en el historial y genera una
+>   alerta para RRHH), o reprogramar el viaje.
+> - Si está **suspendido** o **dado de baja**, el sistema **bloquea** la asignación
+>   (primero debe resolverse desde RRHH).
+
+Los selectores de **camión** y **chofer** permiten **buscar tecleando** (patente,
+nombre o DNI). En el listado de viajes hay un **filtro por chofer**, botones para
+**exportar a Excel** el listado filtrado y, por fila, **Hoja de ruta (PDF)**: un
+comprobante imprimible con la unidad, el chofer, la carga y la ruta para entregarle
+al conductor.
 
 ### Paso 2 — El chofer recibe y prepara el viaje  → *Chofer*
 
@@ -186,6 +204,10 @@ Neto a rendir = Total de gastos rendidos  −  Total de adelantos
 **Documentos y permisos:** `Vigente` → `Por vencer` → `Vencido` (el sistema avisa
 automáticamente antes del vencimiento).
 
+**Estado laboral del empleado:** `Activo` · `Licencia` · `Suspendido` · `Baja`. No
+se edita a mano: lo **calcula el sistema** a partir del *historial laboral* del
+legajo (ver §6) y se **auto-corrige** cuando una licencia o suspensión vence.
+
 ---
 
 ## 6. Módulos de apoyo
@@ -210,9 +232,11 @@ de reglas —no se cargan a mano—. Cada alerta tiene un **nivel de color** seg
 urgencia:
 
 - 🔴 **Roja** — crítico (ej. accidente): atención inmediata.
-- 🟠 **Naranja** — importante (ej. camión detenido demasiado tiempo).
-- 🟡 **Amarilla** — a revisar (ej. gasto fuera del umbral esperado).
-- 🟢 **Verde** — informativa (ej. documento próximo a vencer).
+- 🟠 **Naranja** — importante (ej. camión detenido demasiado tiempo; se finalizó una
+  licencia para poder asignar un viaje).
+- 🟡 **Amarilla** — a revisar (ej. gasto fuera del umbral esperado; viaje asignado a
+  un chofer que venía de licencia).
+- 🟢 **Verde** — informativa (ej. documento o permiso próximo a vencer).
 
 Llegan **en tiempo real** al centro de alertas del navbar (la campanita con
 contador) y a la pantalla **Alertas**, que se puede **filtrar** por nivel, estado y
@@ -233,13 +257,35 @@ los km: km/l, l/100km y costo/km, con gráficos y **exportación a Excel**.
 Organizado en tres pestañas: **Próximos**, **Planes** y **Órdenes**. Se definen
 **planes preventivos** por km, horas o fecha, y el sistema **avisa cuando un camión
 llega a su próximo servicio**. Cada intervención del taller se registra como una
-**orden de trabajo** (ítems, costo, notas y adjuntos).
+**orden de trabajo** (ítems, costo, notas y adjuntos), que puede **imprimirse en PDF**
+como comprobante para el taller.
 
 ### Documentos (Centro Documental)
 
 Repositorio de la documentación de **unidades, choferes y empresa** (seguro, VTV,
-licencias, permisos, etc.), con **fechas de vencimiento**. Tiene una pestaña de
-**Por vencer** y dispara alertas verdes automáticas antes de que algo caduque.
+licencias, permisos, etc.), con **archivo adjunto** (imagen/PDF) y **fechas de
+vencimiento**. Tiene una pestaña de **Por vencer** —con **buscador y filtros** por
+estado y entidad, y **exportación a Excel**— y dispara alertas verdes automáticas
+antes de que algo caduque. Se puede llegar filtrado por una unidad desde el botón
+**Ver documentos** en la pantalla de **Flota**.
+
+### RRHH — Legajo e Historial laboral
+
+Cada empleado tiene un **legajo** con sus datos, sus **permisos/habilitaciones**
+(con archivo adjunto y vencimiento) y su **historial laboral**: una línea de tiempo
+de **movimientos** que registra ingresos, **licencias** (con su motivo: vacaciones,
+enfermedad, accidente, etc.), **suspensiones**, **reincorporaciones** y **bajas**.
+Cada movimiento admite un **archivo de respaldo** (p. ej. certificado de reposo).
+
+- El **estado laboral** (Activo / Licencia / Suspendido / Baja) **surge del
+  historial**: no se edita a mano y se **auto-corrige** cuando un período vence.
+- Una licencia o suspensión con fecha de fin se puede **cerrar antes** (botón de
+  reincorporación anticipada).
+- El sistema **no deja cargar** una licencia, suspensión o baja si el chofer tiene
+  **viajes sin cerrar** en ese período: primero hay que cancelarlos o finalizarlos
+  (ofrece un acceso directo a los viajes de ese chofer).
+- En el listado de RRHH, un panel **"Fuera de servicio hoy"** muestra de un vistazo
+  quién está de licencia o suspensión en la fecha.
 
 ### Indicadores / Panel
 
@@ -284,4 +330,4 @@ Alta de VIAJE  ───────────────►  Ve el viaje asi
 
 ---
 
-_Última actualización: 2026-07-07._
+_Última actualización: 2026-07-24._

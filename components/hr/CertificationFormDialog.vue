@@ -25,8 +25,10 @@ const formErrors = useFormErrors();
 const formRef = ref();
 const valid = ref(true);
 const saving = ref(false);
+const file = ref<File | null>(null);
 
 const isEdit = computed(() => !!props.certification?.id);
+const hasFile = computed(() => !!props.certification?.fileKey);
 
 const emptyForm = (): Partial<Certification> => ({
   type: "driving_license",
@@ -45,11 +47,15 @@ watch(
   (open) => {
     if (open) {
       form.value = props.certification ? { ...props.certification } : emptyForm();
+      file.value = null;
       formErrors.clear();
     }
   },
 );
 
+const onFile = (e: Event) => {
+  file.value = (e.target as HTMLInputElement).files?.[0] ?? null;
+};
 const close = () => emit("update:modelValue", false);
 
 const submit = async () => {
@@ -57,16 +63,21 @@ const submit = async () => {
   if (!res?.valid) return;
   saving.value = true;
 
-  const payload = { ...form.value } as any;
-  ["issueDate", "expiryDate"].forEach((k) => {
-    if (!payload[k]) delete payload[k];
-  });
+  // Multipart: las fechas/campos vacíos no se envían (el backend valida formato).
+  const fd = new FormData();
+  fd.append("type", form.value.type || "");
+  for (const k of ["class", "number", "issuedBy", "issueDate", "expiryDate", "notes"] as const) {
+    const v = (form.value as any)[k];
+    if (v) fd.append(k, v);
+  }
+  if (file.value) fd.append("file", file.value);
 
   try {
     if (isEdit.value) {
-      await hrStore.updateCertification(props.certification!.id, props.employeeId, payload);
+      await hrStore.updateCertification(props.certification!.id, props.employeeId, fd);
     } else {
-      await hrStore.createCertification({ ...payload, employeeId: props.employeeId });
+      fd.append("employeeId", props.employeeId);
+      await hrStore.createCertification(fd, props.employeeId);
     }
     emit("saved");
     close();
@@ -141,6 +152,32 @@ const submit = async () => {
         </v-col>
         <v-col cols="12">
           <VoiceTextarea v-model="form.notes" label="Notas" rows="2" auto-grow />
+        </v-col>
+        <v-col cols="12">
+          <v-file-input
+            :label="hasFile ? 'Reemplazar archivo (imagen o PDF)' : 'Archivo (imagen o PDF)'"
+            prepend-icon=""
+            prepend-inner-icon="mdi-paperclip"
+            variant="outlined"
+            density="compact"
+            accept="image/*,application/pdf"
+            hide-details
+            @change="onFile"
+          />
+          <div v-if="hasFile" class="d-flex align-center ga-1 mt-2 text-caption">
+            <v-icon size="16" color="success">mdi-check-circle-outline</v-icon>
+            <span class="text-medium-emphasis">Tiene un archivo cargado.</span>
+            <v-btn
+              variant="text"
+              size="x-small"
+              color="primary"
+              class="text-none"
+              prepend-icon="mdi-eye"
+              @click="hrStore.openCertFile(props.certification!.id)"
+            >
+              Ver actual
+            </v-btn>
+          </div>
         </v-col>
       </v-row>
     </v-form>
