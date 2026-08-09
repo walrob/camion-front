@@ -13,7 +13,14 @@ export const useIncidentSocket = (onChange: (incident: Incident) => void) => {
     const base = (config.public.apiBaseUrl as string) || "";
     const host = base.replace(/\/api\/v1\/?$/, "");
 
-    socket = io(`${host}/incidents`, { transports: ["websocket"] });
+    // El back exige el JWT en el handshake: sin él rechaza la conexión. Es lo
+    // que mete al cliente en la sala de su empresa y evita que reciba los
+    // incidentes de las demás.
+    const auth = useAuthStore();
+    socket = io(`${host}/incidents`, {
+      transports: ["websocket"],
+      auth: { token: auth.token },
+    });
     socket.on("incident:new", (incident: Incident) => onChange(incident));
     socket.on("incident:update", (incident: Incident) => onChange(incident));
   };
