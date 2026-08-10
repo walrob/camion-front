@@ -74,6 +74,8 @@ onMounted(async () => {
       subtitle="Control de seguridad y auditoría de camiones (Operador Económico Autorizado)"
     />
 
+    <RetentionNotice />
+
     <ReportFilters
       :filters="store.filters"
       :truck-options="truckOptions"

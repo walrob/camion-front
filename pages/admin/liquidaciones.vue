@@ -180,6 +180,8 @@ onMounted(() => settlementStore.getSettlements());
       </template>
     </PageHeader>
 
+    <RetentionNotice />
+
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <VoiceTextField
         v-model="settlementStore.search"

@@ -85,6 +85,8 @@ onBeforeUnmount(() => socket.disconnect());
       </template>
     </PageHeader>
 
+    <RetentionNotice />
+
     <!-- Filtros -->
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <v-select

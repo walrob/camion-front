@@ -109,6 +109,8 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
+    <RetentionNotice />
+
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <VoiceTextField
         v-model="tripStore.search"

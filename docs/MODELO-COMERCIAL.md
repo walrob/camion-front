@@ -262,7 +262,7 @@ Basada en lo efectivamente desarrollado en la plataforma hoy.
 | Ambiente de prueba (sandbox) | — | — | — | ✅ |
 | **LÍMITES Y SOPORTE** | | | | |
 | Retención de histórico | 6 meses | 24 meses | 60 meses | Ilimitada |
-| Almacenamiento de adjuntos | 5 GB | 50 GB | 250 GB | Ilimitado |
+| Almacenamiento de adjuntos | 2 GB | 50 GB | 250 GB | Ilimitado |
 | Soporte | Email, 48h | Prioritario, 24h | SLA 8h hábiles | 24/7, SLA 99,5% |
 | Customer Success | — | — | Revisión trimestral | CSM dedicado |
 
@@ -325,7 +325,7 @@ invisible y no recuperable. Se venden como add-on con precio propio.
 | **Reportes personalizados / BI** — dataset y conector Power BI | $ 99.000 | Gestión+ | Add-on |
 | **Paquete de automatizaciones avanzadas** | $ 69.000 | Operación | ✅ Incluido |
 | **Marca blanca** — logo, colores y dominio propio | $ 149.000 | Gestión+ | Add-on |
-| **Almacenamiento adicional** | $ 19.000 por 50 GB | Todos | No aplica |
+| **Almacenamiento adicional** | $ 5.900 (hasta 10 GB)<br>$ 24.900 (hasta 50 GB) | Todos | No aplica |
 
 ### 5.3 Servicios profesionales (pago único)
 
@@ -576,7 +576,65 @@ márgenes ha destruido en el SaaS argentino.
 
 **Alerta de margen**: el almacenamiento es el riesgo silencioso. Un cliente con
 incidentes videofilmados puede consumir 200 GB en un año. Los límites por plan
-(5 / 50 / 250 GB) y el add-on de GB no son burocracia: son protección de margen.
+(2 / 50 / 250 GB) y el add-on de GB no son burocracia: son protección de margen.
+
+### 7.7 Almacenamiento: por qué se cobra por capacidad y no subiendo de plan
+
+El costo de S3 es proporcional a los **GB**, no a las funcionalidades. Obligar a
+un cliente a saltar de Control a Operación porque se le llenó el espacio le
+vende módulos que no pidió y no resuelve el problema de fondo. Por eso la
+capacidad se amplía con un add-on de **dos escalones fijos**:
+
+| Escalón | Capacidad total | Precio mensual |
+|---|---|---|
+| Sin add-on | La del plan (2 / 50 / 250 GB) | — |
+| **Ampliación 1** | **10 GB** | **$ 5.900** |
+| **Ampliación 2** | **50 GB** | **$ 24.900** |
+
+Es un **techo**, no un incremento: el tope efectivo es el mayor entre lo que trae
+el plan y el escalón contratado, así que contratar 10 GB en un plan que ya trae
+50 nunca degrada la capacidad.
+
+**Dos escalones y no GB a medida** porque un tope cerrado se cotiza de memoria,
+se factura sin prorrateos raros y evita discutir cuántos GB necesita el cliente.
+
+#### Verificación del margen
+
+> ⚠️ **Los costos de abajo son una estimación, no un dato verificado.** No se
+> pudo confirmar la tarifa de `sa-east-1` en la página pública de AWS; hay que
+> validarla en la **AWS Pricing Calculator** antes de fijar estos precios.
+
+Estimación de costo todo incluido (S3 Standard en San Pablo + egreso, asumiendo
+que se consulta ~20% de lo almacenado por mes): **≈ $ 110 – 150 por GB/mes**.
+
+| Escalón | GB sobre el plan Control | Costo estimado | Precio | Margen |
+|---|---:|---:|---:|---:|
+| Ampliación 1 | 8 GB | $ 880 – 1.200 | $ 5.900 | **80 – 85 %** |
+| Ampliación 2 | 48 GB | $ 5.280 – 7.200 | $ 24.900 | **71 – 79 %** |
+
+> El precio anterior del add-on ($ 19.000 por 50 GB = $ 380/GB) quedaba por
+> debajo del objetivo de margen del §7.6 y, además, era **invendible a un cliente
+> de Control**: nadie que necesita 3 GB compra 50.
+
+#### Dos palancas que bajan el costo real
+
+1. **Archivado en frío alineado con la retención.** La retención ya define una
+   frontera: pasados los 6/24/60 meses el dato **no se muestra** (decisión D4 del
+   plan de conversión). Por definición, eso es dato que no se lee — el candidato
+   perfecto para una política de ciclo de vida a S3 Glacier, que recorta el costo
+   de almacenamiento entre 60 % y 80 %. **La ventana de retención y la de
+   archivado deberían ser la misma frontera.**
+2. **Compresión en origen.** Ya se comprimen las imágenes al subirlas. El video
+   de incidentes, que es lo que realmente hace volar el consumo, todavía no.
+
+#### Riesgo cambiario
+
+El costo de S3 está **100 % dolarizado** y el add-on se cobra en pesos. Es el
+único componente del modelo cuyo margen se erosiona con cada devaluación sin que
+nada lo compense. Recomendación: **nominar el add-on de almacenamiento en USD**
+—facturado en pesos al tipo de cambio del día, como Corporate (§7.5)— o, como
+mínimo, revisarlo en cada ajuste trimestral junto con el tipo de cambio y no sólo
+por IPC.
 
 ---
 

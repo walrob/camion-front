@@ -149,6 +149,8 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
+    <RetentionNotice />
+
     <ReportFilters
       :filters="store.filters"
       :truck-options="truckOptions"

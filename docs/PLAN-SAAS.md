@@ -42,7 +42,58 @@
 | **Fase 1 — Multi-tenant** | ✅ **Completa** | 31 tablas, 28 con `companyId NOT NULL`; app arranca sin errores; dos empresas pueden repetir patente |
 | **Fase 2 — Aislamiento** | ✅ **Completa** | Verificado contra la API con dos empresas y datos espejados (misma patente): cada una ve sólo lo suyo, lectura y escritura cruzadas dan 404, y el `companyId` se estampa solo al crear |
 | **Fase 3 — Gating por plan** | ✅ **Completa** | Verificado contra la API: una empresa en Control recibe 403 en rendiciones, indicadores, combustible, mantenimiento, OEA y RRHH, y 200 en los módulos base. El cambio de plan en la base se refleja a los 60s sin re-login |
-| Fase 4 en adelante | ⬜ Pendiente | — |
+| **Fase 4 — Límites cuantitativos** | ✅ **Completa** | Los cuatro límites verificados contra la API: reglas de alerta, roles, almacenamiento y retención de histórico |
+| Fase 5 en adelante | ⬜ Pendiente | — |
+
+### Fase 4 — cómo quedó implementada
+
+| Límite | Dónde se aplica | Comportamiento verificado |
+|---|---|---|
+| Reglas de alerta | `alerts.service.setThreshold()` | La 4.ª regla **activa** en Control da 400. Editar una ya activa o crear una apagada **no** consume cupo. |
+| Roles habilitados | `auth.service.createUser()` | Crear un `auditor` en Control da 400; un `driver`, 201. Los usuarios siguen siendo **ilimitados**: el plan limita *qué* rol, no *cuántos*. |
+| Almacenamiento | `attachments.service.upload()` | Al tope da **413** con el mensaje del add-on. Con espacio, sube y el contador queda exacto. |
+| Retención | `TenantRepository` | Control (6 meses) oculta un viaje de 8 meses; al pasar a Gestión **reaparece**. |
+| Planes de mantenimiento | `maintenance.service.createPlan()` | Implementado (Control: 0, Operación: 10). |
+
+#### Decisiones de implementación
+
+**El corte de retención viaja en el contexto de request, no se consulta al filtrar.**
+`createQueryBuilder` es sincrónico y no puede esperar una consulta del plan, así que
+`AuthGuard` resuelve el corte una vez por request —desde la caché de 60 s— y lo deja en
+el `AsyncLocalStorage`. El repositorio lo lee sin costo.
+
+**La retención recorta sólo la LECTURA.** No toca `update`, `delete` ni `softDelete`: un
+registro fuera de la ventana deja de verse, pero nada se rompe si algo lo referencia. El
+dato **no se borra** (decisión D4), y por eso un upgrade lo devuelve al instante — que es
+exactamente el argumento de venta del §10.2.
+
+**Sólo son históricas 8 tablas** (`trips`, `trip_log_entries`, `settlements`,
+`fuel_records`, `incidents`, `maintenance_orders`, `oea_inspections`, `checklists`). Los
+maestros —flota, choferes, legajos, documentos— quedan afuera a propósito: recortar la
+flota por antigüedad rompería el sistema, no limitaría un histórico.
+
+**El almacenamiento se valida ANTES de subir a S3.** Si se chequeara después, el archivo
+ya estaría ocupando lugar —y costando— aunque la operación terminara rechazada. El
+tamaño se mide después de comprimir, que es lo que realmente se guarda.
+
+**El contador de storage es incremental con reconciliación nocturna.** Contar todos los
+adjuntos en cada subida no escala; pero todo contador incremental se desvía, así que
+`StorageReconciliationService` corre a las 3 AM y lo corrige contra la suma real.
+Verificado: una deriva de 999.999.999 se corrigió a 2.048.
+
+#### Pendiente de Fase 4
+
+- **R4.1 sin resolver**: los reportes agregados (indicadores, panel) no declaran si
+  respetan la retención ni muestran el rango efectivo en el encabezado. Un cliente en
+  Control puede ver un «total de gastos» que en realidad es el de los últimos 6 meses,
+  sin que nada se lo aclare.
+- **R4.3 sin resolver**: al bajar de plan, el excedente (por ejemplo 8 reglas activas
+  en un plan de 3) no se desactiva por antigüedad. Hoy simplemente no se pueden crear
+  más. Corresponde a la Fase 5, junto con el downgrade.
+- El aviso de retención (`RetentionNotice.vue`) está en los cinco listados históricos,
+  pero **el botón lleva a `/upgrade/indicators`**, que no es la pantalla ideal: falta
+  una de «ampliar retención».
+- Sin tests automatizados de los límites: verificado a mano contra la API.
 
 ### Fase 3 — cómo quedó implementada
 
@@ -1003,7 +1054,7 @@ Los límites de `MODELO-COMERCIAL.md` §4.1 que no son "sí/no" sino "cuántos":
 | Límite | Control | Operación | Gestión | Corporate |
 |---|---|---|---|---|
 | Retención de histórico | 6 meses | 24 meses | 60 meses | Ilimitada |
-| Almacenamiento de adjuntos | 5 GB | 50 GB | 250 GB | Ilimitado |
+| Almacenamiento de adjuntos | 2 GB | 50 GB | 250 GB | Ilimitado |
 | Reglas de alerta activas | 3 | 10 | Ilimitadas | Ilimitadas |
 | Planes de mantenimiento activos | — | 10 | Ilimitados | Ilimitados |
 | Roles habilitados | 4 | 6 | 7 | A medida |
