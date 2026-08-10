@@ -41,7 +41,55 @@
 | **Fase 0 — Migraciones** | ✅ **Completa** | `migration:run` + `migration:revert` + `migration:run` sobre base limpia; `npm run build` OK |
 | **Fase 1 — Multi-tenant** | ✅ **Completa** | 31 tablas, 28 con `companyId NOT NULL`; app arranca sin errores; dos empresas pueden repetir patente |
 | **Fase 2 — Aislamiento** | ✅ **Completa** | Verificado contra la API con dos empresas y datos espejados (misma patente): cada una ve sólo lo suyo, lectura y escritura cruzadas dan 404, y el `companyId` se estampa solo al crear |
-| Fase 3 en adelante | ⬜ Pendiente | — |
+| **Fase 3 — Gating por plan** | ✅ **Completa** | Verificado contra la API: una empresa en Control recibe 403 en rendiciones, indicadores, combustible, mantenimiento, OEA y RRHH, y 200 en los módulos base. El cambio de plan en la base se refleja a los 60s sin re-login |
+| Fase 4 en adelante | ⬜ Pendiente | — |
+
+### Fase 3 — cómo quedó implementada
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Vocabulario | `common/enums/feature.enum.ts` | 26 features. El código **nunca** pregunta por `plan.code`. |
+| Catálogo | `database/migrations/…-SeedPlans.ts` | Los 4 planes con los precios de `MODELO-COMERCIAL.md` §3.2. Viven en la base para que el superadmin los edite sin deploy (D8). |
+| Resolución | `plans/plan-context.service.ts` | Consulta a la base con caché de 60s. El plan **no** va en el JWT: el token dura un día y dejaría la situación comercial congelada. |
+| Guard | `auth/guard/feature.guard.ts` | Devuelve 403 con `feature` y `currentPlan` en el cuerpo, para que el front ofrezca el upgrade correcto. |
+| Sesión | `GET /auth/session` | Empresa, plan, features y límites vigentes. |
+
+**Decisión de implementación**: en vez de anotar método por método, `FeatureGuard`
+entró **dentro de `Auth()`** y la feature se declara una vez por controlador con
+`@RequiresFeature()`. El motivo es el orden de guards de Nest: los de clase corren
+*antes* que los de método, así que un `@UseGuards(FeatureGuard)` a nivel de
+controlador se habría ejecutado antes que `AuthGuard` y no habría tenido
+`request.user`. Al ir dentro de `Auth()` queda después de la autenticación, y no hay
+riesgo de que un método nuevo se olvide del gating.
+
+**En el guard de feature el ADMIN no tiene privilegio**, a diferencia del de roles: el
+plan es un límite comercial de la empresa, no un permiso del usuario.
+
+#### R3.1 confirmado y corregido
+
+El panel filtraba datos fuera del plan: `getOverview` devolvía `todayExpenses` y
+`upcomingMaintenance` —bitácora y mantenimiento, ambos de Operación— a cualquier
+empresa, porque esos datos no llegan por el endpoint del módulo sino agregados. Ahora
+`DashboardService` recorta según features y **ni siquiera ejecuta la consulta**;
+devuelve `null` en lugar de `0`, para que el front muestre candado y no un importe en
+cero, que sería engañoso.
+
+#### Front
+
+`useFeatures()` + `authStore.fetchSession()` con ventana de 60s alineada con la caché
+del backend. El sidebar usa el campo que ya existía declarado sin uso: `plan?: string`
+pasó a `feature?: Feature`. Los ítems bloqueados **no se ocultan**: se ven al 45% de
+opacidad, con candado, y linkean a `/upgrade/<feature>`, que explica qué incluye y con
+qué plan viene (MODELO-COMERCIAL §6.2). El texto de venta de cada módulo vive en
+`types/plan.ts` (`FEATURE_INFO`).
+
+#### Pendiente de Fase 3
+
+- El botón «Quiero activarlo» de la pantalla de upgrade lleva a contacto: el cambio de
+  plan autogestionado es de la Fase 5 (facturación).
+- Los endpoints de exportación a Excel de `trips` y `documents` todavía **no** exigen
+  `EXPORT_EXCEL`; sólo están gateados los módulos completos.
+- Falta un test automatizado del gating (hoy verificado a mano contra la API).
 
 ### Fase 2 — cómo quedó implementada
 

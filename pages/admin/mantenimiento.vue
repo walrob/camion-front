@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
@@ -9,6 +10,7 @@ import MaintenanceOrderDialog from "~/components/maintenance/MaintenanceOrderDia
 import ModalConfirm from "~/components/modal/Confirm.vue";
 
 definePageMeta({
+  feature: Feature.MAINTENANCE,
   layout: "admin",
   roles: ["admin", "maintenance", "manager"],
 });

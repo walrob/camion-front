@@ -42,4 +42,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo(home)
     }
   }
+
+  // Plan de la empresa: se refresca con ventana de 60s, así que un cambio de
+  // plan se ve sin volver a entrar.
+  await authStore.fetchSession()
+
+  // Funcionalidad exigida por la página. Si el plan no la incluye se va a la
+  // pantalla que explica qué incluye y cómo activarla, NO a un 403: el objetivo
+  // es vender el upgrade, no dar un error.
+  const featurePage = to.meta.feature as string | undefined
+  if (featurePage && !authStore.features.includes(featurePage)) {
+    return navigateTo(`/upgrade/${featurePage}`)
+  }
 })

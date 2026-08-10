@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import { onMounted, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import PageHeader from "~/components/shared/PageHeader.vue";
@@ -10,6 +11,7 @@ import ChartDetailDialog from "~/components/dashboard/ChartDetailDialog.vue";
 import { useFuelStore } from "~/stores/fuel";
 
 definePageMeta({
+  feature: Feature.FUEL,
   layout: "admin",
   roles: ["admin", "manager", "dispatcher", "maintenance", "auditor"],
 });

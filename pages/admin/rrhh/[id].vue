@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import { ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useHrStore } from "~/stores/hr";
@@ -17,6 +18,7 @@ import type {
 } from "~/types/hr";
 
 definePageMeta({
+  feature: Feature.HR_BASIC,
   layout: "admin",
   roles: ["admin", "hr", "manager", "dispatcher"],
 });

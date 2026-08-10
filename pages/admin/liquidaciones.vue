@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
@@ -10,6 +11,7 @@ import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Settlement } from "~/types/trip";
 
 definePageMeta({
+  feature: Feature.SETTLEMENTS,
   layout: "admin",
   roles: ["admin", "manager", "auditor"],
 });

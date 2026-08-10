@@ -15,6 +15,7 @@ import {
   ClipboardCheckIcon,
 } from "vue-tabler-icons";
 import { Role } from "~/types/enums";
+import { Feature } from "~/types/plan";
 
 export interface menu {
   header?: string;
@@ -31,7 +32,13 @@ export interface menu {
   subCaption?: string;
   external?: boolean;
   roles?: string[];
-  plan?: string;
+  /**
+   * Feature del plan que habilita el ítem. Si el plan no la incluye, el ítem
+   * NO se oculta: se muestra en gris con candado y linkea a la pantalla de
+   * upgrade. Es una decisión comercial explícita (MODELO-COMERCIAL §6.2): el
+   * cliente tiene que ver todos los días lo que le falta.
+   */
+  feature?: Feature;
 }
 
 // Menú del backoffice de flota, agrupado por dominio de uso diario:
@@ -49,6 +56,7 @@ const sidebarItem: menu[] = [
     title: "Indicadores",
     icon: ChartBarIcon,
     to: "/admin/indicadores",
+    feature: Feature.INDICATORS,
     roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
   },
 
@@ -89,12 +97,14 @@ const sidebarItem: menu[] = [
     title: "Mantenimiento",
     icon: ToolIcon,
     to: "/admin/mantenimiento",
+    feature: Feature.MAINTENANCE,
     roles: [Role.ADMIN, Role.MAINTENANCE, Role.MANAGER],
   },
   {
     title: "Combustible",
     icon: GasStationIcon,
     to: "/admin/combustible",
+    feature: Feature.FUEL,
     roles: [
       Role.ADMIN,
       Role.MANAGER,
@@ -115,6 +125,7 @@ const sidebarItem: menu[] = [
     title: "RRHH",
     icon: IdIcon,
     to: "/admin/rrhh",
+    feature: Feature.HR_BASIC,
     roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER],
   },
   {
@@ -129,12 +140,14 @@ const sidebarItem: menu[] = [
     title: "Rendiciones",
     icon: ReceiptIcon,
     to: "/admin/liquidaciones",
+    feature: Feature.SETTLEMENTS,
     roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
   },
   {
     title: "Planillas OEA",
     icon: ClipboardCheckIcon,
     to: "/admin/oea",
+    feature: Feature.OEA,
     roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.AUDITOR],
   },
 ];

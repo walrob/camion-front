@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
 import ReportFilters from "~/components/shared/ReportFilters.vue";
@@ -9,6 +10,7 @@ import { storeToRefs } from "pinia";
 import { useIndicatorStore } from "~/stores/indicator";
 
 definePageMeta({
+  feature: Feature.INDICATORS,
   layout: "admin",
   roles: ["admin", "manager", "auditor"],
 });

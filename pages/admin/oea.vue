@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import PageHeader from "~/components/shared/PageHeader.vue";
@@ -10,6 +11,7 @@ import { useOeaStore } from "~/stores/oea";
 import { useOea, oeaResultOptions } from "~/composables/useOea";
 
 definePageMeta({
+  feature: Feature.OEA,
   layout: "admin",
   roles: ["admin", "manager", "dispatcher", "auditor"],
 });

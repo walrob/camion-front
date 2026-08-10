@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Feature } from "~/types/plan";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
@@ -17,6 +18,7 @@ import ModalConfirm from "~/components/modal/Confirm.vue";
 import type { Employee } from "~/types/hr";
 
 definePageMeta({
+  feature: Feature.HR_BASIC,
   layout: "admin",
   roles: ["admin", "hr", "manager", "dispatcher"],
 });
