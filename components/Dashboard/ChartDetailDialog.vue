@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ApexChartType } from "~/types/vuetify";
 // Modal de gráfico ampliado. Sirve a los dos casos: el gráfico recortado que al
 // abrirse trae el conjunto completo desde el backend (por eso el `loading`
 // propio) y el que simplemente se ve más grande.
@@ -13,7 +14,9 @@ const props = withDefaults(
     series: any[];
     options: any;
     /** Tipo de ApexCharts: bar, donut, line, area… */
-    type?: string;
+    /** Tipo de gráfico de ApexCharts. Tiparlo como `string` dejaba pasar
+     * valores que la librería rechaza en tiempo de ejecución. */
+    type?: ApexChartType;
     height?: number;
     loading?: boolean;
     emptyText?: string;

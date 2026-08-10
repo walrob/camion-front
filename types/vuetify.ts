@@ -44,3 +44,29 @@ export type CalendarType =
   | "4day"
   | "custom-daily"
   | "custom-weekly";
+
+/**
+ * Tipos de gráfico que acepta ApexCharts.
+ *
+ * Se declara acá porque las props de los componentes de gráfico estaban
+ * tipadas como `string`, lo que dejaba pasar valores que la librería rechaza
+ * recién en tiempo de ejecución.
+ */
+export type ApexChartType =
+  | 'line'
+  | 'area'
+  | 'bar'
+  | 'pie'
+  | 'donut'
+  | 'radialBar'
+  | 'scatter'
+  | 'bubble'
+  | 'heatmap'
+  | 'candlestick'
+  | 'boxPlot'
+  | 'violin'
+  | 'radar'
+  | 'polarArea'
+  | 'rangeBar'
+  | 'rangeArea'
+  | 'treemap';

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Anchor } from "vuetify";
 import { computed, useAttrs } from "vue";
 
 // Botón de solo ícono con tooltip descriptivo. Envuelve un v-btn en un v-tooltip
@@ -15,7 +16,7 @@ const props = withDefaults(
      * Ubicación del tooltip. Se llama `tooltipLocation` (no `location`) para no
      * chocar con el prop `location` del v-btn, que se reenvía tal cual.
      */
-    tooltipLocation?: string;
+    tooltipLocation?: Anchor;
   }>(),
   { tooltipLocation: "top" },
 );

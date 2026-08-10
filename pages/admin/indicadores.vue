@@ -21,6 +21,7 @@ const { summary, loading, truckOptions, driverOptions, fleetOptions } =
   storeToRefs(store);
 
 const { money, num } = useFormatters();
+const { limite } = useFeatures();
 const { barOptions } = useBarChart();
 
 const kpis = computed(() => {
@@ -159,6 +160,35 @@ onMounted(async () => {
       show-fleet
       @apply="store.getSummary()"
     />
+
+    <!--
+      Riesgo R4.1: si el plan recorta el histórico, los totales de abajo cubren
+      menos de lo pedido. Mostrarlo es obligatorio: un "gasto total" que en
+      realidad es el de los últimos 6 meses, sin aclararlo, es un dato erróneo.
+    -->
+    <v-alert
+      v-if="summary?.coverage?.truncatedByPlan"
+      variant="tonal"
+      density="compact"
+      color="warning"
+      class="mb-3"
+      rounded="lg"
+    >
+      <div class="d-flex align-center flex-wrap ga-2">
+        <v-icon size="18">mdi-alert-outline</v-icon>
+        <span class="text-body-2">
+          Estos números cubren desde el
+          <strong>{{ summary.coverage.from }}</strong
+          >: tu plan muestra los últimos
+          {{ limite("retentionMonths") }} meses. Los datos anteriores siguen
+          guardados.
+        </span>
+        <v-spacer />
+        <v-btn size="small" variant="text" color="warning" to="/upgrade/indicators">
+          Ampliar histórico
+        </v-btn>
+      </div>
+    </v-alert>
 
     <!-- Carga inicial -->
     <div v-if="loading && !summary" class="d-flex justify-center my-8">

@@ -10,6 +10,11 @@ export enum Role {
 
 export type Priority = 'baja' | 'normal' | 'alta' | 'urgente'
 
+/** Respuesta de un diálogo de confirmación (`ModalConfirm`). */
+export interface ResponseConfirm {
+  resp: boolean
+}
+
 export interface Snackbar {
   color: string
   timeout?: number

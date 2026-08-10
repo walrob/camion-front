@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ApexChartType } from "~/types/vuetify";
 // Card de gráfico de los tableros: título + subtítulo opcional, botón para
 // ampliar y el gráfico ApexCharts —diferido y envuelto en <ClientOnly>— con su
 // estado de "sin datos".
@@ -25,7 +26,9 @@ const props = withDefaults(
     series: any[];
     options: any;
     /** Tipo de ApexCharts: bar, donut, line, area… */
-    type?: string;
+    /** Tipo de gráfico de ApexCharts. Tiparlo como `string` dejaba pasar
+     * valores que la librería rechaza en tiempo de ejecución. */
+    type?: ApexChartType;
     height?: number | string;
     /** El padre tiene el conjunto completo y abre su propio modal al expandir. */
     hasFullDetail?: boolean;

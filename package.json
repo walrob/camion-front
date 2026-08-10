@@ -10,7 +10,8 @@
     "start:prod": "cross-env NODE_ENV=production PORT=3002 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^1.4.1",
@@ -18,7 +19,9 @@
     "@types/node": "^25.0.7",
     "cross-env": "^10.0.0",
     "nuxt": "3.16.2",
-    "pinia": "^3.0.3"
+    "pinia": "^3.0.3",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.9"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.4",

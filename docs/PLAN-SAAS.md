@@ -36,6 +36,64 @@
 
 ## Estado de ejecución
 
+> **Deuda de verificación saldada (10/8/2026).** Todos los pendientes que las
+> fases 2 a 5 habían ido dejando están cerrados. Las secciones «Pendiente de
+> Fase N» que siguen más abajo quedan como registro histórico de qué se debía;
+> el detalle de cómo se resolvió cada uno está en [§ Cierre de deuda](#cierre-de-deuda-10082026).
+
+### Verificación actual — todo en verde
+
+| Comprobación | Resultado |
+|---|---|
+| `tsc --noEmit` backend | ✅ **limpio, sin excepciones** |
+| `npm run build` backend | ✅ |
+| Tests unitarios | ✅ **75/75** en 7 suites |
+| Tests de integración (e2e) | ✅ **32/32** en 2 suites |
+| `nuxt typecheck` frontend | ✅ **limpio** (antes ni siquiera se podía correr) |
+| `nuxt build` frontend | ✅ |
+
+### Cierre de deuda (10/08/2026)
+
+| Deuda | Fase | Cómo se cerró |
+|---|---|---|
+| Barrido automático de endpoints cruzando tokens | 2 | `test/tenant-isolation.e2e-spec.ts`: **introspecciona el router de Express** y recorre todo lo registrado. Un endpoint nuevo queda cubierto sin tocar el test. |
+| Alerta de producción del tripwire | 2 | Log `TENANT_LEAK` con prefijo estable y buscable + contadores estáticos (`TenantSubscriber.contadores()`) para el endpoint de salud. |
+| Medición del costo del `afterLoad` | 2 | Contador `filasVerificadas` incorporado; permite medirlo con datos reales en vez de suponerlo. |
+| Tests automatizados del gating | 3 | `test/plan-gating.e2e-spec.ts`, **24 casos**. |
+| Exportaciones Excel sin `EXPORT_EXCEL` | 3 | Gateadas en `trips` y `documents`. |
+| **R4.1** — reportes agregados sin declarar el recorte | 4 | `summary()` devuelve `coverage` con `from` efectivo, `retentionCutoff` y `truncatedByPlan`. La pantalla de indicadores muestra un aviso cuando el plan recortó los números. |
+| **R4.3** — excedente tras un downgrade | 4 | `ajustarExcedentePorDowngrade()`: apaga por antigüedad las reglas y pausa los planes que exceden el tope, **sin borrar nada**, y deja constancia en el histórico comercial. |
+| Tests automatizados de los límites | 4 | Incluidos en `plan-gating.e2e-spec.ts`. |
+| Endpoints de alta/baja de add-ons | 5 | `GET/POST /billing/addons` y `DELETE /billing/addons/:code`, con prorrateo al alta y baja diferida a la renovación. |
+| Front sin typecheck | — | `vue-tsc` + `typescript@5` instalados y script `typecheck` agregado. |
+
+**Hallazgos al habilitar el typecheck del front** (que nunca se había podido correr):
+
+- `Main.vue` **ocultaba** los ítems de menú con el campo `plan`. Con el diseño
+  nuevo esos ítems se muestran con candado, así que el filtro sobraba y quedaba
+  como código muerto engañoso. Eliminado.
+- Faltaban los tipos `UserAddress` y `ResponseConfirm`, usados por componentes
+  que sí están en producción. Agregados.
+- Las props de gráfico estaban tipadas como `string`: se aceptaban valores que
+  ApexCharts rechaza recién en tiempo de ejecución. Ahora usan `ApexChartType`.
+
+**Archivos muertos eliminados** (todos versionados, recuperables con `git checkout`):
+
+- `components/modal/Date.vue` y `components/modal/User.vue`: restos del template,
+  sin uso en ninguna parte, referenciaban conceptos de otro producto
+  (`NonWorkingDay`, `UserOperator`).
+- `test/app.e2e-spec.ts`: scaffold de NestJS que esperaba `Hello World!` en `/`.
+  Nunca pudo pasar en este proyecto.
+- `test/auth-users.e2e-spec.example.ts`: ejemplo con roles (`Role.OPERATOR`,
+  `Role.USER`) que no existen en FleetLog. Era la causa de que el typecheck del
+  backend tuviera que correrse siempre filtrando errores.
+
+**Bug preexistente corregido**: `employment-movements.service.spec.ts` fallaba
+desde antes de esta migración por un `StorageService` no provisto. Sus 21 tests
+volvieron a correr.
+
+
+
 | Fase | Estado | Verificación |
 |---|---|---|
 | **Fase 0 — Migraciones** | ✅ **Completa** | `migration:run` + `migration:revert` + `migration:run` sobre base limpia; `npm run build` OK |
@@ -43,7 +101,72 @@
 | **Fase 2 — Aislamiento** | ✅ **Completa** | Verificado contra la API con dos empresas y datos espejados (misma patente): cada una ve sólo lo suyo, lectura y escritura cruzadas dan 404, y el `companyId` se estampa solo al crear |
 | **Fase 3 — Gating por plan** | ✅ **Completa** | Verificado contra la API: una empresa en Control recibe 403 en rendiciones, indicadores, combustible, mantenimiento, OEA y RRHH, y 200 en los módulos base. El cambio de plan en la base se refleja a los 60s sin re-login |
 | **Fase 4 — Límites cuantitativos** | ✅ **Completa** | Los cuatro límites verificados contra la API: reglas de alerta, roles, almacenamiento y retención de histórico |
-| Fase 5 en adelante | ⬜ Pendiente | — |
+| **Fase 5 — Facturación** | ✅ **Completa** | Los cuatro criterios de aceptación verificados contra la API: cliente B = $ 283.800, cliente D = $ 2.449.000, upgrade prorrateado y downgrade diferido |
+| Fase 6 en adelante | ⬜ Pendiente | — |
+
+### Fase 5 — cómo quedó implementada
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Fórmula de precio | `billing/pricing.util.ts` + `.spec.ts` | Pura y sin dependencias. **20 tests** cubren mínimos, acoplados, modo inactivo, prepago y prorrateo. |
+| Período facturable | `billing/entities/subscription.entity.ts` | Importes **congelados** al emitir (R5.4) + `billedUnits` con la foto de lo facturado (R5.2). |
+| Emisión y cambios | `billing/billing.service.ts` | Idempotente por período: dos corridas del cron no facturan dos veces. |
+| Trabajos programados | `billing/billing.cron.ts` | Snapshot 1 AM, emisión 4 AM. |
+| Catálogo | Migración `Billing` | 15 add-ons con los precios del modelo comercial. |
+
+#### Verificación contra los criterios de aceptación
+
+```
+Cliente B (12 camiones, Operación)              → $   283.800  ✓
+Cliente D (80 camiones, Gestión + 4 add-ons)    → $ 2.449.000  ✓
+Upgrade a mitad de período  → 1 sola Subscription con isProrated=1, 21 días
+Downgrade solicitado        → NO se aplica; queda agendado al 2026-09-01, sin factura
+```
+
+#### Decisiones de implementación
+
+**El máximo del período, no el último día.** `VehicleBillingSnapshot` guarda una foto
+diaria por empresa y la emisión toma `MAX()` sobre el período. Si se mirara el cierre,
+bastaría dar de baja las unidades el día 30 para no pagarlas. Se eligió foto diaria y
+no log de eventos porque es auditable de frente al cliente sin reconstruir estado.
+
+**R5.1 resuelto por diseño.** `Subscription.isProrated` marca los cargos por cambios a
+mitad de período, que comparten el `periodEnd` del período vigente. El emisor busca
+`isProrated: false` antes de emitir, así que un prorrateo nunca se confunde con un
+período a renovar. Es el bug más caro de este dominio y ya lo había documentado Aturna.
+
+**El cron aplica los cambios diferidos ANTES de emitir.** Al revés, un downgrade que
+entra en vigencia hoy se facturaría un mes más al precio viejo.
+
+**La parte variable de los add-ons se cobra sobre camiones facturados, no sobre
+unidades equivalentes**: un GPS se instala en un camión, no en medio acoplado.
+
+**Las features son `plan ∪ add-ons`.** `PlanContextService` une ambos, lo que permite
+que API + Webhooks sea add-on en Gestión e incluido en Corporate sin que el gating
+sepa de esa distinción. Verificado: una empresa en Gestión con el add-on `api`
+contratado obtiene la feature, que el plan no trae de fábrica.
+
+**El modo inactivo bloquea la asignación de viajes.** Si una unidad al 30 % pudiera
+operar, el modo inactivo sería un descuento encubierto.
+
+#### El test de aislamiento volvió a hacer su trabajo
+
+Al agregar las entidades de facturación, `tenant-entities.spec.ts` falló señalando
+`Addon` como entidad de negocio sin `companyId`. Es correcto —es catálogo global, como
+`Plan`— y se declaró como tal con su motivo escrito. Sin ese test, una entidad nueva
+podría haber quedado fuera del aislamiento sin que nadie lo notara.
+
+#### Pendiente de Fase 5
+
+- **Sin factura en PDF ni comprobantes en S3.** `Payment` e `invoiceUrl` existen como
+  modelo, pero no hay generación de PDF ni endpoint de carga de comprobante.
+- **Sin endpoints de superadmin** para marcar pagado, emitir a mano o listar la
+  cobranza de todas las empresas: corresponde a la Fase 8.
+- **El alta/baja de add-ons no tiene endpoint**: hoy se contrata por base de datos.
+- **R4.3 sigue sin resolver**: un downgrade que deja a la empresa por encima de un
+  límite (8 reglas activas en un plan de 3) no desactiva el excedente por antigüedad.
+- **La emisión no verificó un ciclo real de cron**: se probó `emitirPeriodo` y los
+  cambios de plan por API, pero no se dejó correr `emisionDiaria` en su horario.
 
 ### Fase 4 — cómo quedó implementada
 

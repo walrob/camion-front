@@ -6,6 +6,7 @@ import {
   persistSet,
 } from '~/composables/usePersist'
 import { Role } from '~/types/enums'
+import type { Company, PlanLimits } from '~/types/plan'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

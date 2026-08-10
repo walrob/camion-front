@@ -82,9 +82,13 @@ const toggleTheme = async () => {
 
 const filterSidebarMenu = computed(() => {
   if (!user?.role) return [];
-  const visible = sidebarMenu.value
-    .filter((x) => !x.roles || x.roles.includes(user.role!))
-    .filter((x) => !x.plan);
+  // Sólo se filtra por ROL. Los ítems que el plan no incluye **no se ocultan**:
+  // los muestra `NavItem` en gris con candado y llevan a la pantalla de upgrade.
+  // Es una decisión comercial explícita (MODELO-COMERCIAL §6.2): el cliente
+  // tiene que ver todos los días lo que le falta.
+  const visible = sidebarMenu.value.filter(
+    (x) => !x.roles || x.roles.includes(user.role!),
+  );
   // Descarta headers de secciones que quedaron sin ítems visibles para el rol,
   // para no mostrar títulos de sección huérfanos.
   return visible.filter((item, i) => {
