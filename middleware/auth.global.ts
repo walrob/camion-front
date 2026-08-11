@@ -1,7 +1,15 @@
 import { defineNuxtRouteMiddleware, navigateTo } from 'nuxt/app'
 import { useAuthStore } from '@/stores/auth'
 
-const publicRoutes = ['/auth/login', '/auth/forgot-password', '/auth/reset-password']
+const publicRoutes = [
+  '/auth/login',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  // Alta de empresa y aceptación de invitación: las usa gente que todavía no
+  // tiene cuenta, así que por definición no pueden exigir sesión.
+  '/auth/registro-empresa',
+  '/invite',
+]
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const authStore = useAuthStore()
@@ -46,6 +54,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Plan de la empresa: se refresca con ventana de 60s, así que un cambio de
   // plan se ve sin volver a entrar.
   await authStore.fetchSession()
+
+  // Empresa recién creada: se la lleva por la carga inicial en vez de dejarla
+  // frente a un sistema vacío. No aplica al chofer, que entra por invitación a
+  // una empresa ya configurada.
+  const paso = authStore.company?.onboardingStep ?? 0
+  if (paso > 0 && !isDriver && !to.path.startsWith('/initial')) {
+    return navigateTo('/initial')
+  }
 
   // Funcionalidad exigida por la página. Si el plan no la incluye se va a la
   // pantalla que explica qué incluye y cómo activarla, NO a un 403: el objetivo

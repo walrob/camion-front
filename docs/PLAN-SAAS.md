@@ -102,7 +102,65 @@ volvieron a correr.
 | **Fase 3 — Gating por plan** | ✅ **Completa** | Verificado contra la API: una empresa en Control recibe 403 en rendiciones, indicadores, combustible, mantenimiento, OEA y RRHH, y 200 en los módulos base. El cambio de plan en la base se refleja a los 60s sin re-login |
 | **Fase 4 — Límites cuantitativos** | ✅ **Completa** | Los cuatro límites verificados contra la API: reglas de alerta, roles, almacenamiento y retención de histórico |
 | **Fase 5 — Facturación** | ✅ **Completa** | Los cuatro criterios de aceptación verificados contra la API: cliente B = $ 283.800, cliente D = $ 2.449.000, upgrade prorrateado y downgrade diferido |
-| Fase 6 en adelante | ⬜ Pendiente | — |
+| **Fase 6 — Onboarding y trial** | ✅ **Completa** | 15 tests de integración: alta pública, invitaciones y estados de cuenta |
+| Fase 7 en adelante | ⬜ Pendiente | — |
+
+### Fase 6 — cómo quedó implementada
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Alta pública | `companies/companies.service.ts` | Transaccional, en contexto de sistema (todavía no hay empresa). Throttle de 5 intentos cada 10 min por IP (R6.1). |
+| Invitaciones | `invites/` | Token de un solo uso, 7 días de validez. El rol se valida contra el plan al invitar **y** al aceptar. |
+| Estado de cuenta | `auth/guard/account-status.guard.ts` | Dentro de `Auth()`, se lee de la base y no del token. |
+| Vencimiento de trial | `companies/company-status.cron.ts` | 3 días de gracia antes de suspender. |
+| Front | `pages/auth/registro-empresa.vue`, `pages/invite/[token].vue`, `pages/initial/`, `pages/estado-plan/` | — |
+
+#### Decisiones de implementación
+
+**El trial es del plan Operación, no de Control** (§6.1). Quien probó rendiciones y el
+tablero de combustible durante tres semanas no compara Control contra nada: lo compara
+contra lo que ya tenía.
+
+**Después del alta se entra directo**, sin volver a pedir la contraseña recién creada.
+Lo mismo al aceptar una invitación.
+
+**`BLOCKED` es sólo lectura, no un corte total** (D6), y la facturación queda en lista
+blanca: dejar a alguien bloqueado sin manera de ver qué debe ni cómo pagar es la forma
+más segura de perderlo en vez de cobrarle.
+
+**El seed por empresa resultó innecesario.** El plan preveía sembrar reglas de alerta,
+ítems de checklist y la plantilla OEA. Al revisarlo, los tres ya son constantes del
+código con valor por defecto (`DEFAULT_THRESHOLDS`, `DEFAULT_CHECKLIST_ITEMS`,
+`DEFAULT_OEA_ITEMS`): una empresa nueva opera sin ninguna fila de configuración propia.
+No se construyó el `CompanySeedService` porque no habría hecho nada.
+
+**Los mensajes de rechazo de una invitación distinguen el motivo** —inexistente,
+vencida, ya usada—. Un invitado que ve «token inválido» no sabe si se equivocó de link
+o si tiene que pedir otro.
+
+#### Dos módulos más pasaron a `@Global()`
+
+`CompaniesModule`, por la misma razón que `PlansModule` en la fase 3: `AccountStatusGuard`
+se usa desde `Auth()`, que está en los controladores de todos los dominios, y Nest lo
+instancia en el contexto de cada uno. Sin eso habría que importarlo en los 20 módulos, y
+olvidarse en uno solo dejaría ese controlador sin control de estado de cuenta.
+
+#### El test de aislamiento volvió a atrapar algo
+
+Al agregar `Invite`, `tenant-entities.spec.ts` marcó `Invite.token` como único global.
+Es **correcto** —el token es la credencial y se resuelve antes de saber a qué empresa
+pertenece quien lo usa— y se admitió con su motivo escrito. Es la tercera vez que ese
+test paga su costo.
+
+#### Pendiente de Fase 6
+
+- **No se envía el mail de invitación**: el endpoint devuelve el token para compartirlo
+  a mano. El envío corresponde a la fase 9, junto con el resto de las notificaciones.
+- **Sin verificación de email en el alta**: hoy la cuenta queda activa de inmediato. El
+  plan lo listaba como mitigación de R6.1 junto con el throttle; el throttle está, la
+  verificación no.
+- **El onboarding guiado es de tres pasos con enlaces**, no formularios embebidos: no
+  hay importación de flota desde Excel ni carga de logo dentro del asistente.
 
 ### Fase 5 — cómo quedó implementada
 

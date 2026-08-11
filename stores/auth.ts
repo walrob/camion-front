@@ -23,6 +23,12 @@ export const useAuthStore = defineStore('auth', {
     plan: null as { code: string; name: string } | null,
     features: [] as string[],
     limits: null as PlanLimits | null,
+    /** Consumo y tope de almacenamiento, para avisar antes de chocar el límite. */
+    storage: null as {
+      usedBytes: number
+      maxGb: number | null
+      siguienteEscalonGb: number | null
+    } | null,
     /** Momento de la última lectura de la sesión, para no pedirla en cada ruta. */
     sessionFetchedAt: null as number | null,
   }),
@@ -72,6 +78,7 @@ export const useAuthStore = defineStore('auth', {
       this.plan = null
       this.features = []
       this.limits = null
+      this.storage = null
       this.sessionFetchedAt = null
       await persistRemove('token')
       await persistRemove('expiresAt')
@@ -104,6 +111,7 @@ export const useAuthStore = defineStore('auth', {
         this.plan = data?.plan ?? null
         this.features = data?.features ?? []
         this.limits = data?.limits ?? null
+        this.storage = data?.storage ?? null
         this.sessionFetchedAt = Date.now()
         await persistSet(
           'session',

@@ -58,6 +58,8 @@ export interface Company {
   trialEndsAt?: string | null
   logoUrl?: string | null
   primaryColor?: string | null
+  /** Paso pendiente del onboarding guiado. `0` = terminado. */
+  onboardingStep?: number
 }
 
 /**
