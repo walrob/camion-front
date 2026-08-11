@@ -173,7 +173,8 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: "blank",
+  // Layout público: llevan la barra y el pie de la landing.
+  layout: "public",
 });
 
 useHead({

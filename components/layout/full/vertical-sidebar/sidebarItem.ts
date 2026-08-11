@@ -49,7 +49,7 @@ const sidebarItem: menu[] = [
   {
     title: "Panel",
     icon: LayoutDashboardIcon,
-    to: "/",
+    to: "/admin",
     external: false,
   },
   {

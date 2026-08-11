@@ -103,7 +103,87 @@ volvieron a correr.
 | **Fase 4 — Límites cuantitativos** | ✅ **Completa** | Los cuatro límites verificados contra la API: reglas de alerta, roles, almacenamiento y retención de histórico |
 | **Fase 5 — Facturación** | ✅ **Completa** | Los cuatro criterios de aceptación verificados contra la API: cliente B = $ 283.800, cliente D = $ 2.449.000, upgrade prorrateado y downgrade diferido |
 | **Fase 6 — Onboarding y trial** | ✅ **Completa** | 15 tests de integración: alta pública, invitaciones y estados de cuenta |
-| Fase 7 en adelante | ⬜ Pendiente | — |
+| **Fase 7 — Landing pública** | ✅ **Completa** | Landing en `/`, panel en `/admin`, 24 tests protegiendo R7.1, meta OG verificadas en el HTML servido |
+| Fase 8 en adelante | ⬜ Pendiente | — |
+
+### Fase 7 — cómo quedó implementada
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Rutas públicas | `composables/useRutasPublicas.ts` + `.spec.ts` | Extraído del middleware **para poder testearlo**: es la pieza donde un error deja todo el sistema abierto. |
+| Landing | `pages/index.vue` | Textos del modelo comercial: los tres dolores (§4.3), el diferencial (§8.3) y los precios (§3.2). Con calculadora en vivo. |
+| Layout público | `layouts/public.vue` | Sin sidebar, sin sockets, sin stores del backoffice (R7.4). |
+| Precios | `GET /plans/public` | Público, sólo `isPublic`. Cambiar un precio en la base actualiza la landing sin deploy (D8). |
+| Panel | `pages/admin/index.vue` | Movido desde `pages/index.vue`; el sidebar y el `home` del middleware apuntan a `/admin`. |
+
+#### R7.1 resuelto y blindado
+
+La raíz `/` se compara **por igualdad exacta**; el resto de las rutas públicas, por
+prefijo con separador (`/invite/` y no `/invite`), para que `/invitados` no se cuele.
+Hay **24 tests** que lo verifican, incluido un barrido de rutas privadas y los casos de
+prefijo parecido. Si alguien vuelve a poner `/` en la lista de prefijos, caen.
+
+#### R7.2: se corrigió el manifest, y hacía falta algo más
+
+`site.webmanifest` no tenía `start_url`, así que la PWA instalada arrancaba en `/` —que
+ahora es la landing—. Se corrigió (`start_url: "/chofer"`), y además se agregaron el
+`name`, el `short_name` y el `theme_color`, que estaban vacíos o no coincidían con el
+tema.
+
+Pero **el manifest queda cacheado en los dispositivos que ya instalaron la app**, así
+que ese arreglo no llega solo a quien ya la tiene. Por eso hay también un plugin de
+cliente (`plugins/app-arranque.client.ts`) que detecta modo standalone o Capacitor y
+desvía `/` a `/chofer`. Es lo único que funciona para un manifest ya cacheado.
+
+> **Verificado antes de tocar el arranque**, como pedía el plan: **no hay proyecto
+> nativo en el repositorio** (ni `capacitor.config.*`, ni `android/`, ni `ios/`). El uso
+> es PWA y `@capacitor/preferences` como almacenamiento. El plugin cubre igual el caso
+> nativo para cuando se compile.
+
+#### Hallazgo: el prerender NO resuelve el SEO con `ssr: false`
+
+El plan proponía `nitro.prerender.routes` para tener HTML estático de la landing. Se
+configuró y **pre-renderiza las 3 rutas**, pero al inspeccionar el resultado el
+`index.html` pesa 2,6 KB y **no contiene ni el contenido ni las meta tags de la
+página**: con `ssr: false` el pre-renderizado produce el shell de la SPA sin ejecutar el
+`<script setup>`, así que `useSeoMeta` nunca corre.
+
+Como WhatsApp y LinkedIn no ejecutan JS, las previsualizaciones habrían seguido rotas
+—que es justamente el criterio de aceptación—. **La solución fue poner las meta OG y
+Twitter en `app.head` de `nuxt.config.ts`**, que sí llegan al HTML servido. Verificado
+sobre el build:
+
+```
+<meta property="og:title" content="FleetLog — Gestión de flotas para transporte de carga">
+<meta property="og:description" content="Rendiciones que se arman solas, …">
+<meta property="og:image" content="/og-fleetlog.png">
+<meta name="twitter:card" content="summary_large_image">
+```
+
+La contra es que **todas las rutas comparten la misma tarjeta**. Es aceptable —nadie
+comparte `/admin/viajes`— pero tener tarjetas por página exigiría renderizado híbrido
+(`ssr: true` global + `routeRules` con `ssr: false` para las rutas de la app), que es un
+cambio de arquitectura con riesgo real sobre la autenticación en localStorage.
+
+#### El barrido de aislamiento volvió a atrapar algo
+
+Al publicar `GET /plans/public`, el test «sin token, ninguna ruta privada devuelve
+datos» falló. Era **correcto**: la ruta es pública a propósito. Se agregó una lista
+`PUBLICAS_DECLARADAS` con el motivo escrito, más un test nuevo que verifica que esas
+rutas públicas **no filtren identificadores de ninguna empresa**. Ahora cada endpoint
+abierto a internet es una decisión declarada, no un descuido.
+
+#### Pendiente de Fase 7
+
+- **Falta la imagen `public/og-fleetlog.png`**: las meta la referencian pero el archivo
+  no existe. Sin ella la previsualización sale sin imagen.
+- **Sin Lighthouse**: no se midió el SEO ≥ 90 del criterio de aceptación.
+- **Sin prueba en un dispositivo real** con la PWA ya instalada, que es el caso difícil
+  de R7.2 (manifest cacheado).
+- **No hay landings por segmento** (`/para-transportistas`) ni página `/planes`
+  independiente: los planes viven como sección de la landing.
+- El dominio de `robots.txt` y `sitemap.xml` está puesto como
+  `www.fleetlog.com.ar`: hay que confirmarlo antes de publicar.
 
 ### Fase 6 — cómo quedó implementada
 

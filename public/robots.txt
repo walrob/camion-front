@@ -1,6 +1,17 @@
+# FleetLog — reglas de rastreo
 User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /auth/
+Allow: /$
+Allow: /politica-de-privacidad
+Allow: /terminos-y-condiciones
 
-Sitemap: https://www.supernatu.com.ar/sitemap.xml
+# El sistema de gestión no se indexa: son pantallas privadas y sin valor de
+# búsqueda, y aparecer en Google sólo genera intentos de acceso.
+Disallow: /admin
+Disallow: /chofer
+Disallow: /auth
+Disallow: /invite
+Disallow: /initial
+Disallow: /estado-plan
+Disallow: /upgrade
+
+Sitemap: https://www.fleetlog.com.ar/sitemap.xml

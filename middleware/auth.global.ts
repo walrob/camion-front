@@ -1,54 +1,62 @@
 import { defineNuxtRouteMiddleware, navigateTo } from 'nuxt/app'
 import { useAuthStore } from '@/stores/auth'
+import { esRutaPublica } from '@/composables/useRutasPublicas'
 
-const publicRoutes = [
-  '/auth/login',
-  '/auth/forgot-password',
-  '/auth/reset-password',
-  // Alta de empresa y aceptación de invitación: las usa gente que todavía no
-  // tiene cuenta, así que por definición no pueden exigir sesión.
-  '/auth/registro-empresa',
-  '/invite',
-]
-
+/**
+ * Encaminamiento y control de acceso de todo el front.
+ *
+ * Orden de decisiones, que importa:
+ *
+ *   1. Chofer autenticado → siempre a `/chofer`, incluso desde la landing.
+ *   2. Ruta pública → pasa sin sesión.
+ *   3. Sin sesión en ruta privada → login.
+ *   4. Encaminamiento por rol, roles de página, onboarding y plan.
+ */
 export default defineNuxtRouteMiddleware(async (to) => {
   const authStore = useAuthStore()
   await authStore.loadAuth()
 
-  const isPublic = publicRoutes.some((r) => to.path.startsWith(r))
   const userRole = authStore.user?.role || ''
   const isDriver = userRole === 'driver'
-  const home = isDriver ? '/chofer' : '/'
+  const autenticado = !!authStore.token
 
-  // Si la ruta es pública y el usuario ya está autenticado, redirigir a su home por rol
-  if (isPublic && authStore.token) {
-    return navigateTo(home)
+  // El backoffice ya no vive en `/`: ahí está la landing pública.
+  const home = isDriver ? '/chofer' : '/admin'
+
+  const publica = esRutaPublica(to.path)
+
+  // 1) El chofer nunca ve la landing: su app arranca en `/` cuando se instala
+  //    como PWA, así que si cae ahí autenticado se lo lleva a su pantalla.
+  if (autenticado && isDriver && !to.path.startsWith('/chofer')) {
+    return navigateTo('/chofer')
   }
 
-  // Si la ruta es pública, dejar pasar
-  if (isPublic) {
+  // 2) Rutas públicas. A diferencia de antes, un usuario autenticado **no** es
+  //    expulsado de la landing: puede querer ver precios o compartirla. Sólo se
+  //    lo redirige desde las pantallas de acceso, donde quedarse no tiene
+  //    sentido.
+  if (publica) {
+    const esPantallaDeAcceso =
+      to.path.startsWith('/auth/') || to.path.startsWith('/invite')
+    if (autenticado && esPantallaDeAcceso) {
+      return navigateTo(home)
+    }
     return
   }
 
-  // Si no está autenticado en ruta privada, redirigir a login
-  if (!authStore.token) {
+  // 3) Ruta privada sin sesión.
+  if (!autenticado) {
     return navigateTo('/auth/login')
   }
 
-  // Encaminar por rol: el chofer vive en /chofer (app móvil); el resto en el backoffice.
-  if (isDriver && !to.path.startsWith('/chofer')) {
-    return navigateTo('/chofer')
-  }
+  // 4) Encaminamiento por rol.
   if (!isDriver && to.path.startsWith('/chofer')) {
-    return navigateTo('/')
+    return navigateTo(home)
   }
 
-  // Si está autenticado, verificar roles requeridos por la página
   const rolesPage = to.meta.roles as string[] | undefined
-  if (rolesPage && rolesPage.length > 0) {
-    if (!rolesPage.includes(userRole)) {
-      return navigateTo(home)
-    }
+  if (rolesPage && rolesPage.length > 0 && !rolesPage.includes(userRole)) {
+    return navigateTo(home)
   }
 
   // Plan de la empresa: se refresca con ventana de 60s, así que un cambio de
