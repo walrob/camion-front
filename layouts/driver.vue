@@ -75,6 +75,9 @@ onBeforeUnmount(() => observer?.disconnect());
 <template>
   <v-locale-provider>
     <v-app>
+      <!-- Aviso permanente si se está viendo la cuenta de un cliente. -->
+      <SharedImpersonationBanner />
+
       <v-main class="driver-main">
         <!-- Hero: degradado de marca a todo el ancho, del que cuelga la hoja -->
         <header ref="heroRef" class="driver-hero">

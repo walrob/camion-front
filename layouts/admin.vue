@@ -33,6 +33,9 @@ theme.change(newTheme);
 
       <!-- Layout principal -->
       <LayoutFullMain />
+      <!-- Aviso permanente si se está viendo la cuenta de un cliente. -->
+      <SharedImpersonationBanner />
+
       <v-main>
         <v-container fluid class="page-wrapper">
           <div class="maxWidth">

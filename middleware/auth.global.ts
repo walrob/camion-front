@@ -18,10 +18,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const userRole = authStore.user?.role || ''
   const isDriver = userRole === 'driver'
+  const isSuperadmin = userRole === 'superadmin'
   const autenticado = !!authStore.token
 
   // El backoffice ya no vive en `/`: ahí está la landing pública.
-  const home = isDriver ? '/chofer' : '/admin'
+  const home = isDriver ? '/chofer' : isSuperadmin ? '/superadmin' : '/admin'
 
   const publica = esRutaPublica(to.path)
 
@@ -52,6 +53,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // 4) Encaminamiento por rol.
   if (!isDriver && to.path.startsWith('/chofer')) {
     return navigateTo(home)
+  }
+
+  // El panel de plataforma es sólo del superadmin. Esto es comodidad de
+  // navegación: el control real lo hace el backend, que responde 403 aunque
+  // alguien fuerce la URL o llame a la API directamente.
+  if (to.path.startsWith('/superadmin') && !isSuperadmin) {
+    return navigateTo(home)
+  }
+  // Y el superadmin no tiene nada que hacer en el backoffice de un cliente: no
+  // es de ninguna empresa.
+  if (isSuperadmin && to.path.startsWith('/admin')) {
+    return navigateTo('/superadmin')
   }
 
   const rolesPage = to.meta.roles as string[] | undefined

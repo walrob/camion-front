@@ -104,7 +104,61 @@ volvieron a correr.
 | **Fase 5 — Facturación** | ✅ **Completa** | Los cuatro criterios de aceptación verificados contra la API: cliente B = $ 283.800, cliente D = $ 2.449.000, upgrade prorrateado y downgrade diferido |
 | **Fase 6 — Onboarding y trial** | ✅ **Completa** | 15 tests de integración: alta pública, invitaciones y estados de cuenta |
 | **Fase 7 — Landing pública** | ✅ **Completa** | Landing en `/`, panel en `/admin`, 24 tests protegiendo R7.1, meta OG verificadas en el HTML servido |
-| Fase 8 en adelante | ⬜ Pendiente | — |
+| **Fase 8 — Superadmin** | ✅ **Completa** | 17 tests e2e cubriendo R8.1 y R8.2. Encontró y corrigió un **bug de seguridad real** |
+| Fase 9 en adelante | ⬜ Pendiente | — |
+
+### Fase 8 — cómo quedó implementada
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Rol | `Role.SUPERADMIN` | Único rol de plataforma. |
+| Escape hatch | `setSystemContext()` en `AuthGuard` | **Explícito**: el privilegio se pide por su nombre, no se hereda de "sin empresa". |
+| Auditoría | `audit-log/` | Registro inmutable. Sólo inserta: un log editable no audita nada. |
+| Panel | `superadmin/` | Tablero con MRR, empresas, cobranzas, ABM de planes. |
+| Impersonación | `impersonation.service.ts` + `ImpersonationReadOnlyGuard` | Solo lectura, 30 min, auditada, con banner permanente. |
+
+#### Dos bugs que encontraron los tests
+
+**1. Bug de seguridad: cualquier admin de empresa entraba al panel de plataforma.**
+`RolesGuard` tenía `if (user.role === Role.ADMIN) return true` como atajo — correcto
+cuando ADMIN era el rol máximo, peligroso al aparecer SUPERADMIN por encima. Ese atajo
+convertía a **todo administrador de cliente en operador de la plataforma**: podía ver y
+modificar las demás empresas. Ahora el atajo no aplica cuando la ruta exige SUPERADMIN.
+
+**2. La auditoría se perdía en silencio, justo en las acciones más sensibles.**
+`TenantSubscriber` decidía si una entidad era "de empresa" mirando si tenía columna
+`companyId`. `AuditLog` la tiene —para decir a qué empresa afectó una acción— pero debe
+poder registrar acciones globales del superadmin, sin empresa. El subscriber las
+rechazaba y `AuditLogService` se traga los errores a propósito, así que no fallaba
+nada: simplemente no quedaba registro. Ahora el criterio es **la herencia de
+`TenantEntity`**, que es el contrato que esa clase ya declaraba.
+
+#### La empresa "plataforma", en vez de debilitar la invariante
+
+El superadmin no pertenece a ninguna empresa, pero `user.companyId` es NOT NULL.
+Hacerlo nullable habría abierto un agujero: una fila sin empresa no la filtra nadie.
+En su lugar hay una empresa `isPlatform: true` que representa a FleetLog, **excluida de
+los listados, del MRR, de la facturación y del cron de trials**. La invariante queda
+intacta.
+
+#### El MRR sale de la misma fórmula que factura
+
+`tablero()` usa `calcularPrecioMensual`, no una consulta agregada aparte: dos fórmulas
+para el mismo número terminan siempre en dos números distintos, y entonces ninguno sirve
+para tomar decisiones.
+
+#### Pendiente de Fase 8
+
+- **El front no fue probado contra el backend**: las pantallas compilan y tipan, pero no
+  se abrió el panel en un navegador.
+- **El token de impersonación se copia a mano** desde la ficha: falta el botón que abra
+  la sesión de soporte directamente.
+- **Sin paginación** en el listado de empresas ni en cobranzas: con cientos de clientes
+  hay que agregarla.
+- **`SEED_SUPERADMIN_EMAIL` y `SEED_SUPERADMIN_PASSWORD` no están definidas**, así que
+  la migración no creó el usuario (lo avisa por consola, no falla). Hay que definirlas y
+  crear el superadmin antes de usar el panel.
+- La auditoría **no tiene pantalla**: se consulta por `GET /audit-log`.
 
 ### Fase 7 — cómo quedó implementada
 
