@@ -12,13 +12,18 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 definePageMeta({ layout: "admin" });
 useHead({ title: "Mi plan" });
 
-const { get } = useApi();
+const { get, post, delete: del } = useApi();
 const { money } = useFormatters();
 const auth = useAuthStore();
+const general = useGeneralStore();
+const route = useRoute();
 
 const cotizacion = ref<any>(null);
 const periodos = ref<any[]>([]);
+const mp = ref<any>(null);
 const cargando = ref(true);
+const pagando = ref<string | null>(null);
+const activandoDebito = ref(false);
 
 const company = computed(() => auth.company);
 const storage = computed(() => auth.storage);
@@ -41,14 +46,86 @@ const impagos = computed(() =>
   periodos.value.filter((p) => !p.isPaid),
 );
 
-onMounted(async () => {
+/**
+ * Vuelta desde Mercado Pago.
+ *
+ * MP redirige con `?pago=exitoso` **antes** de mandarnos el aviso, así que en
+ * ese momento el período todavía figura impago. Se avisa que la acreditación
+ * puede demorar en vez de mostrar un total que se contradice con el mensaje.
+ */
+const RETORNOS: Record<string, { color: string; mensaje: string }> = {
+  exitoso: {
+    color: "success",
+    mensaje:
+      "Recibimos tu pago. La acreditación puede demorar unos minutos: cuando " +
+      "Mercado Pago nos confirme, el período figura pagado.",
+  },
+  pendiente: {
+    color: "info",
+    mensaje: "El pago quedó pendiente de acreditación en Mercado Pago.",
+  },
+  fallido: {
+    color: "error",
+    mensaje: "El pago no se completó. Podés volver a intentarlo.",
+  },
+};
+
+async function cargar() {
+  const [q, subs, estadoMp] = await Promise.all([
+    get("billing/quote").catch(() => null),
+    get("billing/subscriptions").catch(() => []),
+    get("billing/mp/status").catch(() => null),
+  ]);
+  cotizacion.value = q;
+  periodos.value = (subs as any[]) ?? [];
+  mp.value = estadoMp;
+}
+
+/** Abre el checkout de MP para un período. */
+async function pagar(periodo: any) {
+  pagando.value = periodo.id;
   try {
-    const [q, subs] = await Promise.all([
-      get("billing/quote").catch(() => null),
-      get("billing/subscriptions").catch(() => []),
-    ]);
-    cotizacion.value = q;
-    periodos.value = (subs as any[]) ?? [];
+    const r: any = await post(`billing/mp/checkout/${periodo.id}`);
+    if (!r?.url) throw new Error("Mercado Pago no devolvió el link de pago.");
+    // Redirección en la misma pestaña: una ventana nueva se la come el
+    // bloqueador de pop-ups justo en el momento de cobrar.
+    window.location.href = r.url;
+  } catch (e) {
+    general.setErrorSnackbar(e);
+    pagando.value = null;
+  }
+}
+
+async function activarDebito() {
+  activandoDebito.value = true;
+  try {
+    const r: any = await post("billing/mp/subscription", {});
+    if (r?.url) window.location.href = r.url;
+  } catch (e) {
+    general.setErrorSnackbar(e);
+  } finally {
+    activandoDebito.value = false;
+  }
+}
+
+async function cancelarDebito() {
+  try {
+    await del("billing/mp/subscription");
+    general.setSuccessSnackbar("Se canceló el débito automático.");
+    mp.value = await get("billing/mp/status").catch(() => null);
+  } catch (e) {
+    general.setErrorSnackbar(e);
+  }
+}
+
+onMounted(async () => {
+  const retorno = RETORNOS[String(route.query.pago ?? "")];
+  if (retorno) {
+    general.setSnackbar({ color: retorno.color, message: retorno.mensaje, timeout: 8000 });
+  }
+
+  try {
+    await cargar();
   } finally {
     cargando.value = false;
   }
@@ -175,7 +252,7 @@ onMounted(async () => {
             </template>
           </v-card>
 
-          <v-card border flat rounded="lg" class="pa-6">
+          <v-card border flat rounded="lg" class="pa-6 mb-4">
             <div class="text-subtitle-1 font-weight-medium mb-2">
               Períodos pendientes
             </div>
@@ -185,13 +262,85 @@ onMounted(async () => {
             <div
               v-for="p in impagos"
               :key="p.id"
-              class="d-flex justify-space-between py-2 border-b"
+              class="d-flex align-center justify-space-between ga-2 py-2 border-b"
             >
-              <span class="text-body-2">
-                {{ String(p.periodStart).slice(0, 10) }}
-              </span>
-              <strong class="text-body-2">{{ money(p.amount) }}</strong>
+              <div>
+                <div class="text-body-2">
+                  {{ String(p.periodStart).slice(0, 10) }}
+                </div>
+                <div
+                  v-if="p.status === 'overdue'"
+                  class="text-caption text-error"
+                >
+                  Vencido el {{ String(p.expiration).slice(0, 10) }}
+                </div>
+              </div>
+              <div class="d-flex align-center ga-2">
+                <strong class="text-body-2">{{ money(p.amount) }}</strong>
+                <v-btn
+                  v-if="mp?.disponible"
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  :loading="pagando === p.id"
+                  @click="pagar(p)"
+                >
+                  Pagar
+                </v-btn>
+              </div>
             </div>
+          </v-card>
+
+          <!-- Débito automático -->
+          <v-card v-if="mp?.disponible" border flat rounded="lg" class="pa-6">
+            <div class="text-subtitle-1 font-weight-medium mb-1">
+              Débito automático
+            </div>
+
+            <template v-if="mp.activo">
+              <div class="d-flex align-center ga-2 mb-3">
+                <v-chip color="success" variant="tonal" size="small">
+                  Activo
+                </v-chip>
+                <span class="text-caption text-medium-emphasis">
+                  {{ mp.payerEmail }}
+                </span>
+              </div>
+              <p class="text-body-2 text-medium-emphasis mb-3">
+                Mercado Pago debita el importe del mes en cada vencimiento. Si
+                cambia la cantidad de unidades, el monto se ajusta solo.
+              </p>
+              <v-btn size="small" variant="text" color="error" @click="cancelarDebito">
+                Cancelar débito automático
+              </v-btn>
+            </template>
+
+            <template v-else>
+              <p class="text-body-2 text-medium-emphasis mb-3">
+                Activalo y no tenés que acordarte de pagar todos los meses.
+                Empieza a debitar en el próximo período.
+              </p>
+              <v-alert
+                v-if="mp.deudaPendiente > 0"
+                type="warning"
+                variant="tonal"
+                density="compact"
+                rounded="lg"
+                class="mb-3"
+              >
+                Primero hay que saldar {{ money(mp.deudaPendiente) }} pendientes.
+              </v-alert>
+              <v-btn
+                color="primary"
+                variant="tonal"
+                size="small"
+                :disabled="mp.deudaPendiente > 0"
+                :loading="activandoDebito"
+                @click="activarDebito"
+              >
+                Activar débito automático
+              </v-btn>
+            </template>
           </v-card>
         </v-col>
       </v-row>

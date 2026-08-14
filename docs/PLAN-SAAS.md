@@ -105,7 +105,126 @@ volvieron a correr.
 | **Fase 6 — Onboarding y trial** | ✅ **Completa** | 15 tests de integración: alta pública, invitaciones y estados de cuenta |
 | **Fase 7 — Landing pública** | ✅ **Completa** | Landing en `/`, panel en `/admin`, 24 tests protegiendo R7.1, meta OG verificadas en el HTML servido |
 | **Fase 8 — Superadmin** | ✅ **Completa** | 17 tests e2e cubriendo R8.1 y R8.2. Encontró y corrigió un **bug de seguridad real** |
-| Fase 9 en adelante | ⬜ Pendiente | — |
+| **Fase 9 — MercadoPago y cobranza** | ✅ **Completa** | 22 tests e2e con los cuatro criterios de aceptación. La unicidad de período y la de pago están **en la base**, no sólo en el código |
+| Fase 10 | ⬜ Pendiente | — |
+
+### Fase 9 — cómo quedó implementada
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Cobro | `mp-payments/` | Link de pago (`Preference`) y débito automático (`PreApproval`). **Una sola cuenta de MP**. |
+| Avisos de MP | `webhooks/` | Público, idempotente por `(type, resourceId)`. |
+| Mora | `billing/dunning.service.ts` | `ACTIVE → DEFAULTER → BLOCKED → ACTIVE`, con 10 días de gracia. |
+| Avisos al cliente | `billing/billing-notifications.service.ts` + `email.service.ts` | Los cinco mails del ciclo, con destinatario resuelto y errores aislados. |
+| Crons | `billing.cron.ts` (5 AM) y `mp-payments.cron.ts` (4:30 AM) | Cobranza diaria y sincronización de importes. |
+| Front | `pages/estado-plan/index.vue` | Botón de pago por período y alta/baja del débito automático. |
+
+**Horarios reales de los crons** (el orden importa más que la hora exacta del
+plan; se respetó el orden y se acomodaron a los que ya existían de fases
+anteriores):
+
+| Hora | Qué corre | Dónde |
+|---|---|---|
+| 1:00 | Snapshot de unidades | `billing.cron.ts` (fase 5) |
+| 3:00 | Reconciliación de almacenamiento | `storage-reconciliation.service.ts` (fase 4) |
+| 4:00 | Cambios diferidos → emisión → marcado de vencidos | `billing.cron.ts` |
+| 4:30 | Sincronización de importes con MP | `mp-payments.cron.ts` |
+| 5:00 | Avisos, mora y bloqueo | `billing.cron.ts` |
+| 5:00 | Vencimiento de trials | `company-status.cron.ts` (fase 6) |
+
+#### La mitad más difícil de Aturna acá no existe
+
+Aturna usa **MP Marketplace**: cada institución cobra a sus pacientes con su
+propia cuenta, y eso obliga a OAuth (`mp-auth/`), a guardar un token por
+institución, a refrescarlo cada 180 días y a resolver con qué credencial se
+consulta cada pago. FleetLog es lo contrario —**FleetLog le cobra a la
+empresa**, siempre con la misma cuenta—, así que **no hay `mp-auth/`, ni tokens
+por empresa, ni cifrado de credenciales**. Lo que quedó es la mitad que sí
+aplica: preferencias, suscripciones y confirmación de avisos.
+
+#### La unicidad está en la base, que es donde sirve
+
+Los dos riesgos caros de esta fase son "cobrar dos veces" (R9.1) y "acreditar
+dos veces" (R9.2). Los dos se resuelven igual: un chequeo previo en el código
+evita el caso normal, y **un índice único evita el simultáneo**, que es el que
+de verdad ocurre —MP reenvía sus avisos en paralelo—.
+
+- `payments.mpPaymentId` es único. Los pagos manuales van en NULL, y MySQL
+  admite repetir NULL.
+- `subscriptions` tiene una columna calculada, `periodKey`, que vale
+  `periodStart` sólo si la fila es un período normal, vigente y no anulado, y
+  NULL en cualquier otro caso. Sobre ella hay un único `(companyId, periodKey)`.
+  Así **no se puede facturar dos veces el mismo mes**, pero **sí se pueden
+  emitir varios prorrateos el mismo día** (un upgrade y un add-on son dos cargos
+  legítimos con la misma fecha) y un período mal emitido se puede anular y
+  volver a emitir. Hay tests de los tres casos.
+
+#### D9 asumida, no resuelta
+
+**Falta que el dueño del producto confirme los días de gracia.** Se implementó
+el valor sugerido en el plan —10 días de vencimiento + **10 días** en
+`DEFAULTER`— en una única constante, `DIAS_DE_GRACIA` en `dunning.service.ts`.
+Cambiarlo es cambiar ese número.
+
+#### Ningún bloqueo es silencioso (R9.3)
+
+El cron de las 5 hace cinco cosas **en este orden**: avisa a quien se le termina
+la prueba (7, 3 y 1 día antes), avisa a quien vence en tres días, marca la mora,
+**avisa al superadmin de las cuentas que se bloquean mañana** y recién entonces
+bloquea. El aviso interno es la mitigación de R9.3: un bloqueo sobre alguien que
+sí pagó —una transferencia sin conciliar, un webhook que no llegó— se arregla en
+un minuto si se ve venir, y cuesta un cliente si se entera el cliente primero.
+
+Los cinco pasos son idempotentes. En particular, el reloj de la gracia arranca
+en `Company.defaultedAt` y no se reescribe: si se reiniciara en cada corrida,
+nadie llegaría nunca al bloqueo.
+
+#### Lo que el webhook NO hace
+
+El endpoint es público —MP no manda credenciales—, así que **no se cree nada de
+lo que llega en el cuerpo**: el aviso sólo dice qué recurso mirar, y el estado y
+el importe se leen contra la API de MP con nuestro token. Un tercero que mandara
+avisos falsos sólo lograría que consultemos pagos que no existen. Hay un test
+que lo fija.
+
+Tampoco acredita de más: un pago que no cubre el período **queda registrado pero
+no levanta el bloqueo**, para poder explicarle al cliente qué pasó con su intento
+en lugar de decirle que no pagó.
+
+#### El precio no es fijo, así que el débito tampoco
+
+Una suscripción de MP creada en marzo debitaría el importe de marzo para
+siempre, y como el precio de FleetLog depende de la flota del mes, la diferencia
+quedaría impaga sin que nadie se entere. Por eso hay un cron a las 4:30 que le
+informa a MP el importe vigente de cada empresa, después de la emisión de las 4.
+
+#### El test de la fase 1 volvió a atrapar algo
+
+`tenant-entities.spec.ts` —la red de seguridad del modelo multi-empresa— falló
+al agregar `MpWebhookEvent` y el único de `payments.mpPaymentId`. Hizo
+exactamente lo que tenía que hacer: **exigir una justificación escrita** para
+cada excepción al aislamiento, en vez de dejarlas pasar. Las dos quedaron
+declaradas con su motivo en ese archivo.
+
+#### Pendiente de Fase 9
+
+- **Nunca se probó contra Mercado Pago de verdad**: los tests usan un doble del
+  SDK. Falta una corrida en sandbox con credenciales reales.
+  > El `notification_url` de las suscripciones **ya no es una incógnita**:
+  > Aturna lo manda igual, con el mismo SDK y en producción, así que la falta
+  > en el tipo de TypeScript es un hueco del tipado y no del comportamiento.
+- **`MP_ACCESS_TOKEN` no está definida**: sin ella el sistema funciona igual y
+  el cobro es manual. El front oculta los botones de pago.
+- **`BACK_URL` tiene que ser una URL pública**: en desarrollo, MP no puede
+  alcanzar `localhost` y hace falta un túnel. Se acepta con el prefijo
+  `/api/v1/` incluido (formato de Aturna) o sin él, con tests que lo fijan: si
+  esa URL apunta a un 404, el cobro sale bien y **el pago no se acredita nunca,
+  sin ningún error visible**.
+- **Sin comprobante fiscal**: se registra el pago, no se emite factura AFIP.
+- **El superadmin no puede reprocesar un aviso fallido desde el panel**: queda
+  en `mp_webhook_events` con el error, pero hay que dispararlo a mano.
+- **Sin reintento propio**: si MP agota sus reenvíos con todos fallando, el pago
+  queda sin acreditar hasta que alguien lo concilie.
 
 ### Fase 8 — cómo quedó implementada
 
