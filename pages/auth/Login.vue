@@ -18,6 +18,30 @@
                 Iniciar sesión
               </h2>
 
+              <v-alert
+                v-if="faltaVerificar"
+                type="warning"
+                variant="tonal"
+                density="comfortable"
+                rounded="lg"
+                class="mb-4"
+              >
+                <div class="text-body-2">
+                  Falta confirmar tu correo. Revisá tu casilla —también el
+                  correo no deseado—.
+                </div>
+                <v-btn
+                  variant="text"
+                  color="warning"
+                  size="small"
+                  class="mt-2 px-0"
+                  :loading="reenviando"
+                  @click="reenviarVerificacion"
+                >
+                  Reenviar el mensaje
+                </v-btn>
+              </v-alert>
+
               <v-form ref="formRef" @submit.prevent="handleLogin">
                 <v-row>
                   <v-col cols="12">
@@ -97,6 +121,18 @@ const email = ref("");
 const password = ref("");
 const showPass = ref(false);
 const loading = ref(false);
+const faltaVerificar = ref(false);
+const reenviando = ref(false);
+
+/**
+ * Cómo se reconoce el rechazo por casilla sin confirmar.
+ *
+ * Se busca una frase corta y estable del mensaje del backend
+ * (`EMAIL_SIN_VERIFICAR`) en vez del texto entero: así una coma corregida del
+ * lado del servidor no deja al usuario sin el botón de reenvío, que es
+ * justamente su única salida.
+ */
+const MARCA_SIN_VERIFICAR = "confirmar tu correo";
 
 // Las cuentas demo (solo lectura) entran por acá como cualquier otra: el
 // middleware global encamina según el rol que devuelve el backend.
@@ -105,6 +141,7 @@ const handleLogin = async () => {
   if (!valid) return;
 
   loading.value = true;
+  faltaVerificar.value = false;
   try {
     const res = await $api.post("auth/login", {
       email: email.value,
@@ -114,9 +151,32 @@ const handleLogin = async () => {
     await authStore.setAuth(token, expiresAt, user);
     await navigateTo("/");
   } catch (error: any) {
-    generalStore.setErrorSnackbar(error);
+    const mensaje = String(error?.response?.data?.message ?? "");
+    if (mensaje.includes(MARCA_SIN_VERIFICAR)) {
+      // El aviso queda fijo en la pantalla con el botón de reenvío: un snackbar
+      // que se va solo no le sirve a alguien que necesita hacer algo con él.
+      faltaVerificar.value = true;
+    } else {
+      generalStore.setErrorSnackbar(error);
+    }
   } finally {
     loading.value = false;
+  }
+};
+
+const reenviarVerificacion = async () => {
+  reenviando.value = true;
+  try {
+    await $api.post("auth/resend-verification", { email: email.value });
+    generalStore.setSnackbar({
+      color: "success",
+      message:
+        "Si la dirección corresponde a una cuenta sin confirmar, te enviamos el mensaje.",
+    });
+  } catch (error: any) {
+    generalStore.setErrorSnackbar(error);
+  } finally {
+    reenviando.value = false;
   }
 };
 </script>

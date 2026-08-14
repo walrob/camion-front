@@ -2,6 +2,7 @@ import {
   LayoutDashboardIcon,
   TruckIcon,
   UsersIcon,
+  UserPlusIcon,
   IdIcon,
   RouteIcon,
   ReceiptIcon,
@@ -133,6 +134,14 @@ const sidebarItem: menu[] = [
     icon: UsersIcon,
     to: "/admin/choferes",
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR],
+  },
+  {
+    // Accesos de gente sin legajo (contador, despachante tercerizado, auditor).
+    // El personal en relación de dependencia entra por RRHH.
+    title: "Equipo",
+    icon: UserPlusIcon,
+    to: "/admin/equipo",
+    roles: [Role.ADMIN, Role.MANAGER],
   },
 
   { header: "Administración" },

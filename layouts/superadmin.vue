@@ -17,6 +17,8 @@ const SECCIONES = [
   { texto: "Empresas", icono: "mdi-domain", to: "/superadmin/empresas" },
   { texto: "Planes", icono: "mdi-tag-multiple-outline", to: "/superadmin/planes" },
   { texto: "Cobranzas", icono: "mdi-cash-multiple", to: "/superadmin/cobranzas" },
+  { texto: "Pagos", icono: "mdi-credit-card-check-outline", to: "/superadmin/pagos" },
+  { texto: "Auditoría", icono: "mdi-clipboard-text-clock-outline", to: "/superadmin/auditoria" },
 ];
 
 const salir = async () => {

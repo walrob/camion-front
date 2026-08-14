@@ -24,6 +24,9 @@ export const RUTAS_PUBLICAS_POR_PREFIJO = [
   '/auth/login',
   '/auth/forgot-password',
   '/auth/reset-password',
+  // Confirmación de la casilla: la usa quien todavía no puede iniciar sesión,
+  // que es exactamente lo que este link viene a destrabar.
+  '/auth/verify-email',
   // Alta de empresa y aceptación de invitación: las usa gente que todavía no
   // tiene cuenta, así que por definición no pueden exigir sesión.
   '/auth/registro-empresa',

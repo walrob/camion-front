@@ -40,6 +40,10 @@
 > fases 2 a 5 habían ido dejando están cerrados. Las secciones «Pendiente de
 > Fase N» que siguen más abajo quedan como registro histórico de qué se debía;
 > el detalle de cómo se resolvió cada uno está en [§ Cierre de deuda](#cierre-de-deuda-10082026).
+>
+> **Segundo cierre (14/8/2026).** Se saldó lo que habían dejado las fases 6 a 9,
+> salvo lo que depende de Mercado Pago real y del dominio definitivo. Detalle en
+> [§ Cierre de deuda de las fases 6 a 9](#cierre-de-deuda-de-las-fases-6-a-9-14082026).
 
 ### Verificación actual — todo en verde
 
@@ -47,10 +51,47 @@
 |---|---|
 | `tsc --noEmit` backend | ✅ **limpio, sin excepciones** |
 | `npm run build` backend | ✅ |
-| Tests unitarios | ✅ **75/75** en 7 suites |
-| Tests de integración (e2e) | ✅ **32/32** en 2 suites |
-| `nuxt typecheck` frontend | ✅ **limpio** (antes ni siquiera se podía correr) |
+| Tests unitarios backend | ✅ **78/78** en 8 suites |
+| Tests de integración (e2e) | ✅ **104/104** en 5 suites |
+| `nuxt typecheck` frontend | ✅ **limpio** |
+| Tests unitarios frontend | ✅ **25/25** |
 | `nuxt build` frontend | ✅ |
+
+### Cierre de deuda de las fases 6 a 9 (14/08/2026)
+
+| Deuda | Fase | Cómo se cerró |
+|---|---|---|
+| **Sin verificación de email en el alta** (R6.1) | 6 | Columna `user.emailVerifiedAt` + `POST /auth/verify-email` y `/auth/resend-verification`. El login rechaza la casilla sin confirmar y el front ofrece el reenvío. **7 tests e2e**, incluido el que fija que un token de sesión no sirve como token de confirmación. |
+| **No se envía el mail de invitación** | 6 | `EmailService.sendInvitacion` desde `InvitesService`. El envío **no propaga errores** y el token se sigue devolviendo: si el SMTP falla, la invitación ya es válida y el link se puede compartir a mano. |
+| **Las invitaciones no tenían pantalla** | 6 | `/admin/equipo`: usuarios con acceso, invitaciones pendientes con link copiable y alta con el rol recortado por el plan. Encuadrada como el camino de **quien no lleva legajo** (contador, despachante tercerizado, auditor); el personal propio sigue entrando por RRHH, que además arma el legajo. |
+| Correo en los tests de integración | — | `EMAIL_ENABLED=false` corta el envío en un solo punto (`EmailService.despachar`). Cada alta de empresa y cada invitación abrían una conexión SMTP real, con el riesgo de escribirle a una dirección de verdad usada como dato de prueba. |
+| Onboarding sin carga de logo | 6 | `PATCH /companies/me/logo` (multipart, la key de S3 la resuelve el backend) y una tarjeta opcional en `/initial`. La importación por Excel **no se hizo**: el paso 1 avisa que se puede pedir la carga asistida. |
+| **El superadmin no puede reprocesar un aviso de MP fallido** | 9 | `GET /superadmin/mp-events` y `POST /superadmin/mp-events/:id/retry`, con pantalla en `/superadmin/pagos`. El reproceso pasa por el mismo camino que el reenvío de MP: la doble acreditación la sigue impidiendo el índice único de `payments.mpPaymentId`. |
+| Sin panel de pagos | 9 | `GET /superadmin/payments`: cobros de MP y conciliados a mano en un solo listado, con filtro por empresa, estado, medio y referencia. |
+| **Sin paginación** en empresas y cobranzas | 8 | Servidor: `{ items, meta }` con la misma forma que el resto de la API (`metaDePaginacion`). En cobranzas los totales se calculan sobre toda la deuda, no sobre la página. |
+| **La auditoría no tenía pantalla** | 8 | `/superadmin/auditoria`, con filtros por acción, actor, entidad y rango de fechas, y el `metadata` de cada acción en un detalle. `GET /audit-log` quedó paginado y se sumó `GET /audit-log/actions`. |
+| `SEED_SUPERADMIN_*` sin definir | 8 | Definidas en dev y prod, más `SuperadminSeeder`: idempotente y en cada arranque, así que ya no hace falta revertir la migración para crear el superadmin. |
+
+**Bugs que aparecieron al hacerlo:**
+
+- `findOneByEmailWithPassword` usa una **lista `select` explícita**. Al agregar
+  `emailVerifiedAt` sin sumarla a esa lista, la columna llegaba `undefined` y el
+  login rechazaba a **todos los usuarios**, no sólo a los sin confirmar. Lo
+  atajaron los e2e de las cuatro suites a la vez.
+- `CreateUserDto` tenía `isEmailVerified: boolean`, un campo del template **sin
+  columna detrás**: se pasaba en `true` desde tres lugares y no se guardaba en
+  ninguno. Reemplazado por `emailVerifiedAt`.
+- `.env.production` declaraba `BACK_URL` **dos veces**, y la segunda estaba
+  vacía. Como `dotenv` deja la última, el `notification_url` de Mercado Pago
+  habría salido vacío en producción. Eliminada la duplicada.
+- `UsersSeeder` contaba **todos** los usuarios para decidir si sembrar el admin
+  inicial. Con el superadmin ya creado, una base nueva se quedaba sin ningún
+  administrador de empresa según qué seeder arrancara primero. Ahora cuenta sólo
+  los de la empresa cliente.
+- El alta pública redirigía a `/initial/empresa`, que **no existe**. Con la
+  verificación de por medio ese salto ya no ocurre.
+- `/auth/verify-email` tenía pantalla en el front pero **no estaba declarada como
+  ruta pública** ni existía el endpoint: el middleware la habría sacado al login.
 
 ### Cierre de deuda (10/08/2026)
 
@@ -208,6 +249,9 @@ declaradas con su motivo en ese archivo.
 
 #### Pendiente de Fase 9
 
+> Cerrados el 14/8/2026: el panel de pagos, el listado de avisos y el reproceso
+> manual. Lo que sigue depende de credenciales reales de MP.
+
 - **Nunca se probó contra Mercado Pago de verdad**: los tests usan un doble del
   SDK. Falta una corrida en sandbox con credenciales reales.
   > El `notification_url` de las suscripciones **ya no es una incógnita**:
@@ -221,8 +265,8 @@ declaradas con su motivo en ese archivo.
   esa URL apunta a un 404, el cobro sale bien y **el pago no se acredita nunca,
   sin ningún error visible**.
 - **Sin comprobante fiscal**: se registra el pago, no se emite factura AFIP.
-- **El superadmin no puede reprocesar un aviso fallido desde el panel**: queda
-  en `mp_webhook_events` con el error, pero hay que dispararlo a mano.
+- ~~**El superadmin no puede reprocesar un aviso fallido desde el panel**~~
+  → cerrado el 14/8/2026: `/superadmin/pagos`, solapa «Avisos de Mercado Pago».
 - **Sin reintento propio**: si MP agota sus reenvíos con todos fallando, el pago
   queda sin acreditar hasta que alguien lo concilie.
 
@@ -268,16 +312,21 @@ para tomar decisiones.
 
 #### Pendiente de Fase 8
 
+> Cerrados el 14/8/2026: la paginación de empresas y cobranzas, la pantalla de
+> auditoría y el seeder del superadmin.
+
 - **El front no fue probado contra el backend**: las pantallas compilan y tipan, pero no
   se abrió el panel en un navegador.
 - **El token de impersonación se copia a mano** desde la ficha: falta el botón que abra
   la sesión de soporte directamente.
-- **Sin paginación** en el listado de empresas ni en cobranzas: con cientos de clientes
-  hay que agregarla.
-- **`SEED_SUPERADMIN_EMAIL` y `SEED_SUPERADMIN_PASSWORD` no están definidas**, así que
-  la migración no creó el usuario (lo avisa por consola, no falla). Hay que definirlas y
-  crear el superadmin antes de usar el panel.
-- La auditoría **no tiene pantalla**: se consulta por `GET /audit-log`.
+- ~~**Sin paginación** en el listado de empresas ni en cobranzas~~
+  → cerrado el 14/8/2026, contra el servidor y con los totales de cobranza
+  calculados sobre toda la deuda, no sobre la página visible.
+- ~~**`SEED_SUPERADMIN_EMAIL` y `SEED_SUPERADMIN_PASSWORD` no están definidas**~~
+  → cerrado el 14/8/2026. Además de definirlas, ahora hay un `SuperadminSeeder`
+  idempotente: definirlas después de haber migrado ya no obliga a revertir nada.
+- ~~La auditoría **no tiene pantalla**~~ → cerrado el 14/8/2026:
+  `/superadmin/auditoria`.
 
 ### Fase 7 — cómo quedó implementada
 
@@ -407,13 +456,18 @@ test paga su costo.
 
 #### Pendiente de Fase 6
 
-- **No se envía el mail de invitación**: el endpoint devuelve el token para compartirlo
-  a mano. El envío corresponde a la fase 9, junto con el resto de las notificaciones.
-- **Sin verificación de email en el alta**: hoy la cuenta queda activa de inmediato. El
-  plan lo listaba como mitigación de R6.1 junto con el throttle; el throttle está, la
-  verificación no.
-- **El onboarding guiado es de tres pasos con enlaces**, no formularios embebidos: no
-  hay importación de flota desde Excel ni carga de logo dentro del asistente.
+> Cerrados el 14/8/2026: el mail de invitación, la verificación de email y la
+> carga de logo en el onboarding.
+
+- ~~**No se envía el mail de invitación**~~ → cerrado el 14/8/2026, junto con la
+  pantalla que faltaba: `/admin/equipo`. El token se sigue devolviendo y se
+  muestra como link copiable, que es la salida cuando el correo cae en spam o la
+  casilla está mal escrita.
+- ~~**Sin verificación de email en el alta**~~ → cerrado el 14/8/2026. Quien no
+  confirma no entra: el login lo dice y ofrece el reenvío.
+- **El onboarding guiado es de tres pasos con enlaces**, no formularios embebidos.
+  La carga de logo sí quedó embebida; **la importación de flota desde Excel no se
+  hizo** y el paso 1 avisa que se puede pedir la carga asistida.
 
 ### Fase 5 — cómo quedó implementada
 

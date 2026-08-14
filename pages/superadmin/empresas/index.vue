@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
-/** Listado de empresas con sus métricas de uso. */
+/**
+ * Listado de empresas con sus métricas de uso.
+ *
+ * Filtra y pagina **contra el servidor**: cada fila cuesta dos consultas más
+ * (usuarios y unidades), así que traerlas todas para filtrar en el navegador
+ * hacía que abrir la pantalla se pusiera más caro con cada cliente nuevo.
+ */
 definePageMeta({ layout: "superadmin", roles: ["superadmin"] });
 useHead({ title: "Empresas" });
 
 const { get } = useApi();
 const { num } = useFormatters();
+const general = useGeneralStore();
 
 const empresas = ref<any[]>([]);
+const meta = ref<any>(null);
 const cargando = ref(true);
+const pagina = ref(1);
 const busqueda = ref("");
 const estado = ref<string | null>(null);
 
@@ -29,25 +38,36 @@ const COLOR: Record<string, string> = {
   cancelled: "grey",
 };
 
-const filtradas = computed(() => {
-  const q = busqueda.value.trim().toLowerCase();
-  return empresas.value.filter((e) => {
-    if (estado.value && e.status !== estado.value) return false;
-    if (!q) return true;
-    return (
-      e.name?.toLowerCase().includes(q) || e.slug?.toLowerCase().includes(q)
-    );
-  });
-});
-
 const cargar = async () => {
   cargando.value = true;
   try {
-    empresas.value = await get("superadmin/companies");
+    const r: any = await get("superadmin/companies", {
+      page: pagina.value,
+      limit: 20,
+      search: busqueda.value || undefined,
+      estado: estado.value || undefined,
+    });
+    empresas.value = r.items;
+    meta.value = r.meta;
+  } catch (e: any) {
+    general.setErrorSnackbar(e);
   } finally {
     cargando.value = false;
   }
 };
+
+// Los filtros se aplican solos, con espera: cada tecla no puede ser una
+// consulta que además cuenta usuarios y unidades de veinte empresas.
+let debounce: ReturnType<typeof setTimeout>;
+watch([busqueda, estado], () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => {
+    pagina.value = 1;
+    cargar();
+  }, 400);
+});
+
+watch(pagina, cargar);
 
 onMounted(cargar);
 </script>
@@ -56,7 +76,7 @@ onMounted(cargar);
   <div>
     <h1 class="text-h5 font-weight-bold mb-1">Empresas</h1>
     <p class="text-body-2 text-medium-emphasis mb-4">
-      {{ filtradas.length }} de {{ empresas.length }} empresas.
+      {{ meta?.totalItems ?? 0 }} empresas.
     </p>
 
     <div class="d-flex flex-wrap ga-3 mb-4">
@@ -100,7 +120,7 @@ onMounted(cargar);
           </tr>
         </thead>
         <tbody>
-          <tr v-for="e in filtradas" :key="e.id">
+          <tr v-for="e in empresas" :key="e.id">
             <td>
               <div class="font-weight-medium">{{ e.name }}</div>
               <div class="text-caption text-medium-emphasis">{{ e.slug }}</div>
@@ -124,7 +144,7 @@ onMounted(cargar);
               </v-btn>
             </td>
           </tr>
-          <tr v-if="!filtradas.length">
+          <tr v-if="!empresas.length">
             <td colspan="7" class="text-center text-medium-emphasis py-6">
               Sin resultados.
             </td>
@@ -132,5 +152,14 @@ onMounted(cargar);
         </tbody>
       </v-table>
     </v-card>
+
+    <div v-if="meta && meta.totalPages > 1" class="d-flex justify-center mt-4">
+      <v-pagination
+        v-model="pagina"
+        :length="meta.totalPages"
+        :total-visible="7"
+        density="comfortable"
+      />
+    </div>
   </div>
 </template>

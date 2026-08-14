@@ -13,14 +13,16 @@ import { useRouter } from "vue-router";
 definePageMeta({ layout: "blank" });
 useHead({ title: "Crear cuenta" });
 
-const router = useRouter();
 const { post } = useApi();
 const r = useValidations();
-const auth = useAuthStore();
+const general = useGeneralStore();
 
 const formRef = ref();
 const cargando = ref(false);
+const reenviando = ref(false);
 const error = ref("");
+/** Alta hecha: falta que confirme la casilla. */
+const creada = ref(false);
 
 const form = ref({
   companyName: "",
@@ -46,22 +48,31 @@ const crear = async () => {
       phone: form.value.phone || undefined,
     });
 
-    // Entra directo: pedirle que vuelva a escribir la contraseña recién creada
-    // es fricción sin ningún beneficio.
-    const data: any = await post("auth/login", {
-      email: form.value.adminEmail,
-      password: form.value.adminPassword,
-    });
-    await auth.setAuth(data.token, data.expiresAt, data.user);
-    await auth.fetchSession(true);
-
-    router.push("/initial/empresa");
+    // No se entra directo: el backend manda un mail de confirmación y el login
+    // rechaza a quien no la hizo. Intentarlo acá sólo mostraría un error justo
+    // después de un alta que salió bien.
+    creada.value = true;
   } catch (e: any) {
     error.value =
       e?.response?.data?.message ??
       "No pudimos crear la cuenta. Intentá de nuevo en un momento.";
   } finally {
     cargando.value = false;
+  }
+};
+
+const reenviar = async () => {
+  reenviando.value = true;
+  try {
+    await post("auth/resend-verification", { email: form.value.adminEmail });
+    general.setSnackbar({
+      color: "success",
+      message: "Listo, te lo mandamos de nuevo.",
+    });
+  } catch (e: any) {
+    general.setErrorSnackbar(e);
+  } finally {
+    reenviando.value = false;
   }
 };
 </script>
@@ -82,6 +93,46 @@ const crear = async () => {
                 <LayoutFullLogoVertical />
               </div>
 
+              <!-- Alta hecha: sólo falta que confirme la casilla. -->
+              <template v-if="creada">
+                <div class="text-center">
+                  <v-avatar color="success" variant="tonal" size="64" class="mb-4">
+                    <v-icon size="34">mdi-email-check-outline</v-icon>
+                  </v-avatar>
+
+                  <h2 class="text-h5 font-weight-bold mb-2">
+                    Revisá tu correo
+                  </h2>
+                  <p class="text-body-2 text-medium-emphasis mb-1">
+                    Te mandamos un mensaje a
+                  </p>
+                  <p class="text-body-1 font-weight-medium mb-4">
+                    {{ form.adminEmail }}
+                  </p>
+                  <p class="text-body-2 text-medium-emphasis mb-6">
+                    Confirmá la dirección desde ese mensaje y empezás tus 21
+                    días. Si no aparece, mirá en el correo no deseado.
+                  </p>
+
+                  <v-btn
+                    variant="tonal"
+                    color="primary"
+                    block
+                    :loading="reenviando"
+                    @click="reenviar"
+                  >
+                    Reenviar el mensaje
+                  </v-btn>
+
+                  <div class="mt-4">
+                    <NuxtLink to="/auth/login" class="text-primary text-body-2">
+                      Ya lo confirmé, iniciar sesión
+                    </NuxtLink>
+                  </div>
+                </div>
+              </template>
+
+              <template v-else>
               <h2 class="text-h5 font-weight-bold text-center mb-1">
                 Probá FleetLog 21 días
               </h2>
@@ -210,6 +261,7 @@ const crear = async () => {
                   </v-col>
                 </v-row>
               </v-form>
+              </template>
             </v-card-item>
           </v-card>
         </v-col>
