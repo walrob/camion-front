@@ -4,6 +4,13 @@
 > Mercado: Argentina. Moneda de lista: ARS + IVA.
 > Fecha de elaboración: agosto 2026 · Tipo de cambio de referencia: USD 1 = ARS 1.520 (oficial venta).
 
+> **Estado al 15/08/2026.** El modelo dejó de ser un diseño: **está implementado**.
+> Planes, features, límites, facturación, prorrateo, trial, alta autoservicio y
+> cobro por Mercado Pago corren en el producto (fases 0 a 9 de
+> [`PLAN-SAAS.md`](./PLAN-SAAS.md)). Lo que **no** está construido —y por lo tanto
+> no se puede vender todavía— está marcado con ⏳ a lo largo del documento y
+> resumido en el [§12](#12-anexo--estado-de-implementación-del-gating).
+
 ---
 
 ## Índice
@@ -19,7 +26,7 @@
 9. [Simulación de ingresos](#9-simulación-de-ingresos)
 10. [Ventajas y desventajas del modelo](#10-ventajas-y-desventajas-del-modelo)
 11. [Recomendación final](#11-recomendación-final)
-12. [Anexo — Implementación técnica del gating](#12-anexo--implementación-técnica-del-gating)
+12. [Anexo — Estado de implementación del gating](#12-anexo--estado-de-implementación-del-gating)
 
 ---
 
@@ -133,6 +140,12 @@ explícita en el contrato:
 
 El modo inactivo es un mecanismo de **retención**, no de descuento: evita que un
 cliente con flota estacional dé de baja el servicio completo en temporada baja.
+
+> **Implementado, con el detalle que evita el abuso**: se factura el **máximo de
+> unidades activas del período** —hay una foto diaria por empresa—, no la
+> situación del último día, así que dar de baja las unidades el día 30 no evita el
+> cargo. Y una unidad en modo inactivo **no admite asignación de viajes**: si
+> pudiera operar al 30 %, el modo inactivo sería un descuento encubierto.
 
 ### 2.4 Los acopl​ados
 
@@ -253,18 +266,27 @@ Basada en lo efectivamente desarrollado en la plataforma hoy.
 | Disponibilidad de flota · Tiempo de resolución | — | — | ✅ | ✅ |
 | Filtros por flota / camión / chofer | — | — | ✅ | ✅ |
 | Exportación de todos los reportes | — | Parcial | ✅ | ✅ |
-| Reportes programados por email | — | — | ✅ | ✅ |
+| Reportes programados por email ⏳ | — | — | ✅ | ✅ |
 | **PLATAFORMA** | | | | |
-| Multi-empresa / multi-sucursal | — | — | — | ✅ |
-| Consolidación de grupo | — | — | — | ✅ |
-| API REST + Webhooks | — | — | Add-on | ✅ |
-| SSO / Active Directory | — | — | — | ✅ |
-| Ambiente de prueba (sandbox) | — | — | — | ✅ |
+| Multi-empresa / multi-sucursal ⏳ | — | — | — | ✅ |
+| Consolidación de grupo ⏳ | — | — | — | ✅ |
+| API REST + Webhooks ⏳ | — | — | Add-on | ✅ |
+| SSO / Active Directory ⏳ | — | — | — | ✅ |
+| Ambiente de prueba (sandbox) ⏳ | — | — | — | ✅ |
 | **LÍMITES Y SOPORTE** | | | | |
 | Retención de histórico | 6 meses | 24 meses | 60 meses | Ilimitada |
 | Almacenamiento de adjuntos | 2 GB | 50 GB | 250 GB | Ilimitado |
 | Soporte | Email, 48h | Prioritario, 24h | SLA 8h hábiles | 24/7, SLA 99,5% |
 | Customer Success | — | — | Revisión trimestral | CSM dedicado |
+
+> **⏳ = vendido en la matriz, todavía no construido.** El gating de esas filas ya
+> existe —la feature está declarada y el plan la trae—, pero **detrás no hay
+> funcionalidad**: `scheduled_reports` no envía ningún reporte y las capacidades de
+> plataforma (multi-empresa, API pública, SSO, sandbox) son la **fase 10**, que
+> está postergada a propósito hasta que haya demanda real. **Consecuencia
+> comercial: Corporate no es vendible hoy** salvo como contrato a futuro con fecha
+> comprometida. Todo el resto de la matriz está implementado y verificado contra
+> la API.
 
 ### 4.2 Las cinco funcionalidades que nunca se regalan
 
@@ -327,6 +349,21 @@ invisible y no recuperable. Se venden como add-on con precio propio.
 | **Marca blanca** — logo, colores y dominio propio | $ 149.000 | Gestión+ | Add-on |
 | **Almacenamiento adicional** | $ 5.900 (hasta 10 GB)<br>$ 24.900 (hasta 50 GB) | Todos | No aplica |
 
+**Estado del catálogo.** Los 15 add-ons —los diez de arriba más los servicios
+profesionales del §5.3— **están cargados con estos precios** y se contratan y
+facturan por sistema: alta con prorrateo inmediato y baja diferida a la
+renovación. Ahora bien, **facturable no es lo mismo que entregable**:
+
+| Add-on | Qué hace hoy el sistema |
+|---|---|
+| **Almacenamiento** (10/50 GB) | ✅ Completo: levanta el tope real de la cuenta. |
+| **Automatizaciones avanzadas** | ✅ Habilita los umbrales de alerta personalizables en Operación. |
+| **Soporte Premium** | ✅ Es un servicio humano: el sistema solo lo factura. |
+| **API REST + Webhooks** ⏳ | Habilita la feature, pero **la API pública no existe** (fase 10). |
+| **Reportes / BI** ⏳ | Habilita `scheduled_reports`, que **no envía nada** todavía. |
+| **Marca blanca** ⏳ | La feature se activa; **no hay logo, colores ni dominio propio** detrás. |
+| **GPS · IA · ERP · Portal del dador de carga** ⏳ | **Sin desarrollo**: son integraciones a construir. Vender uno es comprometer un desarrollo. |
+
 ### 5.3 Servicios profesionales (pago único)
 
 No escalan, pero **financian el CAC y aumentan brutalmente la retención**: un cliente
@@ -340,6 +377,10 @@ que pagó una migración no se va a los 6 meses.
 | **Consultoría de procesos / diagnóstico de flota** | desde $ 1.200.000 | Cuentas de 30+ unidades |
 | **Reporte a medida** | desde $ 490.000 | Post-venta, Gestión+ |
 | **Integración a medida** | Cotizada (scoping pago previo de $ 350.000) | Corporate |
+
+> En el catálogo del sistema están cargados los cuatro primeros. **Reporte a
+> medida** e **integración a medida** se cotizan caso por caso y se facturan a
+> mano, que es lo correcto: no tienen precio de lista.
 
 > **Regla de oro para integraciones a medida**: nunca cotizar sin un *scoping* pago
 > previo. Es el error que convierte a un SaaS en una consultora — exactamente lo que
@@ -371,6 +412,11 @@ Control contra nada — compara Control contra *lo que ya tenía*. La tasa de co
 directa a Operación sube fuerte, y quien no convierte cae naturalmente a Control en
 lugar de irse.
 
+> **Implementado tal cual.** Toda alta pública nace con 21 días de Operación
+> (`DIAS_DE_TRIAL = 21`, `PLAN_DE_TRIAL = 'operacion'`). Hay avisos por email a los
+> 7, 3 y 1 día del vencimiento, y **3 días de gracia** antes de suspender la
+> cuenta. Los datos no se borran: activar un plan los devuelve.
+
 ### 6.2 Paywalls visibles, no invisibles
 
 El módulo no disponible **no se oculta**: se muestra en el menú, en gris, con un
@@ -392,10 +438,22 @@ Al hacer clic, no aparece un formulario de contacto: aparece **una pantalla del 
 con datos de ejemplo del propio cliente** (sus camiones, sus choferes) y un botón
 "Activar en mi cuenta". La fricción de upgrade debe ser menor que la de abrir WhatsApp.
 
-### 6.3 Disparadores automáticos de upgrade
+> **Implementado a medias, y la mitad que falta es la que convierte.** El candado
+> visible sí está: el ítem bloqueado se muestra al 45 % de opacidad y lleva a
+> `/upgrade/<feature>`. Pero esa pantalla **explica** qué incluye el módulo y con
+> qué plan viene; **no muestra el módulo con los datos del cliente**. Es la
+> diferencia entre un folleto y una demo, y era el punto del diseño. Queda como
+> mejora pendiente de mayor impacto comercial.
 
-El sistema ya tiene la telemetría para detectarlos. Cada uno dispara un aviso in-app y
-una tarea comercial:
+### 6.3 Disparadores automáticos de upgrade ⏳
+
+**Nada de esta sección está implementado.** El sistema tiene los datos para
+detectarlos —viajes, documentos vencidos, aperturas de pantalla, vehículos,
+empleados— pero **no hay telemetría de producto ni avisos in-app**: hoy los
+disparadores se detectan a mano mirando el panel de superadmin. Es la palanca de
+expansión más barata que queda sin construir.
+
+Cada uno debería disparar un aviso in-app y una tarea comercial:
 
 | Disparador | Señal | Oferta |
 |---|---|---|
@@ -419,6 +477,19 @@ una tarea comercial:
 
 Esta asimetría es estándar en SaaS y perfectamente defendible: subir es gratis y
 al instante; bajar requiere esperar al ciclo.
+
+> **Implementado, con una decisión que el diseño no había previsto.** El upgrade
+> emite un cargo prorrateado en el acto; el downgrade queda agendado a la
+> renovación y no factura nada al pedirse. Lo que se resolvió después: un
+> downgrade que deja a la empresa **por encima de un límite** (8 reglas de alerta
+> activas en un plan de 3) **no borra nada** — apaga el excedente por antigüedad y
+> pausa lo que sobra, dejando constancia en el histórico comercial. Subir de plan
+> lo devuelve intacto.
+>
+> **Autoservicio hasta donde llega el cobro**: el cambio de plan y el alta/baja de
+> add-ons son por API; el pago es por Mercado Pago (link por período o débito
+> automático). **Sin factura AFIP**: el sistema registra el pago, no emite el
+> comprobante fiscal.
 
 ### 6.5 El camino de vida del cliente
 
@@ -593,7 +664,8 @@ capacidad se amplía con un add-on de **dos escalones fijos**:
 
 Es un **techo**, no un incremento: el tope efectivo es el mayor entre lo que trae
 el plan y el escalón contratado, así que contratar 10 GB en un plan que ya trae
-50 nunca degrada la capacidad.
+50 nunca degrada la capacidad. **Así está implementado**, y cuando la cuenta llega
+al tope el rechazo de la subida ofrece el escalón siguiente.
 
 **Dos escalones y no GB a medida** porque un tope cerrado se cotiza de memoria,
 se factura sin prorrateos raros y evita discutir cuántos GB necesita el cliente.
@@ -882,14 +954,20 @@ El pago de implementación reduce el payback real entre 1 y 3 meses adicionales.
 
 ### 11.3 Secuencia de ejecución sugerida
 
-| Fase | Plazo | Foco |
+| Fase | Estado | Foco |
 |---|---|---|
-| **1. Habilitar el gating por plan** | Inmediato | Implementar el campo `plan` que ya existe en el menú, más límites de retención, storage y reglas activas. Sin esto, no hay planes: hay una lista de precios. |
-| **2. Facturación y prorrateo** | 1-2 meses | Motor de suscripciones con add-ons, modo inactivo y prorrateo. La tarifa plana lo simplifica mucho, pero no lo elimina: no postergar, es lo que rompe a los 40 clientes. |
-| **3. Lanzar Operación y Gestión** | Mes 2 | Son el 62% del MRR objetivo. La venta arranca por acá, no por Control. |
-| **4. Autoservicio para Control** | Mes 4-6 | Alta con tarjeta, sin llamada. Es el motor de volumen y el semillero de upgrades. |
-| **5. Add-ons: GPS primero, IA después** | Mes 6-12 | GPS es el más pedido y el más fácil de vender. IA es el que más sube el ARPU. |
-| **6. Corporate** | Mes 12+ | Requiere multi-empresa, SSO y API. No venderlo antes de tenerlo. |
+| **1. Habilitar el gating por plan** | ✅ **Hecho** | 26 features, guard en el backend, candados visibles en el menú y los cuatro límites (retención, storage, reglas de alerta, planes de mantenimiento) validados del lado del servidor. |
+| **2. Facturación y prorrateo** | ✅ **Hecho** | Suscripciones, add-ons, modo inactivo, prorrateo, snapshot diario de unidades y emisión idempotente. Cobro por Mercado Pago y ciclo de mora automático. |
+| **3. Lanzar Operación y Gestión** | 🎯 **Es el próximo paso, y es comercial, no técnico** | El producto ya los soporta completos. Lo que falta es la venta. |
+| **4. Autoservicio para Control** | ✅ **Hecho** | Alta pública con verificación de email, trial de 21 días, onboarding guiado, invitaciones por email y pago autogestionado. |
+| **5. Add-ons: GPS primero, IA después** | ⏳ **Sin desarrollo** | Están en el catálogo y se facturan; no hay integración detrás (§5.2). |
+| **6. Corporate** | ⏸️ **Postergado a propósito** | Multi-empresa, SSO y API son la fase 10 del plan técnico, en espera de demanda real. **No venderlo antes de tenerlo** sigue vigente. |
+
+**Lo que cambió respecto del plan original**: el autoservicio (paso 4, previsto
+para el mes 4-6) se adelantó y salió junto con la facturación, así que hoy el
+embudo completo —landing, alta, prueba, contratación y cobro— funciona sin
+intervención humana. La secuencia dejó de estar limitada por el desarrollo y pasó
+a estarlo por la venta.
 
 ### 11.4 Las tres métricas del tablero
 
@@ -905,24 +983,34 @@ de lista.
 
 ---
 
-## 12. Anexo — Implementación técnica del gating
+## 12. Anexo — Estado de implementación del gating
 
-La arquitectura ya contempla el modelo: [`sidebarItem.ts:34`](../components/layout/full/vertical-sidebar/sidebarItem.ts) declara un campo
-`plan?: string` en la interfaz `menu` que hoy está sin usar. Ese es el punto de entrada.
+> Este anexo describía el trabajo mínimo pendiente. **Ese trabajo está hecho**;
+> ahora describe cómo quedó y qué falta. El detalle técnico completo, fase por
+> fase, está en [`PLAN-SAAS.md`](./PLAN-SAAS.md).
 
-**Trabajo mínimo para habilitar planes:**
+**Lo que está funcionando:**
 
-1. **Campo `plan` en el menú** — poblar `plan` en cada ítem de `sidebarItem.ts` y
-   renderizar los no disponibles en gris con candado en lugar de ocultarlos (§6.2).
-2. **Plan en la sesión** — exponer el plan de la cuenta desde el backend en el
-   payload de autenticación y guardarlo en el store de auth.
-3. **Middleware de plan** — junto al middleware de roles existente, un chequeo de plan
-   que redirija a la pantalla de upsell del módulo en lugar de a un 403.
-4. **Límites cuantitativos** — reglas de alerta activas, planes de mantenimiento
-   activos, GB de adjuntos y meses de retención, validados en el backend (nunca solo
-   en el front).
-5. **Telemetría de disparadores** — registrar los eventos de §6.3 para alimentar
-   avisos in-app y tareas comerciales.
+| Pieza | Cómo quedó |
+|---|---|
+| **Vocabulario** | 26 *features*. El código de negocio **nunca pregunta por el nombre del plan**: pregunta por feature. Eso permite que API sea add-on en Gestión e incluida en Corporate sin lógica duplicada. |
+| **Catálogo en la base** | Planes y add-ons —precios, mínimos, features y límites— viven en la base, **no en el código**: el superadmin cambia un precio y la landing lo publica sin deploy. |
+| **Gating real en el backend** | Un guard por controlador devuelve 403 con la feature y el plan actual, para que el front ofrezca el upgrade correcto. **El ADMIN no tiene privilegio acá**: el plan es un límite comercial de la empresa, no un permiso del usuario. |
+| **Paywall visible** | El ítem bloqueado se muestra con candado y linkea a la pantalla de upgrade (§6.2). |
+| **«Mi plan» en el menú** | Sección **Cuenta** del sidebar, para `ADMIN` y `MANAGER`. El ítem avisa por sí solo: «Pago pendiente», «Suspendida» o los días que quedan de prueba en la última semana. Es el recordatorio que hace que una mora se resuelva en dos clics en lugar de escalar a un bloqueo. |
+| **Los cuatro límites** | Reglas de alerta activas, planes de mantenimiento, GB de adjuntos y meses de retención — todos validados en el servidor. El de storage se valida **antes** de subir a S3, y un contador se reconcilia todas las noches. |
+| **Aislamiento entre empresas** | Filtrado por empresa por defecto en todo el acceso a datos, más un *tripwire* que corta si una consulta devolvió una fila ajena. Un barrido automático recorre **todos** los endpoints cruzando tokens: un endpoint nuevo queda cubierto sin tocar el test. |
+| **Sin re-login al cambiar de plan** | El plan **no viaja en el token**: se resuelve contra la base con caché de 60 s. Un upgrade se refleja en menos de un minuto. |
+| **Retención sin borrar nada** | Recorta la **lectura**, no el dato (decisión D4). Es lo que hace verdadero el argumento del §10.2: subir de plan devuelve el histórico al instante. |
+
+**Lo que falta, en orden de impacto comercial:**
+
+1. **Telemetría de disparadores (§6.3)** — es la palanca de expansión más barata
+   que queda sin construir.
+2. **Pantalla de upgrade con los datos del propio cliente (§6.2)** — hoy explica en
+   vez de demostrar.
+3. **Comprobante fiscal** — se registra el pago; la factura AFIP se emite aparte.
+4. **Los add-ons con ⏳ del §5.2** — se facturan, no se entregan.
 
 > **Regla de seguridad**: el gating de front es experiencia de usuario; el gating real
 > vive en el backend. Un cliente Control no debe poder consultar el endpoint de

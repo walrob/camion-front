@@ -44,6 +44,14 @@
 > **Segundo cierre (14/8/2026).** Se saldó lo que habían dejado las fases 6 a 9,
 > salvo lo que depende de Mercado Pago real y del dominio definitivo. Detalle en
 > [§ Cierre de deuda de las fases 6 a 9](#cierre-de-deuda-de-las-fases-6-a-9-14082026).
+>
+> **Las fases 0 a 9 están completas.** La **fase 10 queda postergada a
+> propósito** hasta que haya demanda real: el porqué y las tres señales que
+> indican cuándo arrancarla están en
+> [§ Por qué la fase 10 espera](#por-qué-la-fase-10-espera). Al evaluarla apareció
+> un bug que **no dependía de ella** —el rate limit no corría en ningún
+> endpoint— y se corrigió por separado:
+> [§ El rate limit no corría](#el-rate-limit-no-corría--corregido-el-14082026).
 
 ### Verificación actual — todo en verde
 
@@ -51,8 +59,8 @@
 |---|---|
 | `tsc --noEmit` backend | ✅ **limpio, sin excepciones** |
 | `npm run build` backend | ✅ |
-| Tests unitarios backend | ✅ **78/78** en 8 suites |
-| Tests de integración (e2e) | ✅ **104/104** en 5 suites |
+| Tests unitarios backend | ✅ **87/87** en 9 suites |
+| Tests de integración (e2e) | ✅ **109/109** en 6 suites |
 | `nuxt typecheck` frontend | ✅ **limpio** |
 | Tests unitarios frontend | ✅ **25/25** |
 | `nuxt build` frontend | ✅ |
@@ -147,7 +155,7 @@ volvieron a correr.
 | **Fase 7 — Landing pública** | ✅ **Completa** | Landing en `/`, panel en `/admin`, 24 tests protegiendo R7.1, meta OG verificadas en el HTML servido |
 | **Fase 8 — Superadmin** | ✅ **Completa** | 17 tests e2e cubriendo R8.1 y R8.2. Encontró y corrigió un **bug de seguridad real** |
 | **Fase 9 — MercadoPago y cobranza** | ✅ **Completa** | 22 tests e2e con los cuatro criterios de aceptación. La unicidad de período y la de pago están **en la base**, no sólo en el código |
-| Fase 10 | ⬜ Pendiente | — |
+| Fase 10 | ⏸️ **Postergada a propósito** | Ver [§ Por qué la fase 10 espera](#por-qué-la-fase-10-espera) |
 
 ### Fase 9 — cómo quedó implementada
 
@@ -2218,6 +2226,102 @@ vencimiento próximo, de pago recibido, de mora y de bloqueo.
 **Esfuerzo relativo: XL**. Se planifica por separado cuando exista el primer
 cliente Corporate real.
 
+### Por qué la fase 10 espera
+
+**Decisión del 14/08/2026: no se arranca ninguno de los cinco tracks todavía.**
+
+Se llegó a evaluarla en detalle y se frenó antes de escribir la primera línea de
+producción. El motivo no es de esfuerzo sino de secuencia, y sale del propio
+`MODELO-COMERCIAL.md`:
+
+| Capacidad | Plan que la incluye | Cuándo se vende |
+|---|---|---|
+| `multi_company`, `sso`, `sandbox` | Sólo Corporate | §11.3: **Mes 12+**, *"no venderlo antes de tenerlo"* |
+| `api` | Add-on de Gestión ($ 119.000) e incluida en Corporate | Cuando un cliente Gestión lo pida |
+| `white_label` | Add-on de Gestión+ ($ 149.000) | Ídem |
+
+La curva de §9.3 pone el año 1 en **mix Control / Operación**. Los dos tracks
+vendibles hoy (`api` y `white_label`) son add-ons de **Gestión**, que en esa
+curva todavía casi no existe, y los otros tres son exclusivos de Corporate, que
+son 15 clientes del año 3.
+
+Y hay una razón que pesa más que el calendario: **una API es un contrato que se
+sostiene para siempre**. La forma que se le dé sin un integrador real del otro
+lado es una conjetura, y la conjetura se paga cuando el primer cliente pide algo
+que no encaja y ya hay endpoints publicados que no se pueden cambiar. Es
+exactamente el mismo argumento que §11.3 aplica a Corporate, sólo que en la
+escala de un add-on.
+
+**Cuándo dejar de esperar** — cualquiera de estas tres alcanza:
+
+1. Un cliente Gestión pide la integración y está dispuesto a pagarla.
+2. Aparece la primera oportunidad Corporate concreta (ahí el track que arranca es
+   multi-empresa, no la API).
+3. La operación interna necesita la API para algo propio (por ejemplo, alimentar
+   un tablero de la plataforma sin consultar la base a mano).
+
+Cuando eso pase, el orden sugerido es **API REST + Webhooks primero**: es el
+único track que no toca el núcleo de aislamiento de la fase 2, así que no
+arrastra la revisión de los 104 tests e2e que sí arrastra multi-empresa.
+
+Lo que ya está listo y no hay que rehacer: los flags `api`, `multi_company`,
+`sso`, `sandbox` y `white_label` existen en `Feature` y están sembrados en los
+planes y en el catálogo de add-ons, y `PlanContextService` ya resuelve las
+features como `plan ∪ add-ons`. El gating está puesto; falta lo que va detrás.
+
+### El rate limit no corría — corregido el 14/08/2026
+
+Apareció al evaluar la fase 10 y **no dependía de ella**, así que se resolvió por
+separado.
+
+> **`ThrottlerGuard` nunca se había registrado como `APP_GUARD`.**
+>
+> `app.module.ts` importaba `ThrottlerModule.forRoot(...)`, pero sin un provider
+> `APP_GUARD` **`@nestjs/throttler` no intercepta nada**: los seis `@Throttle(...)`
+> de las fases 6 y 9 estaban declarados y no corrían, y el techo global tampoco.
+> Quedaban sin efecto el freno al alta pública de empresas —que es la mitigación
+> de **R6.1** junto con la verificación de email—, el reenvío de invitaciones y de
+> confirmación de casilla, y el webhook de Mercado Pago, que **es público**.
+>
+> Es el peor tipo de protección: la que se lee bien en el código, figura como
+> cubierta en el plan y no hace nada.
+
+**Cómo se cerró:**
+
+| Cambio | Por qué |
+|---|---|
+| `AppThrottlerGuard` registrado como `APP_GUARD` | Global y no por controlador: un límite que hay que acordarse de poner en cada ruta nueva falta tarde o temprano justo donde importa |
+| El contador es **por sesión** cuando hay token, y por IP cuando no | Contar por IP a los usuarios autenticados rompería a cualquier cliente con oficina: diez personas detrás de una sola IP pública compartirían el balde y se cortarían entre ellas. Los anónimos no tienen token, y son justo los casos —login, alta, webhook— donde limitar por IP es lo correcto |
+| El token se guarda hasheado (SHA-256 recortado) en la clave del throttler | La clave termina en memoria y en los diagnósticos; una credencial válida no tiene por qué estar ahí |
+| `TRUST_PROXY` en `main.ts`, con default 1 en producción | **Sin esto el arreglo habría sido peor que el problema.** La app escucha en texto plano y nginx termina TLS, así que `req.ip` era siempre la IP del proxy: todo el tráfico anónimo habría compartido un contador y el alta de empresas se habría agotado entre todos los clientes |
+| `THROTTLE_ENABLED=false` en el entorno e2e | Las suites corren seguidas desde la misma IP y agotarían cualquier techo. Un test que falla por el rate limit no dice nada sobre lo que probaba |
+
+**Verificación:** `src/common/throttler/app-throttler.guard.spec.ts` (9 casos sobre
+qué se cuenta) y `test/rate-limit.e2e-spec.ts` (5 casos e2e). Estos últimos son
+los que importan, porque prueban lo que fallaba: que un endpoint decorado
+devuelva **429**. Se verifican dos endpoints con límites distintos (5 y 5 sobre
+un techo global de 120) para que no puedan pasar por casualidad si el guard
+estuviera enganchado pero ignorando el `@Throttle` del método.
+
+> ⚠️ **`TRUST_PROXY` hay que definirlo en el `.env.production` del servidor**: los
+> `.env` están en `.gitignore` y no viajan con el deploy. El default del código es
+> 1 (nginx en la misma máquina); si hay un balanceador o un CDN delante, va 2.
+
+### Deuda abierta
+
+> **`POST /auth/login` no tiene `@Throttle` propio.** Apareció al escribir los
+> tests del arreglo anterior: un test daba por hecho un límite de 20 intentos y
+> resultó que no existe. Hoy el login sólo tiene el techo global —**120 intentos
+> por minuto y por IP**—, que para probar contraseñas por fuerza bruta es
+> holgado. Lo mismo vale para `forgot-password`, `reset-password` y
+> `change-password`.
+>
+> El arreglo es un decorador por endpoint. Se dejó afuera a propósito del cambio
+> anterior: aquél reparaba una protección que se creía activa, y ésta es una
+> protección nueva, con su propia decisión de cuán estricta conviene que sea
+> (demasiado estricta y un usuario que se equivoca tres veces queda afuera diez
+> minutos).
+
 ---
 
 ## 11. Orden de ejecución, dependencias y esfuerzo
@@ -2255,7 +2359,7 @@ cliente Corporate real.
 | **7** | Landing pública | **M** | — | `/` es pública y la PWA del chofer sigue funcionando |
 | **8** | Superadmin | **M** | 5, 6 | Gestión de cartera sin tocar la base |
 | **9** | MercadoPago y crons | **L** | 5 | Ciclo de cobro completo sin intervención |
-| **10** | Corporate | **XL** | 1–9 | Multi-empresa, API, SSO |
+| **10** | Corporate | **XL** | 1–9 | Multi-empresa, API, SSO — ⏸️ [postergada](#por-qué-la-fase-10-espera) |
 
 **Escala**: S ≈ 3-4 días · M ≈ 1,5-2 semanas · L ≈ 2-3 semanas · XL ≈ 3-4 semanas
 (1 desarrollador full-time).

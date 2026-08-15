@@ -69,8 +69,10 @@ const destino = computed(() =>
     </template>
     <!---If any chip or label-->
     <template v-slot:append v-else-if="item.chip">
+      <!-- `chipColor` es lo que permite que el aviso de deuda salga en rojo y
+           no en el color de marca, que no comunicaría nada. -->
       <v-chip
-        color="primary"
+        :color="item.chipColor || 'primary'"
         class="sidebarchip"
         :size="item.chipIcon ? 'x-small' : 'x-small'"
         :variant="item.chipVariant"

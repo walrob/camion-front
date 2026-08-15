@@ -15,69 +15,210 @@
 ## 1. ¿Qué es el sistema?
 
 Reemplaza el cuaderno del chofer y los grupos de WhatsApp por una plataforma web
-**mobile-first**. Tiene **dos experiencias** sobre una misma aplicación:
+**mobile-first**. Es un servicio **multi-empresa**: cada empresa tiene su propia
+cuenta y **solo ve sus datos**. Hay **tres puertas** sobre la misma aplicación:
 
-| Experiencia | Para quién | Cómo se ve |
-|-------------|------------|------------|
-| **App del Chofer** | rol `DRIVER` | Pantalla de celular con barra de navegación inferior, botones grandes, dictado por voz y captura de fotos. Funciona sin señal (offline) y se sincroniza al recuperar conexión. |
-| **Backoffice / Gerencial** | `ADMIN`, `MANAGER`, `DISPATCHER`, `MAINTENANCE`, `HR`, `AUDITOR` | Panel de escritorio con menú lateral (sidebar) organizado por secciones. |
+| Puerta | Dirección | Para quién |
+|--------|-----------|------------|
+| **Sitio público** | `/` | Cualquiera: qué hace el sistema, planes y precios, alta de cuenta. |
+| **App del Chofer** | `/chofer` | rol `DRIVER`. Pantalla de celular con barra inferior, botones grandes, dictado por voz y captura de fotos. Funciona sin señal (offline) y se sincroniza al recuperar conexión. |
+| **Backoffice / Gerencial** | `/admin` | `ADMIN`, `MANAGER`, `DISPATCHER`, `MAINTENANCE`, `HR`, `AUDITOR`. Panel de escritorio con menú lateral organizado por secciones. |
 
 Al iniciar sesión, el sistema redirige automáticamente: el chofer va a `/chofer`
-y el resto al panel de administración. Cada usuario ve solo lo que su rol permite.
+y el resto a `/admin`. Cada usuario ve solo lo que su rol permite, y cada empresa
+solo lo que su **plan** incluye (ver §3).
+
+> **Si la app del chofer está instalada** en el celular (PWA), abre directamente en
+> `/chofer`: no pasa por el sitio público.
 
 ---
 
-## 2. Roles y qué puede hacer cada uno
+## 2. Alta de la cuenta y primeros pasos
 
-| Rol | Función | Accede principalmente a |
-|-----|---------|-------------------------|
-| **ADMIN** | Administrador del sistema | Todo: usuarios, flota, viajes, finanzas, configuración |
-| **MANAGER** (Gerente) | Dirección / dueños | Panel, indicadores, lectura de toda la operación |
-| **DISPATCHER** (Despachante) | Coordina la operación diaria | Alta de viajes, incidentes, alertas, mensajes, flota |
-| **MAINTENANCE** (Taller) | Mantenimiento de unidades | Mantenimiento, órdenes de trabajo, documentos de camiones |
-| **DRIVER** (Chofer) | Conductor en ruta | Sus viajes, bitácora, checklist, combustible, OEA, incidentes, mensajes |
-| **HR** (RRHH) | Recursos Humanos | Legajos del personal, permisos/vencimientos, choferes |
-| **AUDITOR** | Auditoría / contable | Lectura de bitácoras, rendiciones, indicadores, planillas OEA |
+### 2.1 Crear la cuenta
+
+Desde el sitio público, **Crear cuenta** (`/auth/registro-empresa`): nombre de la
+empresa, CUIT, y el nombre, email y contraseña del primer usuario, que queda como
+**ADMIN**.
+
+1. **Confirmación de email.** Llega un correo con un link de verificación. Hasta
+   confirmar, el login no deja entrar y ofrece **reenviar** el correo.
+2. **Prueba gratuita: 21 días de plan Operación completo** —no del plan de
+   entrada—, así que durante ese período están habilitadas rendiciones,
+   combustible, mantenimiento, OEA y RRHH básico.
+3. Al vencer la prueba sin contratar, la cuenta queda **suspendida** tras 3 días de
+   gracia: los datos no se borran y se recuperan al activar un plan.
+
+### 2.2 Configuración inicial (`/initial`)
+
+Después del alta aparece una guía de **tres pasos**, que se pueden saltear y
+retomar:
+
+1. **Cargá tu flota** — camiones y acoplados con patente y número interno. (Si son
+   muchas unidades, se puede pedir la carga asistida desde la planilla: todavía no
+   hay importador de Excel.)
+2. **Sumá a tu equipo** — choferes y taller. Los choferes son **ilimitados en todos
+   los planes**.
+3. **Creá tu primer viaje** — con camión y chofer asignados; la app del chofer lo
+   recibe al instante.
+
+En esa misma pantalla se puede cargar el **logo de la empresa**, que después
+aparece en la aplicación.
+
+### 2.3 Dos caminos para dar acceso a una persona
+
+| Camino | Cuándo | Dónde |
+|---|---|---|
+| **RRHH → Choferes** | Personal propio, en relación de dependencia: además del acceso, arma el **legajo**. | `/admin/rrhh` y `/admin/choferes` |
+| **Equipo (invitación por email)** | Gente sin legajo: contador, despachante tercerizado, auditor externo. | `/admin/equipo` |
+
+La invitación se manda por email, **vale 7 días** y es de un solo uso. La pantalla
+muestra además un **link copiable**, que es la salida cuando el correo cae en spam
+o la casilla quedó mal escrita. El **rol que se puede invitar depende del plan**
+(§3.3). `/admin/equipo` es de `ADMIN` y `MANAGER`.
 
 ---
 
-## 3. Menú del Backoffice
+## 3. Planes, candados y límites
 
-El menú lateral está agrupado por dominio de uso diario:
+La empresa contrata un **plan** —Control, Operación, Gestión o Corporate— y eso
+define **qué módulos están habilitados**, además de los límites de la cuenta.
+
+### 3.1 Los módulos bloqueados se ven, no se esconden
+
+Un módulo fuera del plan **sigue apareciendo en el menú**, en gris y con un
+**candado**. Al hacer clic lleva a una pantalla que explica qué incluye y con qué
+plan viene. La regla también corre del lado del servidor: no alcanza con conocer la
+dirección de la pantalla.
+
+### 3.2 Qué trae cada plan
+
+| Módulo | Control | Operación | Gestión | Corporate |
+|---|:---:|:---:|:---:|:---:|
+| Flota, Documentos, Alertas, Viajes, Checklist, Mensajes, Incidentes, App del chofer | ✅ | ✅ | ✅ | ✅ |
+| Bitácora en ruta y **Rendiciones** | — | ✅ | ✅ | ✅ |
+| Combustible · Mantenimiento · Planillas OEA | — | ✅ | ✅ | ✅ |
+| Tablero kanban de incidentes | — | ✅ | ✅ | ✅ |
+| RRHH — legajo y habilitaciones | — | ✅ | ✅ | ✅ |
+| Exportación a Excel | — | ✅ | ✅ | ✅ |
+| **Indicadores** gerenciales (costo por km) | — | — | ✅ | ✅ |
+| RRHH — historial laboral y estados automáticos | — | — | ✅ | ✅ |
+| Ranking de consumo · Umbrales de alerta · Rol Auditor | — | — | ✅ | ✅ |
+| Multi-empresa, API y SSO | — | — | — | ✅ |
+
+### 3.3 Límites por plan
+
+| Límite | Control | Operación | Gestión | Corporate |
+|---|---|---|---|---|
+| **Retención de histórico** | 6 meses | 24 meses | 60 meses | Sin límite |
+| **Almacenamiento de adjuntos** | 2 GB | 50 GB | 250 GB | Sin límite |
+| **Reglas de alerta activas** | 3 | 10 | Sin límite | Sin límite |
+| **Planes de mantenimiento activos** | — | 10 | Sin límite | Sin límite |
+| **Roles habilitados** | 4 | 6 | 7 | 7 |
+| **Usuarios y choferes** | Ilimitados | Ilimitados | Ilimitados | Ilimitados |
+
+- **Retención**: los listados históricos (viajes, bitácora, rendiciones,
+  combustible, incidentes, órdenes de trabajo, OEA y checklists) muestran un aviso
+  cuando el plan recorta lo que se ve. **El dato no se borra**: al subir de plan
+  reaparece completo. Los maestros —flota, choferes, legajos, documentos— nunca se
+  recortan.
+- **Almacenamiento**: al llegar al tope, la subida de un adjunto se rechaza con el
+  mensaje del add-on de ampliación.
+- **Roles**: Control habilita `ADMIN`, `MANAGER`, `DISPATCHER` y `DRIVER`;
+  Operación suma `MAINTENANCE` y `HR`; Gestión suma `AUDITOR`.
+- Los **indicadores** avisan en pantalla cuando el rango que muestran quedó
+  recortado por la retención del plan.
+
+---
+
+## 4. Estado de la cuenta y pagos
+
+En **Mi plan** —menú lateral, sección **Cuenta**— se ve el plan vigente, el consumo
+del mes (camiones y acoplados activos), el total mensual y los períodos pendientes
+de pago. Desde ahí se paga con **Mercado Pago** —link de pago por período o
+**débito automático**— y se da de baja el débito. Lo ven `ADMIN` y `MANAGER`.
+
+> El propio ítem del menú avisa cuando hay algo que resolver: **«Pago pendiente»**
+> en naranja si la cuenta entró en mora, **«Suspendida»** en rojo si ya está
+> bloqueada, y los **días que quedan de prueba** durante la última semana. Con la
+> cuenta al día no muestra nada.
+
+**Estados de la cuenta:**
+
+| Estado | Qué pasa |
+|---|---|
+| **Prueba** (`trial`) | Acceso completo al plan Operación por 21 días. Avisos a los 7, 3 y 1 día del vencimiento. |
+| **Activa** (`active`) | Acceso completo. |
+| **En mora** (`defaulter`) | Acceso completo, con aviso de deuda a la vista. Empieza después de 10 días de vencido el período. |
+| **Bloqueada** (`blocked`) | **Solo lectura**, 10 días después de entrar en mora. Se puede seguir viendo la información y **pagar**; no se puede cargar nada nuevo. |
+| **Dada de baja** (`cancelled`) | Sin acceso. |
+
+Cómo se cobra: la facturación es **abono del plan + precio por vehículo activo**,
+con los acoplados al 50 % y un **mínimo de vehículos** por plan. Se cuenta el
+**máximo de unidades activas del mes**, no las del último día. Subir de plan o
+agregar unidades es inmediato y se prorratea; bajar de plan o quitar unidades
+recién tiene efecto en la renovación del período.
+
+---
+
+## 5. Roles y qué puede hacer cada uno
+
+| Rol | Función | Accede principalmente a | Desde el plan |
+|-----|---------|-------------------------|---------------|
+| **ADMIN** | Administrador de la empresa | Todo: usuarios, flota, viajes, finanzas, plan y pagos | Control |
+| **MANAGER** (Gerente) | Dirección / dueños | Panel, indicadores, lectura de toda la operación | Control |
+| **DISPATCHER** (Despachante) | Coordina la operación diaria | Alta de viajes, incidentes, alertas, mensajes, flota | Control |
+| **DRIVER** (Chofer) | Conductor en ruta | Sus viajes, bitácora, checklist, combustible, OEA, incidentes, mensajes | Control |
+| **MAINTENANCE** (Taller) | Mantenimiento de unidades | Mantenimiento, órdenes de trabajo, documentos de camiones | Operación |
+| **HR** (RRHH) | Recursos Humanos | Legajos del personal, permisos/vencimientos, choferes | Operación |
+| **AUDITOR** | Auditoría / contable | Lectura de bitácoras, rendiciones, indicadores, planillas OEA | Gestión |
+
+---
+
+## 6. Menú del Backoffice
+
+El menú lateral está agrupado por dominio de uso diario. Los ítems marcados con 🔒
+dependen del plan: si no está incluido, se ven con candado.
 
 **Inicio**
-- **Panel** — resumen gerencial.
-- **Indicadores** — KPIs con filtros y exportación (`ADMIN`, `MANAGER`, `AUDITOR`).
+- **Panel** (`/admin`) — resumen gerencial.
+- 🔒 **Indicadores** (`/admin/indicadores`) — KPIs con filtros y exportación
+  (`ADMIN`, `MANAGER`, `AUDITOR`; plan Gestión).
 
 **Operación**
-- **Viajes** — alta y seguimiento de viajes.
-- **Incidentes** — tablero de incidentes reportados por choferes.
-- **Alertas** — bandeja priorizada de avisos automáticos.
-- **Mensajes** — mensajería con los choferes.
+- **Viajes** (`/admin/viajes`) — alta y seguimiento de viajes.
+- **Incidentes** (`/admin/incidentes`) — tablero de incidentes reportados por choferes.
+- **Alertas** (`/admin/alertas`) — bandeja priorizada de avisos automáticos.
+- **Mensajes** (`/admin/mensajes`) — mensajería con los choferes.
 
 **Flota**
-- **Flota** — camiones y acoplados.
-- **Mantenimiento** — planes preventivos y órdenes de trabajo.
-- **Combustible** — tablero de consumos (km/l, gasto por camión/chofer).
-- **Documentos** — centro documental con vencimientos.
+- **Flota** (`/admin/flota`) — camiones y acoplados.
+- 🔒 **Mantenimiento** (`/admin/mantenimiento`) — planes preventivos y órdenes de trabajo.
+- 🔒 **Combustible** (`/admin/combustible`) — tablero de consumos (km/l, gasto por camión/chofer).
+- **Documentos** (`/admin/documentos`) — centro documental con vencimientos.
 
 **Personal**
-- **RRHH** — legajos, permisos/habilitaciones e **historial laboral** del personal.
-- **Choferes** — perfil operativo del chofer.
+- 🔒 **RRHH** (`/admin/rrhh`) — legajos, permisos/habilitaciones e **historial laboral** del personal.
+- **Choferes** (`/admin/choferes`) — perfil operativo del chofer.
+- **Equipo** (`/admin/equipo`) — accesos e invitaciones para gente sin legajo.
 
 **Administración**
-- **Rendiciones** — cierre de gastos por viaje.
-- **Planillas OEA** — inspecciones de seguridad firmadas.
+- 🔒 **Rendiciones** (`/admin/liquidaciones`) — cierre de gastos por viaje.
+- 🔒 **Planillas OEA** (`/admin/oea`) — inspecciones de seguridad firmadas.
+
+**Cuenta**
+- **Mi plan** (`/estado-plan`) — plan contratado, consumo, deuda y pago (§4).
 
 ---
 
-## 4. Flujo completo de un viaje
+## 7. Flujo completo de un viaje
 
 Este es el circuito central del sistema, paso a paso.
 
 ### Paso 0 — Preparación (una sola vez / según necesidad)
 
-Antes de operar, deben existir los datos base. Los carga el backoffice:
+Antes de operar, deben existir los datos base. Los carga el backoffice —es lo mismo
+que propone la guía de configuración inicial (§2.2):
 
 1. **Flota** (`Flota`): dar de alta camiones (patente, número interno, km actual) y
    acoplados. Desde la tabla, el botón **Ver documentos** de cada unidad abre el
@@ -192,7 +333,7 @@ Neto a rendir = Total de gastos rendidos  −  Total de adelantos
 
 ---
 
-## 5. Estados a tener en cuenta
+## 8. Estados a tener en cuenta
 
 **Viaje:** `Asignado` → `En curso` → `Finalizado` (o `Cancelado`).
 
@@ -206,11 +347,16 @@ automáticamente antes del vencimiento).
 
 **Estado laboral del empleado:** `Activo` · `Licencia` · `Suspendido` · `Baja`. No
 se edita a mano: lo **calcula el sistema** a partir del *historial laboral* del
-legajo (ver §6) y se **auto-corrige** cuando una licencia o suspensión vence.
+legajo (ver §9) y se **auto-corrige** cuando una licencia o suspensión vence.
 
 ---
 
-## 6. Módulos de apoyo
+## 9. Módulos de apoyo
+
+> Varios de estos módulos dependen del plan contratado (§3.2): **Combustible**,
+> **Mantenimiento**, **Planillas OEA**, **Rendiciones** y el tablero kanban de
+> **Incidentes** vienen desde Operación; **Indicadores**, el ranking de consumo y
+> el **historial laboral** de RRHH, desde Gestión.
 
 ### Incidentes
 
@@ -301,7 +447,7 @@ operativa del día a día.
 
 ---
 
-## 7. Resumen del recorrido (de un vistazo)
+## 10. Resumen del recorrido (de un vistazo)
 
 ```
 BACKOFFICE                          CHOFER (celular)                 BACKOFFICE
@@ -330,4 +476,7 @@ Alta de VIAJE  ───────────────►  Ve el viaje asi
 
 ---
 
-_Última actualización: 2026-07-24._
+_Última actualización: 2026-08-15 — incorpora el alta autoservicio, los planes y
+límites, el estado de cuenta y el pago por Mercado Pago (fases 0 a 9 del plan SaaS).
+La **fase 10** —multi-empresa, API y SSO del plan Corporate— todavía no está
+disponible._

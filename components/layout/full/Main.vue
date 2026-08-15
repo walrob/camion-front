@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, shallowRef } from "vue";
-import sidebarItems from "@/components/layout/full/vertical-sidebar/sidebarItem";
+import sidebarItems, {
+  type menu,
+} from "@/components/layout/full/vertical-sidebar/sidebarItem";
 import { useDisplay, useTheme } from "vuetify";
 import { Menu2Icon, MoonIcon, SunIcon } from "vue-tabler-icons";
 
@@ -80,6 +82,34 @@ const toggleTheme = async () => {
   }
 };
 
+/**
+ * Aviso de estado comercial sobre el ítem «Mi plan».
+ *
+ * Una cuenta en mora o con la prueba por vencer se arregla en dos clics, pero
+ * sólo si alguien se entera: el chip es lo que convierte el ítem de menú en un
+ * recordatorio. Con la cuenta al día no muestra nada, para no gritar sin motivo.
+ */
+const chipDelPlan = computed<Pick<menu, "chip" | "chipColor"> | null>(() => {
+  const company = authStore.company;
+  if (!company) return null;
+
+  if (company.status === "defaulter")
+    return { chip: "Pago pendiente", chipColor: "warning" };
+  if (company.status === "blocked")
+    return { chip: "Suspendida", chipColor: "error" };
+
+  if (company.status === "trial" && company.trialEndsAt) {
+    const dias = Math.max(
+      0,
+      Math.ceil((new Date(company.trialEndsAt).getTime() - Date.now()) / 86_400_000),
+    );
+    // Antes de la última semana el aviso es ruido: la prueba recién empieza.
+    if (dias <= 7) return { chip: `${dias} d de prueba`, chipColor: "info" };
+  }
+
+  return null;
+});
+
 const filterSidebarMenu = computed(() => {
   if (!user?.role) return [];
   // Sólo se filtra por ROL. Los ítems que el plan no incluye **no se ocultan**:
@@ -91,11 +121,19 @@ const filterSidebarMenu = computed(() => {
   );
   // Descarta headers de secciones que quedaron sin ítems visibles para el rol,
   // para no mostrar títulos de sección huérfanos.
-  return visible.filter((item, i) => {
+  const conSeccionesLlenas = visible.filter((item, i) => {
     if (!item.header) return true;
     const next = visible[i + 1];
     return !!next && !next.header;
   });
+
+  // El chip de «Mi plan» depende del estado de la cuenta, que es dinámico: se
+  // agrega acá y no en `sidebarItem.ts`, que es una constante.
+  const chip = chipDelPlan.value;
+  if (!chip) return conSeccionesLlenas;
+  return conSeccionesLlenas.map((item) =>
+    item.to === "/estado-plan" ? { ...item, ...chip } : item,
+  );
 });
 
 const props = defineProps({

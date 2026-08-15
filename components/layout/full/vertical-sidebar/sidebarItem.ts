@@ -14,6 +14,7 @@ import {
   MessageIcon,
   GasStationIcon,
   ClipboardCheckIcon,
+  CreditCardIcon,
 } from "vue-tabler-icons";
 import { Role } from "~/types/enums";
 import { Feature } from "~/types/plan";
@@ -158,6 +159,21 @@ const sidebarItem: menu[] = [
     to: "/admin/oea",
     feature: Feature.OEA,
     roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.AUDITOR],
+  },
+
+  { header: "Cuenta" },
+  {
+    // La suscripción a FleetLog, no la plata de los viajes: por eso va en su
+    // propia sección y no en Administración.
+    //
+    // Sin feature: nunca se bloquea por plan — es la pantalla donde se paga, y
+    // sigue accesible incluso con la cuenta suspendida (lista blanca del
+    // `AccountStatusGuard`). Los roles son los de `GET billing/quote`, que es lo
+    // que la pantalla necesita para cargar.
+    title: "Mi plan",
+    icon: CreditCardIcon,
+    to: "/estado-plan",
+    roles: [Role.ADMIN, Role.MANAGER],
   },
 ];
 
