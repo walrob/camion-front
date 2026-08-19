@@ -33,8 +33,8 @@ const onLogin = async () => {
 
     if (res.data && res.data.token) {
       authStore.setLastUserEmail(email.value);
-      authStore.setAuth(res.data.token, res.data.expiresAt, res.data.user);
-      await navigateTo("/");
+      await authStore.setAuth(res.data.token, res.data.expiresAt, res.data.user);
+      await navigateTo(authStore.paginaDeInicio);
     } else {
       errorMsg.value = "Credenciales incorrectas";
     }

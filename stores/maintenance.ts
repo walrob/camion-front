@@ -97,6 +97,22 @@ export const useMaintenanceStore = defineStore("maintenance", {
     async updateOrder(id: string, truckId: string, payload: any) {
       return this.mutate("patch", `maintenance/orders/${id}/`, payload, "OT actualizada", () => this.getOrders(truckId), true);
     },
+    /**
+     * Reabre una OT finalizada para poder corregirla.
+     *
+     * Vuelve a "en proceso". Lo que el cierre ya le hizo al plan (el próximo
+     * service quedó contado desde esta orden) no se revierte: se recalcula al
+     * cerrarla de nuevo.
+     */
+    async reopenOrder(id: string, truckId: string, reason: string) {
+      return this.mutate(
+        "patch",
+        `maintenance/orders/${id}/reopen/`,
+        { reason },
+        "OT reabierta",
+        () => this.getOrders(truckId),
+      );
+    },
 
     async mutate(
       method: "post" | "patch" | "delete",

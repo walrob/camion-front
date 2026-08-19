@@ -47,6 +47,32 @@ const setSeverity = (severity: string) => {
   if (incident.value && severity !== incident.value.severity)
     incidentStore.changeSeverity(incident.value.id, severity);
 };
+/**
+ * Un incidente resuelto queda de sólo lectura salvo por los comentarios.
+ *
+ * Comentar sigue habilitado a propósito: agrega información sin reescribir lo
+ * que pasó. Reasignar o cambiar la severidad, en cambio, alteran el registro de
+ * cómo se atendió el hecho, así que exigen reabrirlo primero — y eso el backend
+ * lo rechaza igual, esto es sólo para no ofrecer un botón que va a fallar.
+ */
+const resuelto = computed(() => incident.value?.status === "resolved");
+
+const auth = useAuthStore();
+const puedeReabrir = computed(
+  () => auth.isAdmin || auth.isManager || auth.isDispatcher,
+);
+
+const reaperturaAbierta = ref(false);
+const reabriendo = ref(false);
+
+const confirmarReapertura = async (motivo: string) => {
+  if (!incident.value) return;
+  reabriendo.value = true;
+  const ok = await incidentStore.reopen(incident.value.id, motivo);
+  reabriendo.value = false;
+  if (ok) reaperturaAbierta.value = false;
+};
+
 const sendComment = async () => {
   if (comment.value.trim() && incident.value) {
     await incidentStore.comment(incident.value.id, comment.value);
@@ -115,6 +141,7 @@ const sendComment = async () => {
               variant="outlined"
               density="compact"
               hide-details
+              :disabled="resuelto"
               @update:model-value="doAssign"
             />
           </v-col>
@@ -128,6 +155,7 @@ const sendComment = async () => {
               variant="outlined"
               density="compact"
               hide-details
+              :disabled="resuelto"
               @update:model-value="setSeverity"
             />
           </v-col>
@@ -135,7 +163,7 @@ const sendComment = async () => {
 
         <!-- Estado -->
         <v-row dense class="mb-2">
-          <v-col cols="12" class="d-flex align-center ga-1">
+          <v-col v-if="!resuelto" cols="12" class="d-flex align-center ga-1">
             <v-btn
               v-for="s in incidentStatusOptions"
               :key="s.value"
@@ -145,6 +173,27 @@ const sendComment = async () => {
               @click="setStatus(s.value)"
             >
               {{ s.label }}
+            </v-btn>
+          </v-col>
+
+          <!-- Cerrado: se puede comentar, no reescribir. -->
+          <v-col v-else cols="12" class="d-flex align-center ga-2">
+            <v-icon size="16" color="medium-emphasis">
+              mdi-lock-check-outline
+            </v-icon>
+            <span class="text-caption text-medium-emphasis">
+              Resuelto{{ incident.resolvedAt ? ` el ${fmt(incident.resolvedAt)}` : "" }}.
+              Para reasignarlo o cambiarle la severidad hay que reabrirlo.
+            </span>
+            <v-spacer />
+            <v-btn
+              v-if="puedeReabrir"
+              size="x-small"
+              variant="text"
+              prepend-icon="mdi-lock-open-variant-outline"
+              @click="reaperturaAbierta = true"
+            >
+              Reabrir
             </v-btn>
           </v-col>
         </v-row>
@@ -187,6 +236,14 @@ const sendComment = async () => {
         <v-btn variant="text" @click="close">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
+
+    <ModalReopen
+      v-model="reaperturaAbierta"
+      title="Reabrir incidente"
+      description="Vuelve a quedar en curso y el motivo se suma al historial."
+      :loading="reabriendo"
+      @confirm="confirmarReapertura"
+    />
   </v-dialog>
 </template>
 

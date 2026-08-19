@@ -30,7 +30,7 @@ export default defineNuxtConfig({
           content:
             "FleetLog reemplaza el cuaderno del chofer, el Excel y los grupos " +
             "de WhatsApp: rendiciones automáticas, control de vencimientos y " +
-            "costo por kilómetro. Probalo gratis 21 días.",
+            "costo por kilómetro. Probalo gratis 30 días.",
         },
         { name: "author", content: "NorthAr Consulting" },
         // Debe seguir a `primary` de FleetLight (theme/LightTheme.ts).
@@ -57,7 +57,7 @@ export default defineNuxtConfig({
           property: "og:description",
           content:
             "Rendiciones que se arman solas, vencimientos bajo control y el " +
-            "costo por kilómetro de tu flota. Probalo gratis 21 días, sin tarjeta.",
+            "costo por kilómetro de tu flota. Probalo gratis 30 días, sin tarjeta.",
         },
         { property: "og:image", content: "/og-fleetlog.png" },
         { property: "og:locale", content: "es_AR" },
@@ -70,7 +70,7 @@ export default defineNuxtConfig({
           name: "twitter:description",
           content:
             "Rendiciones automáticas, vencimientos bajo control y costo por " +
-            "kilómetro. Probalo gratis 21 días.",
+            "kilómetro. Probalo gratis 30 días.",
         },
         { name: "twitter:image", content: "/og-fleetlog.png" },
       ],

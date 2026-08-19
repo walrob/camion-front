@@ -38,7 +38,6 @@ const abrir = (p: any) => {
     name: p.name,
     baseFee: Number(p.baseFee),
     pricePerVehicle: Number(p.pricePerVehicle),
-    minVehicles: Number(p.minVehicles),
     setupFee: Number(p.setupFee),
   };
   dialogo.value = true;
@@ -101,7 +100,6 @@ onMounted(cargar);
             <th>Plan</th>
             <th class="text-right">Abono</th>
             <th class="text-right">Por vehículo</th>
-            <th class="text-right">Mínimo</th>
             <th class="text-right">Implementación</th>
             <th></th>
           </tr>
@@ -116,7 +114,6 @@ onMounted(cargar);
             </td>
             <td class="text-right">{{ money(p.baseFee) }}</td>
             <td class="text-right">{{ money(p.pricePerVehicle) }}</td>
-            <td class="text-right">{{ p.minVehicles }}</td>
             <td class="text-right">{{ money(p.setupFee) }}</td>
             <td class="text-right">
               <v-btn size="small" variant="text" @click="abrir(p)">
@@ -151,13 +148,6 @@ onMounted(cargar);
           variant="outlined"
           density="comfortable"
           prefix="$"
-        />
-        <v-text-field
-          v-model.number="editando.minVehicles"
-          label="Mínimo de camiones"
-          type="number"
-          variant="outlined"
-          density="comfortable"
         />
         <v-text-field
           v-model.number="editando.setupFee"

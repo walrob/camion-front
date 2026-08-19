@@ -35,6 +35,33 @@ onMounted(() => {
   alertStore.getAlerts();
   alertStore.getCount();
 });
+
+// ── Reapertura ──────────────────────────────────────────────────────────────
+// Una alerta resuelta no vuelve atrás con un click: se reabre con motivo y eso
+// queda en la auditoría. RRHH no aparece acá porque no revierte cierres (lo
+// rechaza el backend igual).
+const auth = useAuthStore();
+const puedeReabrir = computed(
+  () => auth.isAdmin || auth.isManager || auth.isDispatcher,
+);
+
+const reapertura = ref<{ abierto: boolean; id: string; titulo: string }>({
+  abierto: false,
+  id: "",
+  titulo: "",
+});
+const reabriendo = ref(false);
+
+const pedirReapertura = (a: { id: string; title: string }) => {
+  reapertura.value = { abierto: true, id: a.id, titulo: a.title };
+};
+
+const confirmarReapertura = async (motivo: string) => {
+  reabriendo.value = true;
+  const ok = await alertStore.reopen(reapertura.value.id, motivo);
+  reabriendo.value = false;
+  if (ok) reapertura.value.abierto = false;
+};
 </script>
 
 <template>
@@ -196,8 +223,35 @@ onMounted(() => {
               Resolver
             </v-btn>
           </div>
+
+          <div v-else class="d-flex ga-2 mt-3 align-center">
+            <v-icon size="15" color="medium-emphasis">
+              mdi-lock-check-outline
+            </v-icon>
+            <span class="text-caption text-medium-emphasis">
+              Resuelta. Si el problema sigue, reabrila indicando el motivo.
+            </span>
+            <v-spacer />
+            <v-btn
+              v-if="puedeReabrir"
+              size="small"
+              variant="text"
+              prepend-icon="mdi-lock-open-variant-outline"
+              @click="pedirReapertura(a)"
+            >
+              Reabrir
+            </v-btn>
+          </div>
         </div>
       </v-card>
     </template>
+
+    <ModalReopen
+      v-model="reapertura.abierto"
+      title="Reabrir alerta"
+      :description="reapertura.titulo"
+      :loading="reabriendo"
+      @confirm="confirmarReapertura"
+    />
   </div>
 </template>

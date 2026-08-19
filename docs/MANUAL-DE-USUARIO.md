@@ -154,8 +154,8 @@ de pago. Desde ahí se paga con **Mercado Pago** —link de pago por período o
 | **Dada de baja** (`cancelled`) | Sin acceso. |
 
 Cómo se cobra: la facturación es **abono del plan + precio por vehículo activo**,
-con los acoplados al 50 % y un **mínimo de vehículos** por plan. Se cuenta el
-**máximo de unidades activas del mes**, no las del último día. Subir de plan o
+con los acoplados al 50 %. **No hay mínimo de vehículos**: se factura lo que hay.
+Se cuenta el **máximo de unidades activas del mes**, no las del último día. Subir de plan o
 agregar unidades es inmediato y se prorratea; bajar de plan o quitar unidades
 recién tiene efecto en la renovación del período.
 

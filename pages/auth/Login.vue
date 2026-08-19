@@ -149,7 +149,9 @@ const handleLogin = async () => {
     });
     const { token, expiresAt, user } = res.data;
     await authStore.setAuth(token, expiresAt, user);
-    await navigateTo("/");
+    // Al panel que corresponde al rol, no a la landing: el middleware sólo
+    // saca de `/` al chofer, así que un admin se quedaría en la página pública.
+    await navigateTo(authStore.paginaDeInicio);
   } catch (error: any) {
     const mensaje = String(error?.response?.data?.message ?? "");
     if (mensaje.includes(MARCA_SIN_VERIFICAR)) {

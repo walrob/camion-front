@@ -78,7 +78,7 @@ const aceptar = async () => {
     await auth.setAuth(data.token, data.expiresAt, data.user);
     await auth.fetchSession(true);
 
-    router.push(data.user?.role === "driver" ? "/chofer" : "/");
+    router.push(auth.paginaDeInicio);
   } catch (e: any) {
     error.value =
       e?.response?.data?.message ?? "No pudimos completar el alta.";

@@ -148,6 +148,35 @@ const onConfirmClose = async (payload: { resp: boolean }) => {
     await settlementStore.close(toClose.value.id);
   toClose.value = null;
 };
+
+// ── Reapertura ──────────────────────────────────────────────────────────────
+// Cerrada es plata rendida, así que volver a borrador es la reapertura más
+// restringida: sólo administración y gerencia, con motivo y auditada. El
+// auditor ve y cierra, pero no revierte cierres.
+const auth = useAuthStore();
+const puedeReabrir = computed(() => auth.isAdmin || auth.isManager);
+
+const reapertura = ref<{ abierto: boolean; id: string; viaje: string }>({
+  abierto: false,
+  id: "",
+  viaje: "",
+});
+const reabriendo = ref(false);
+
+const pedirReapertura = (s: Settlement) => {
+  reapertura.value = {
+    abierto: true,
+    id: s.id,
+    viaje: s.trip?.code ? `Viaje ${s.trip.code}` : "",
+  };
+};
+
+const confirmarReapertura = async (motivo: string) => {
+  reabriendo.value = true;
+  const ok = await settlementStore.reopen(reapertura.value.id, motivo);
+  reabriendo.value = false;
+  if (ok) reapertura.value.abierto = false;
+};
 // Al buscar volvemos a la primera página: la anterior puede no existir con el
 // nuevo resultado.
 const onSearch = useDebounceFn(() => {
@@ -290,6 +319,22 @@ onMounted(() => settlementStore.getSettlements());
             />
           </template>
         </v-tooltip>
+        <v-tooltip
+          v-if="item.status === 'closed' && puedeReabrir"
+          text="Reabrir para recalcular"
+          location="top"
+        >
+          <template #activator="{ props: tp }">
+            <v-btn
+              v-bind="tp"
+              icon="mdi-lock-open-variant-outline"
+              aria-label="Reabrir rendición"
+              size="small"
+              variant="text"
+              @click="pedirReapertura(item)"
+            />
+          </template>
+        </v-tooltip>
       </template>
     </ResponsiveTable>
 
@@ -368,8 +413,15 @@ onMounted(() => settlementStore.getSettlements());
     <ModalConfirm
       v-model="confirm"
       title="Cerrar rendición"
-      description="<p>¿Cerrar esta rendición? No podrá recalcularse.</p>"
+      description="<p>¿Cerrar esta rendición? Deja de poder recalcularse: para volver a tocarla hay que reabrirla, y eso queda auditado.</p>"
       @save="onConfirmClose"
+    />
+    <ModalReopen
+      v-model="reapertura.abierto"
+      title="Reabrir rendición"
+      :description="`${reapertura.viaje} · Vuelve a borrador para poder recalcularla.`"
+      :loading="reabriendo"
+      @confirm="confirmarReapertura"
     />
   </div>
 </template>

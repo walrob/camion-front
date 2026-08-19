@@ -98,6 +98,27 @@ export const useSettlementStore = defineStore("settlement", {
       }
     },
 
+    /**
+     * Vuelve a borrador una rendición cerrada para poder recalcularla.
+     *
+     * Es plata ya rendida al chofer: el backend sólo se lo permite a
+     * administración y gerencia, y lo deja asentado en la auditoría con el neto
+     * que tenía al reabrirse.
+     */
+    async reopen(id: string, reason: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        await $api.post(`settlements/${id}/reopen/`, { reason });
+        general.setSuccessSnackbar("Rendición reabierta");
+        await this.getSettlements();
+        return true;
+      } catch (e) {
+        general.setErrorSnackbar(e);
+        return false;
+      }
+    },
+
     async openPdf(id: string) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();

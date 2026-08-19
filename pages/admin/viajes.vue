@@ -213,7 +213,13 @@ onMounted(async () => {
           color="warning"
           @click="askCancel(item)"
         />
+        <!--
+          Sólo se borra lo que todavía no pasó. Un viaje en curso o terminado es
+          el registro de lo que hizo la unidad —kilómetros, gastos, liquidación—
+          así que se cancela, no se elimina. El backend lo rechaza igual.
+        -->
         <IconBtn
+          v-if="item.status === 'assigned' || item.status === 'canceled'"
           tooltip="Eliminar viaje"
           icon="mdi-delete"
           size="small"

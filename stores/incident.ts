@@ -142,6 +142,22 @@ export const useIncidentStore = defineStore("incident", {
       );
     },
 
+    /**
+     * Reabre un incidente resuelto y lo deja en curso.
+     *
+     * Usa el mismo endpoint que el cambio de estado —para el backend reabrir
+     * *es* pasar de resuelto a otra cosa— pero el motivo acá no es opcional:
+     * sin él la API responde 400.
+     */
+    async reopen(id: string, reason: string) {
+      return this.mutate(
+        `incidents/${id}/status/`,
+        "patch",
+        { status: "in_progress", note: reason },
+        "Incidente reabierto",
+      );
+    },
+
     async changeSeverity(id: string, severity: string) {
       return this.mutate(
         `incidents/${id}/severity/`,

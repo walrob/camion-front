@@ -45,6 +45,24 @@ export const useAuthStore = defineStore('auth', {
     isDemo: (state) => !!state.user?.isDemo,
 
     /**
+     * Pantalla en la que arranca este usuario, según su rol.
+     *
+     * `/` es la landing pública, no el backoffice: después de un login o de
+     * aceptar una invitación hay que mandarlo acá, o el usuario recién
+     * autenticado termina mirando la página de precios.
+     *
+     * Replica el encaminamiento de `middleware/auth.global.ts`: si cambia uno,
+     * cambia el otro. El superadmin se compara por texto porque no está en el
+     * enum `Role` — no es un rol de empresa.
+     */
+    paginaDeInicio: (state) => {
+      const rol = state.user?.role
+      if (rol === Role.DRIVER) return '/chofer'
+      if (rol === 'superadmin') return '/superadmin'
+      return '/admin'
+    },
+
+    /**
      * ¿El plan de la empresa incluye esta funcionalidad?
      *
      * Sirve para la experiencia de usuario (mostrar el candado, no romper la

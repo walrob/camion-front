@@ -1,0 +1,130 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Documentos legales públicos (términos y condiciones, privacidad).
+//
+// El contenido llega por slot desde las páginas, así que los estilos NO pueden
+// ir en un <style scoped> del componente: van acá, globales y acotados a la
+// clase `.legal`, que envuelve todo el articulado.
+// ─────────────────────────────────────────────────────────────────────────────
+
+.legal {
+  max-width: 72ch;
+  color: rgb(var(--v-theme-textPrimary));
+
+  // Medida y aire de lectura larga: interlineado alto y párrafos separados.
+  p,
+  li {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  // La barra superior es fija: sin esto el ancla deja el título tapado.
+  h2 {
+    scroll-margin-top: 96px;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgb(var(--v-theme-borderColor));
+    font-size: 1.35rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  // El primero no lleva la línea de separación: no separa nada.
+  h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  h3 {
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 1.15rem 1.15rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  a {
+    color: rgb(var(--v-theme-primary));
+  }
+
+  // Bloque destacado para las advertencias que no deberían pasarse por alto
+  // (qué NO hace el servicio, obligaciones del cliente sobre sus choferes).
+  .legal-nota {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid rgb(var(--v-theme-primary));
+    border-radius: 0 8px 8px 0;
+    background: rgba(var(--v-theme-primary), 0.06);
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Leyendas de la AAIP y aclaraciones fiscales: letra chica, pero visible.
+  .legal-fina {
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: rgb(var(--v-theme-textSecondary));
+  }
+
+  // ── Marcador de dato pendiente ──────────────────────────────────────────
+  // Los documentos quedan con datos societarios que sólo la empresa conoce
+  // (CUIT, domicilio, jurisdicción). Se resaltan en amarillo a propósito: es
+  // imposible publicar la página sin verlos.
+  .legal-completar {
+    padding: 0.05em 0.4em;
+    border-radius: 4px;
+    background: rgba(var(--v-theme-warning), 0.22);
+    border: 1px dashed rgba(var(--v-theme-warning), 0.9);
+    font-size: 0.9em;
+    font-weight: 600;
+    // Sin `nowrap`: alguno de estos marcadores es largo y en un teléfono
+    // provocaría desborde horizontal de toda la página.
+  }
+}
+
+// ── Índice lateral ──────────────────────────────────────────────────────────
+.legal-indice {
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.legal-indice__item {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgb(var(--v-theme-textSecondary));
+  text-decoration: none;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: rgb(var(--v-theme-primary));
+  }
+}
+
+.legal-indice__num {
+  flex: 0 0 1.35rem;
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--v-theme-textSecondary));
+  opacity: 0.65;
+}

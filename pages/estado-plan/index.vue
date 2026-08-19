@@ -29,7 +29,8 @@ const company = computed(() => auth.company);
 const storage = computed(() => auth.storage);
 
 const diasDeTrial = computed(() => {
-  if (company.value?.status !== "trial" || !company.value?.trialEndsAt) return null;
+  if (company.value?.status !== "trial" || !company.value?.trialEndsAt)
+    return null;
   const fin = new Date(company.value.trialEndsAt).getTime();
   return Math.max(0, Math.ceil((fin - Date.now()) / 86_400_000));
 });
@@ -42,9 +43,7 @@ const ESTADOS: Record<string, { texto: string; color: string }> = {
   cancelled: { texto: "Dada de baja", color: "error" },
 };
 
-const impagos = computed(() =>
-  periodos.value.filter((p) => !p.isPaid),
-);
+const impagos = computed(() => periodos.value.filter((p) => !p.isPaid));
 
 /**
  * Vuelta desde Mercado Pago.
@@ -121,7 +120,11 @@ async function cancelarDebito() {
 onMounted(async () => {
   const retorno = RETORNOS[String(route.query.pago ?? "")];
   if (retorno) {
-    general.setSnackbar({ color: retorno.color, message: retorno.mensaje, timeout: 8000 });
+    general.setSnackbar({
+      color: retorno.color,
+      message: retorno.mensaje,
+      timeout: 8000,
+    });
   }
 
   try {
@@ -148,7 +151,9 @@ onMounted(async () => {
         <!-- Plan y estado -->
         <v-col cols="12" md="7">
           <v-card border flat rounded="lg" class="pa-6">
-            <div class="d-flex align-center justify-space-between flex-wrap ga-3 mb-4">
+            <div
+              class="d-flex align-center justify-space-between flex-wrap ga-3 mb-4"
+            >
               <div>
                 <div class="text-caption text-medium-emphasis">Plan actual</div>
                 <div class="text-h5 font-weight-bold">
@@ -198,13 +203,15 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="d-flex justify-space-between pt-3">
-                <div class="text-subtitle-1 font-weight-bold">Total mensual</div>
+                <div class="text-subtitle-1 font-weight-bold">
+                  Total mensual
+                </div>
                 <div class="text-subtitle-1 font-weight-bold">
                   {{ money(cotizacion.desglose.amount) }}
                 </div>
               </div>
               <p class="text-caption text-medium-emphasis mt-2">
-                Importes sin IVA. Se factura el día
+                Importes con IVA. Se factura el día
                 {{ cotizacion.company?.billingDay ?? 1 }} de cada mes.
               </p>
             </div>
@@ -217,7 +224,9 @@ onMounted(async () => {
             <div class="text-subtitle-1 font-weight-medium mb-3">Consumo</div>
 
             <div v-if="cotizacion" class="d-flex justify-space-between py-1">
-              <span class="text-body-2 text-medium-emphasis">Camiones activos</span>
+              <span class="text-body-2 text-medium-emphasis"
+                >Camiones activos</span
+              >
               <strong>{{ cotizacion.unidades.activeTrucks }}</strong>
             </div>
             <div v-if="cotizacion" class="d-flex justify-space-between py-1">
@@ -237,7 +246,9 @@ onMounted(async () => {
                 </strong>
               </div>
               <v-progress-linear
-                :model-value="(storage.usedBytes / (storage.maxGb * 1073741824)) * 100"
+                :model-value="
+                  (storage.usedBytes / (storage.maxGb * 1073741824)) * 100
+                "
                 color="primary"
                 height="6"
                 rounded
@@ -256,7 +267,10 @@ onMounted(async () => {
             <div class="text-subtitle-1 font-weight-medium mb-2">
               Períodos pendientes
             </div>
-            <div v-if="!impagos.length" class="text-body-2 text-medium-emphasis">
+            <div
+              v-if="!impagos.length"
+              class="text-body-2 text-medium-emphasis"
+            >
               No tenés pagos pendientes.
             </div>
             <div
@@ -310,7 +324,12 @@ onMounted(async () => {
                 Mercado Pago debita el importe del mes en cada vencimiento. Si
                 cambia la cantidad de unidades, el monto se ajusta solo.
               </p>
-              <v-btn size="small" variant="text" color="error" @click="cancelarDebito">
+              <v-btn
+                size="small"
+                variant="text"
+                color="error"
+                @click="cancelarDebito"
+              >
                 Cancelar débito automático
               </v-btn>
             </template>
@@ -328,7 +347,8 @@ onMounted(async () => {
                 rounded="lg"
                 class="mb-3"
               >
-                Primero hay que saldar {{ money(mp.deudaPendiente) }} pendientes.
+                Primero hay que saldar
+                {{ money(mp.deudaPendiente) }} pendientes.
               </v-alert>
               <v-btn
                 color="primary"

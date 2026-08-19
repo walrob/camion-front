@@ -22,7 +22,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const autenticado = !!authStore.token
 
   // El backoffice ya no vive en `/`: ahí está la landing pública.
-  const home = isDriver ? '/chofer' : isSuperadmin ? '/superadmin' : '/admin'
+  const home = authStore.paginaDeInicio
 
   const publica = esRutaPublica(to.path)
 

@@ -86,6 +86,27 @@ export const useAlertStore = defineStore("alert", {
       }
     },
 
+    /**
+     * Vuelve a poner en gestión una alerta resuelta.
+     *
+     * Va por un endpoint propio y no por `setStatus` porque no es un cambio de
+     * estado más: exige motivo y queda auditado.
+     */
+    async reopen(id: string, reason: string) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      try {
+        const resp = await $api.patch(`alerts/${id}/reopen/`, { reason });
+        this.upsert(resp.data);
+        await this.getCount();
+        general.setSuccessSnackbar("Alerta reabierta");
+        return true;
+      } catch (e) {
+        general.setErrorSnackbar(e);
+        return false;
+      }
+    },
+
     upsert(alert: Alert) {
       const idx = this.alerts.findIndex((a) => a.id === alert.id);
       if (idx >= 0) this.alerts[idx] = alert;

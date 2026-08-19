@@ -1,0 +1,374 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Landing pública (pages/index.vue)
+//
+// La landing tiene un problema que el backoffice no tiene: en cinco segundos
+// alguien decide si esto es una herramienta seria o un Excel con logo. Por eso
+// acá se rompen dos reglas del sistema de diseño interno, a propósito:
+//
+//  1. Las bandas oscuras son oscuras SIEMPRE, en tema claro y oscuro. Son una
+//     decisión editorial (el corte cinematográfico de la portada), no un estado
+//     del tema. Sus colores van en hexadecimal fijo y no por token.
+//  2. La tipografía escala con clamp() y no con las clases text-h* de Vuetify:
+//     un titular de portada necesita ser más grande y más apretado que
+//     cualquier título del sistema.
+//
+// Todo lo demás (tarjetas, botones, superficies claras) sí usa los tokens del
+// tema, así que la landing sigue el tema como el resto de la aplicación.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Azules de marca del logo, en su versión profunda para fondos.
+$lp-navy-900: #050a18;
+$lp-blue: #2563eb;
+$lp-green: #4caf50;
+
+// Alto de la barra superior pública. Tiene que coincidir con el `height` del
+// v-app-bar de `layouts/public.vue`: la portada se mete por debajo de ella.
+$lp-topbar-h: 68px;
+
+// ── Tipografía editorial ────────────────────────────────────────────────────
+.lp-display {
+  font-size: clamp(2.35rem, 6.2vw, 4.4rem);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+
+.lp-h2 {
+  font-size: clamp(1.75rem, 3.6vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+  font-weight: 700;
+}
+
+.lp-h3 {
+  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.lp-lead {
+  font-size: clamp(1.02rem, 1.5vw, 1.28rem);
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+// Ancho de lectura: un párrafo de 1400 px de ancho no se lee, se saltea.
+.lp-medida {
+  max-width: 62ch;
+}
+
+.lp-medida-centro {
+  max-width: 62ch;
+  margin-inline: auto;
+}
+
+// ── Bandas oscuras ──────────────────────────────────────────────────────────
+.lp-oscuro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: $lp-navy-900;
+  color: #fff;
+
+  .text-medium-emphasis,
+  .lp-tenue {
+    color: rgba(255, 255, 255, 0.66) !important;
+  }
+}
+
+// Resplandores de fondo: dos focos de color muy difusos. Es lo que separa un
+// fondo oscuro "apagado" de uno con profundidad.
+.lp-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(42rem 30rem at 12% -10%, rgba(37, 99, 235, 0.42), transparent 62%),
+    radial-gradient(34rem 26rem at 88% 8%, rgba(76, 175, 80, 0.2), transparent 60%),
+    radial-gradient(50rem 34rem at 60% 108%, rgba(37, 99, 235, 0.16), transparent 65%);
+}
+
+// Grilla en fuga: la ruta, sugerida. Se desvanece hacia el centro para no
+// competir con el texto.
+.lp-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(68% 70% at 50% 40%, transparent 30%, #000 100%);
+  -webkit-mask-image: radial-gradient(68% 70% at 50% 40%, transparent 30%, #000 100%);
+}
+
+// ── Portada ─────────────────────────────────────────────────────────────────
+.lp-hero {
+  // Se mete por debajo de la barra superior (que en la portada es transparente)
+  // para que el azul llegue al borde de arriba de la ventana sin costura.
+  margin-top: -$lp-topbar-h;
+  padding-block: calc(#{$lp-topbar-h} + clamp(4rem, 8vw, 7rem)) clamp(3.5rem, 7vw, 6rem);
+}
+
+.lp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+// Punto latiendo: señal de "esto está vivo", el mismo recurso de los tableros
+// de operación. Se apaga con prefers-reduced-motion.
+.lp-pulso {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $lp-green;
+  box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6);
+  animation: lp-pulso 2.4s infinite;
+}
+
+@keyframes lp-pulso {
+  70% {
+    box-shadow: 0 0 0 9px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+// Vidrio: los paneles de producto sobre la portada oscura.
+.lp-vidrio {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+  backdrop-filter: blur(14px);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.75);
+}
+
+.lp-vidrio--flota {
+  animation: lp-flotar 7s ease-in-out infinite;
+}
+
+@keyframes lp-flotar {
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.lp-vidrio-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0.65rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+// Tira de cumplimiento al pie de la portada.
+.lp-tira {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
+}
+
+// ── Números grandes ─────────────────────────────────────────────────────────
+.lp-metrica {
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  // Tonos medios a propósito: el degradado tiene que dar contraste suficiente
+  // tanto sobre la superficie clara como sobre la oscura del tema.
+  background: linear-gradient(120deg, #3b82f6, #22a55b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// ── Dolores numerados ───────────────────────────────────────────────────────
+.lp-num {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(var(--v-theme-primary), 0.22);
+}
+
+// ── Tarjetas de la landing ──────────────────────────────────────────────────
+// Mismo lenguaje que el backoffice (border flat rounded-lg), con una elevación
+// mínima al pasar el mouse: la landing sí puede responder al cursor.
+.lp-card {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -24px rgba(15, 23, 42, 0.45);
+    border-color: rgba(var(--v-theme-primary), 0.35) !important;
+  }
+}
+
+// Maqueta de teléfono para la app del chofer.
+.lp-fono {
+  width: 262px;
+  max-width: 100%;
+  border-radius: 30px;
+  border: 1px solid rgb(var(--v-theme-borderColor));
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 40px 80px -40px rgba(15, 23, 42, 0.55);
+  overflow: hidden;
+}
+
+.lp-fono__barra {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    content: "";
+    width: 74px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgb(var(--v-theme-borderColor));
+  }
+}
+
+// Barras de un mini gráfico decorativo. Usa la paleta de gráficos (chart*), no
+// los colores saturados de la interfaz.
+.lp-barra {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: rgb(var(--v-theme-chartPrimary));
+  opacity: 0.85;
+}
+
+.lp-barra--alta {
+  background: rgb(var(--v-theme-chartSecondary));
+  opacity: 1;
+}
+
+// ── Planes ──────────────────────────────────────────────────────────────────
+.lp-plan--destacado {
+  border-color: rgba(var(--v-theme-primary), 0.55) !important;
+  box-shadow: 0 24px 60px -34px rgba(var(--v-theme-primary), 0.85);
+}
+
+// ── Aparición al hacer scroll ───────────────────────────────────────────────
+.lp-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--lp-delay, 0ms);
+}
+
+.lp-reveal.lp-visible {
+  opacity: 1;
+  transform: none;
+}
+
+// Nadie debería marearse leyendo una página de precios.
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal,
+  .lp-reveal.lp-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .lp-pulso,
+  .lp-vidrio--flota {
+    animation: none;
+  }
+
+  .lp-card:hover {
+    transform: none;
+  }
+}
+
+// ── Botón fantasma sobre fondo oscuro ───────────────────────────────────────
+// El `color` de Vuetify no sirve acá: necesita blanco sobre la banda oscura sin
+// tocar la paleta del tema.
+.lp-btn-ghost.v-btn {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.32);
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+// Los enlaces del menú apuntan a anclas y la barra superior es fija: sin esto
+// el título de la sección queda tapado por la barra.
+section[id] {
+  scroll-margin-top: 88px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+// El backoffice le da a `.v-main` un margen lateral de 16px para despegar las
+// tarjetas del borde. En las páginas públicas ese margen deja dos franjas
+// blancas a los costados de las bandas oscuras: acá van a sangre completa.
+.lp-main {
+  margin-inline: 0;
+}
+
+// ── Shell público (layouts/public.vue) ──────────────────────────────────────
+// La barra y el pie son oscuros siempre, igual que las bandas: así el marco de
+// la página cierra en azul por arriba y por abajo, sin bordes blancos alrededor
+// de la portada.
+.lp-topbar {
+  background: $lp-navy-900 !important;
+  color: #fff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+// Arriba de todo en la portada la barra desaparece y deja ver el resplandor del
+// hero; al scrollear se vuelve sólida para que el logo claro siga leyéndose.
+.lp-topbar--transparente {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+}
+
+.lp-footer {
+  background: $lp-navy-900 !important;
+  color: #fff !important;
+
+  .text-medium-emphasis {
+    color: rgba(255, 255, 255, 0.66) !important;
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.66);
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .v-divider {
+    border-color: rgba(255, 255, 255, 0.14);
+    opacity: 1;
+  }
+}

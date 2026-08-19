@@ -80,6 +80,28 @@ const openEditOrder = (o: any) => {
   selectedOrder.value = o;
   orderDialog.value = true;
 };
+
+// ── Órdenes finalizadas ─────────────────────────────────────────────────────
+// Una OT finalizada no se edita: sus kilómetros y su fecha son la base desde la
+// que el plan cuenta el próximo service. Se reabre con motivo y ahí sí.
+const ordenCerrada = (o: any) => o?.status === "done";
+
+const reapertura = ref<{ abierto: boolean; id: string }>({
+  abierto: false,
+  id: "",
+});
+const reabriendo = ref(false);
+
+const pedirReapertura = (o: any) => {
+  reapertura.value = { abierto: true, id: o.id };
+};
+
+const confirmarReapertura = async (motivo: string) => {
+  reabriendo.value = true;
+  const ok = await store.reopenOrder(reapertura.value.id, truckId.value, motivo);
+  reabriendo.value = false;
+  if (ok) reapertura.value.abierto = false;
+};
 const { moneyFixed: money, fmtDate } = useFormatters();
 
 watch(truckId, (id) => {
@@ -262,11 +284,20 @@ onMounted(async () => {
               @click="store.openOrderPdf(item.id)"
             />
             <IconBtn
+              v-if="!ordenCerrada(item)"
               tooltip="Editar orden"
               icon="mdi-pencil"
               size="small"
               variant="text"
               @click="openEditOrder(item)"
+            />
+            <IconBtn
+              v-else
+              tooltip="Reabrir orden para corregirla"
+              icon="mdi-lock-open-variant-outline"
+              size="small"
+              variant="text"
+              @click="pedirReapertura(item)"
             />
           </template>
         </ResponsiveTable>
@@ -293,6 +324,13 @@ onMounted(async () => {
       title="Eliminar plan"
       description="<p>¿Eliminar este plan de mantenimiento?</p>"
       @save="onConfirmDelete"
+    />
+    <ModalReopen
+      v-model="reapertura.abierto"
+      title="Reabrir orden de trabajo"
+      description="Vuelve a quedar en proceso para poder corregirla."
+      :loading="reabriendo"
+      @confirm="confirmarReapertura"
     />
   </div>
 </template>

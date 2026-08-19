@@ -103,7 +103,8 @@ cliente nuevo, la facturación crece.
 ### 2.2 Por qué abono base + por vehículo (y no solo por vehículo)
 
 Fleetio y la mayoría de los SaaS de flota cobran **únicamente** por vehículo y
-resuelven el piso con un mínimo de unidades. El esquema **abono base + por vehículo**
+resuelven el piso con un mínimo de unidades facturables. El esquema
+**abono base + por vehículo**
 que elegiste es superior para el mercado argentino por cuatro razones:
 
 1. **Separa el precio del valor funcional del precio de la escala.** El abono base es
@@ -176,7 +177,6 @@ todo el SaaS B2B maduro.
 | **Flota** | 3 – 8 unidades | 8 – 25 unidades | 25 – 80 unidades | 60+ unidades |
 | **Abono base / mes** | **$ 59.000** | **$ 129.000** | **$ 249.000** | desde **$ 490.000** |
 | **Por vehículo / mes** | **$ 7.900** | **$ 12.900** | **$ 18.900** | negociado (desde $ 10.900) |
-| **Mínimo de vehículos** | 3 | 5 | 8 | 25 |
 | **Implementación (única)** | $ 290.000 | $ 590.000 | $ 990.000 | desde $ 2.500.000 |
 | **Compromiso** | Mensual o anual | Anual recomendado | Anual | 24 – 36 meses |
 | **Usuarios y choferes** | Ilimitados | Ilimitados | Ilimitados | Ilimitados |
@@ -184,19 +184,23 @@ todo el SaaS B2B maduro.
 *Precios en ARS + IVA. Acoplados al 50%. **Tarifa plana por vehículo: sin tramos ni
 escalones de volumen** — la compresión la produce el abono base (§7.2).*
 
-### 3.3 Lógica de los mínimos de vehículos
+### 3.3 Sin mínimo de vehículos
 
-El mínimo es el mecanismo que **impide que un cliente chico se lleve el 100% del
-producto pagando poco**. Una empresa de 4 camiones que quiere Gestión paga por 8:
+Los planes **no** tienen piso facturable. Se cobra el abono más los vehículos que
+la empresa efectivamente tiene:
 
 ```
-4 camiones en Gestión    →  $ 249.000 + (8 × $ 18.900)  =  $ 400.200/mes
-4 camiones en Operación  →  $ 129.000 + (5 × $ 12.900)  =  $ 193.500/mes
+4 camiones en Gestión    →  $ 249.000 + (4 × $ 18.900)  =  $ 324.600/mes
+4 camiones en Operación  →  $ 129.000 + (4 × $ 12.900)  =  $ 180.600/mes
 ```
 
-No se le niega el producto — se le cobra lo que vale el acceso a esas capacidades.
-En la práctica, ese cliente compara y elige Operación, que es exactamente el
-resultado deseado.
+Los mínimos (3 / 5 / 8 / 25) existieron hasta la migración `DropMinVehicles`.
+Cumplían el rol de impedir que un cliente chico se llevara todo el producto
+pagando poco, pero ese trabajo ya lo hace el abono base: en el ejemplo, Gestión
+le sale casi el doble que Operación a la misma flota, que es el resultado que se
+buscaba. A cambio, se evitaba una factura que había que explicar —"¿por qué me
+cobran 8 camiones si tengo 4?"— y un control extra en el motor de precios, en el
+ABM de planes y en la landing.
 
 ---
 
@@ -919,7 +923,7 @@ El pago de implementación reduce el payback real entre 1 y 3 meses adicionales.
 | 3 | **El abono base castiga a la cuenta muy chica.** Un fletero de 3 camiones paga 66% de abono fijo. | Es deliberado: esa cuenta no es rentable sin abono base. Se compensa con un plan Control genuinamente barato en términos absolutos (≈ USD 57/mes) y autoservicio sin costo comercial. |
 | 4 | **Sin hardware no hay ancla física de retención.** | Reemplazada por tres anclas: implementación paga, contrato anual con bonificación de implementación como incentivo, y data gravity. Es el riesgo #1 del modelo y requiere disciplina. |
 | 5 | **Riesgo macro argentino: inflación y devaluación.** | Revisión trimestral con cláusula IPC en Control/Operación/Gestión; nominación en USD para Corporate (§7.5). |
-| 6 | **Canibalización: clientes que se quedan en Control para siempre.** | Mínimos de vehículos, módulos de dinero reservados a Operación+, retención de histórico de solo 6 meses. A los 7 meses, un cliente Control ya perdió acceso a su primer mes de datos: es el recordatorio permanente. |
+| 6 | **Canibalización: clientes que se quedan en Control para siempre.** | Módulos de dinero reservados a Operación+, retención de histórico de solo 6 meses. A los 7 meses, un cliente Control ya perdió acceso a su primer mes de datos: es el recordatorio permanente. |
 | 7 | **Los add-ons de integración pueden convertir el SaaS en consultora.** | Scoping pago obligatorio, catálogo cerrado de ERPs soportados y desarrollo a medida solo en Corporate. |
 | 8 | **Complejidad de facturación** (prorrateos, modo inactivo, add-ons). | Requiere motor de facturación propio desde el día 1. Intentar sostenerlo con planillas fracasa alrededor de los 40 clientes. La tarifa plana por vehículo reduce mucho esta complejidad respecto de un esquema de tramos. |
 | 9 | **Sin escalones automáticos, una flota de 150+ unidades puede percibir el precio como alto** si compara solo el componente variable. | El salto obligatorio a Corporate a los 100 vehículos resuelve el caso antes de que aparezca, y convierte el descuento en contrato plurianual en vez de regalarlo por tabla. |
@@ -994,7 +998,7 @@ de lista.
 | Pieza | Cómo quedó |
 |---|---|
 | **Vocabulario** | 26 *features*. El código de negocio **nunca pregunta por el nombre del plan**: pregunta por feature. Eso permite que API sea add-on en Gestión e incluida en Corporate sin lógica duplicada. |
-| **Catálogo en la base** | Planes y add-ons —precios, mínimos, features y límites— viven en la base, **no en el código**: el superadmin cambia un precio y la landing lo publica sin deploy. |
+| **Catálogo en la base** | Planes y add-ons —precios, features y límites— viven en la base, **no en el código**: el superadmin cambia un precio y la landing lo publica sin deploy. |
 | **Gating real en el backend** | Un guard por controlador devuelve 403 con la feature y el plan actual, para que el front ofrezca el upgrade correcto. **El ADMIN no tiene privilegio acá**: el plan es un límite comercial de la empresa, no un permiso del usuario. |
 | **Paywall visible** | El ítem bloqueado se muestra con candado y linkea a la pantalla de upgrade (§6.2). |
 | **«Mi plan» en el menú** | Sección **Cuenta** del sidebar, para `ADMIN` y `MANAGER`. El ítem avisa por sí solo: «Pago pendiente», «Suspendida» o los días que quedan de prueba en la última semana. Es el recordatorio que hace que una mora se resuelva en dos clics en lugar de escalar a un bloqueo. |

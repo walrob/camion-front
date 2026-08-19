@@ -481,7 +481,7 @@ test paga su costo.
 
 | Pieza | Archivo | Nota |
 |---|---|---|
-| Fórmula de precio | `billing/pricing.util.ts` + `.spec.ts` | Pura y sin dependencias. **20 tests** cubren mínimos, acoplados, modo inactivo, prepago y prorrateo. |
+| Fórmula de precio | `billing/pricing.util.ts` + `.spec.ts` | Pura y sin dependencias. **21 tests** cubren la ausencia de mínimos, acoplados, modo inactivo, prepago y prorrateo. |
 | Período facturable | `billing/entities/subscription.entity.ts` | Importes **congelados** al emitir (R5.4) + `billedUnits` con la foto de lo facturado (R5.2). |
 | Emisión y cambios | `billing/billing.service.ts` | Idempotente por período: dos corridas del cron no facturan dos veces. |
 | Trabajos programados | `billing/billing.cron.ts` | Snapshot 1 AM, emisión 4 AM. |
@@ -867,7 +867,7 @@ Estas **no se asumen**. Cada una está marcada en la fase donde aparece.
 |---|---|---|---|---|
 | **D1** ✅ | ¿`user.email` sigue siendo único global o pasa a `(companyId, email)`? | (a) Global: un email = una persona = una empresa. Login simple. (b) Compuesto: la misma persona puede tener cuenta en dos empresas con el mismo email, pero el login necesita elegir empresa. | **RESUELTA: (a) único global.** Coincide con la recomendación. Un `User` pertenece a **una** empresa por vez (`companyId`) y tiene control de estado activo/inactivo. Ver [§3.1](#31-d1-resuelta--email-único-global-y-el-caso-borde-del-cambio-de-empresa). | 1 |
 | **D2** | ¿Qué plan se le asigna a la empresa #1 (la instalación actual)? | Gestión / Corporate / un plan interno `LEGACY` sin límites | **Plan interno `LEGACY`** con todas las features y límites en ilimitado, para que la migración no le quite nada a nadie. Se lo reasigna comercialmente después. | 1 |
-| **D3** ✅ | ¿El mínimo de vehículos del plan se aplica sobre camiones o sobre unidades equivalentes (acoplado = 0,5)? | (a) Solo camiones (b) Unidades equivalentes | **RESUELTA: (a) el mínimo se cuenta SOLO sobre camiones.** ⚠️ Contradice la recomendación original (que era (b)). Ver [§3.2](#32-d3-resuelta--el-mínimo-cuenta-camiones-el-precio-cuenta-acoplados). | 5 |
+| **D3** ✅ | ¿El mínimo de vehículos del plan se aplica sobre camiones o sobre unidades equivalentes (acoplado = 0,5)? | (a) Solo camiones (b) Unidades equivalentes | **RESUELTA: (a) el mínimo se cuenta SOLO sobre camiones.** ⚠️ Contradice la recomendación original (que era (b)). **Sin efecto: los mínimos se eliminaron (migración `DropMinVehicles`).** Ver [§3.2](#32-d3-resuelta--el-mínimo-cuenta-camiones-el-precio-cuenta-acoplados). | 5 |
 | **D4** ✅ | Retención de histórico: ¿se **borra** o se **oculta** el dato viejo? | (a) Borrado físico/soft al vencer la retención (b) Se conserva y se filtra en lectura | **RESUELTA: (b) se conserva y se filtra en lectura.** Coincide con la recomendación. Borrar destruye el argumento de upgrade ("volvé a ver tu histórico") y es irreversible ante un error. | 4 |
 | **D5** | ¿El trial de 21 días de plan Operación requiere tarjeta? | Sí / No | **No** (§6.1 del modelo comercial: el trial ancla arriba y debe tener fricción cero). Requiere una política de expiración clara. | 6 |
 | **D6** | ¿Qué pasa cuando vence el trial y no hay pago? | (a) Bloqueo total (b) Solo lectura (c) Degradación automática a Control | **(b) Solo lectura** con lista blanca, como el `AccountStatusGuard` de Aturna. Es reversible y no destruye la relación comercial. | 6, 9 |
@@ -919,6 +919,11 @@ este mecanismo sin migración destructiva: el `companyId` actual pasa a ser la
 "empresa activa" del usuario.
 
 ### 3.2 D3 resuelta — el mínimo cuenta camiones, el precio cuenta acoplados
+
+> ⚠️ **Sin efecto desde la migración `DropMinVehicles`.** Los planes ya no tienen
+> mínimo de vehículos: se factura lo que hay, y `pricing.util.ts` no tiene piso.
+> Lo de abajo queda como registro de por qué se decidió lo que se decidió en su
+> momento; el modelo vigente está en `MODELO-COMERCIAL.md` §3.3.
 
 **Decisión**: el mínimo de vehículos del plan (3 / 5 / 8 / 25) se aplica
 **solo sobre camiones activos**. ⚠️ Contradice la recomendación original de este

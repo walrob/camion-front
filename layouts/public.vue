@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+
+import { CONTACTO } from "~/composables/useContacto";
 
 /**
  * Layout de las páginas públicas: landing, planes, contacto y legales.
@@ -12,25 +14,59 @@ const auth = useAuthStore();
 
 /** Si ya hay sesión, se ofrece entrar al panel en vez de "Ingresar". */
 const autenticado = computed(() => !!auth.token);
-const destinoPanel = computed(() =>
-  auth.user?.role === "driver" ? "/chofer" : "/admin",
-);
+const destinoPanel = computed(() => auth.paginaDeInicio);
+
+/**
+ * La barra arranca transparente sobre la portada —el azul del hero llega hasta
+ * el borde de arriba— y se vuelve sólida apenas se scrollea, porque más abajo
+ * las secciones son claras y el logo de la barra es la variante blanca.
+ */
+const route = useRoute();
+const arriba = ref(true);
+
+function alScrollear() {
+  arriba.value = window.scrollY < 24;
+}
+
+onMounted(() => {
+  alScrollear();
+  window.addEventListener("scroll", alScrollear, { passive: true });
+});
+
+onBeforeUnmount(() => window.removeEventListener("scroll", alScrollear));
+
+const barraTransparente = computed(() => route.path === "/" && arriba.value);
+
+/** Redes de NorthAr Consulting, en el pie. */
+const REDES = [
+  { icono: "mdi-whatsapp", titulo: "WhatsApp", url: CONTACTO.whatsappUrl },
+  { icono: "mdi-linkedin", titulo: "LinkedIn", url: CONTACTO.linkedin },
+  { icono: "mdi-instagram", titulo: "Instagram", url: CONTACTO.instagram },
+];
 
 const SECCIONES = [
-  { texto: "Cómo funciona", ancla: "#modulos" },
+  { texto: "Cómo funciona", ancla: "#producto" },
   { texto: "Planes", ancla: "#planes" },
+  { texto: "Preguntas", ancla: "#faq" },
   { texto: "Contacto", ancla: "#contacto" },
 ];
 
-useHead({ titleTemplate: (t?: string) => (t ? `${t} | FleetLog` : "FleetLog") });
+useHead({
+  titleTemplate: (t?: string) => (t ? `${t} | FleetLog` : "FleetLog"),
+});
 </script>
 
 <template>
   <v-app>
-    <v-app-bar flat border height="68" class="px-2">
+    <v-app-bar
+      flat
+      height="68"
+      class="px-2 lp-topbar"
+      :class="{ 'lp-topbar--transparente': barraTransparente }"
+    >
       <v-container class="d-flex align-center py-0">
         <NuxtLink to="/" class="d-flex align-center text-decoration-none">
-          <LayoutFullLogoHorizontal :height="34" />
+          <LayoutFullLogoHorizontal light :height="34" />
         </NuxtLink>
 
         <v-spacer />
@@ -59,22 +95,38 @@ useHead({ titleTemplate: (t?: string) => (t ? `${t} | FleetLog` : "FleetLog") })
       </v-container>
     </v-app-bar>
 
-    <v-main>
+    <v-main class="lp-main">
       <slot />
     </v-main>
 
-    <v-footer class="border-t py-8">
+    <v-footer class="lp-footer py-8">
       <v-container>
         <v-row>
-          <v-col cols="12" md="5">
-            <LayoutFullLogoHorizontal :height="34" />
-            <p class="text-body-2 text-medium-emphasis mt-3 mb-0">
-              Gestión de flotas para empresas de transporte de carga.
-              Reemplazá el cuaderno, el Excel y los grupos de WhatsApp.
+          <v-col cols="12" md="4">
+            <LayoutFullLogoHorizontal light :height="34" />
+            <p class="text-body-2 text-medium-emphasis mt-3 mb-3">
+              Gestión de flotas para empresas de transporte de carga. Reemplazá
+              el cuaderno, el Excel y los grupos de WhatsApp.
             </p>
+
+            <div class="d-flex ga-1">
+              <v-btn
+                v-for="r in REDES"
+                :key="r.url"
+                :href="r.url"
+                :icon="r.icono"
+                :title="r.titulo"
+                :aria-label="r.titulo"
+                target="_blank"
+                rel="noopener"
+                variant="text"
+                density="comfortable"
+                size="small"
+              />
+            </div>
           </v-col>
 
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="2">
             <div class="text-subtitle-2 font-weight-medium mb-2">Producto</div>
             <div class="d-flex flex-column ga-1">
               <a href="#modulos" class="text-body-2 text-medium-emphasis">
@@ -92,7 +144,7 @@ useHead({ titleTemplate: (t?: string) => (t ? `${t} | FleetLog` : "FleetLog") })
             </div>
           </v-col>
 
-          <v-col cols="6" md="4">
+          <v-col cols="6" md="3">
             <div class="text-subtitle-2 font-weight-medium mb-2">Legales</div>
             <div class="d-flex flex-column ga-1">
               <NuxtLink
@@ -107,6 +159,26 @@ useHead({ titleTemplate: (t?: string) => (t ? `${t} | FleetLog` : "FleetLog") })
               >
                 Política de privacidad
               </NuxtLink>
+            </div>
+          </v-col>
+
+          <v-col cols="12" md="3">
+            <div class="text-subtitle-2 font-weight-medium mb-2">Contacto</div>
+            <div class="d-flex flex-column ga-1">
+              <a
+                :href="`mailto:${CONTACTO.email}`"
+                class="text-body-2 text-medium-emphasis"
+              >
+                {{ CONTACTO.email }}
+              </a>
+              <a
+                :href="CONTACTO.whatsappUrl"
+                target="_blank"
+                rel="noopener"
+                class="text-body-2 text-medium-emphasis"
+              >
+                {{ CONTACTO.whatsappVisible }}
+              </a>
             </div>
           </v-col>
         </v-row>
