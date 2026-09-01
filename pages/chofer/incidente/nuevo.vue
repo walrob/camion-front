@@ -5,7 +5,7 @@ import { useTripStore } from "~/stores/trip";
 import { useIncidentStore } from "~/stores/incident";
 import { useGeolocation } from "~/composables/useGeolocation";
 import { useGeneralStore } from "~/stores/general";
-import { incidentTypeOptions } from "~/composables/useIncidentStatus";
+import { useCatalogStore, CATALOG } from "~/stores/catalog";
 import VoiceTextarea from "~/components/form/VoiceTextarea.vue";
 
 definePageMeta({ layout: "driver" });
@@ -18,6 +18,14 @@ const incidentStore = useIncidentStore();
 const general = useGeneralStore();
 const { getPosition } = useGeolocation();
 const { myTrips } = storeToRefs(tripStore);
+
+// Los tipos los define la empresa (docs/CONFIGURACION.md §5). El store cachea
+// el catálogo para que la pantalla funcione sin señal.
+const catalogStore = useCatalogStore();
+const tiposDeIncidente = computed(() =>
+  catalogStore.activos(CATALOG.INCIDENT_TYPE),
+);
+onMounted(() => catalogStore.load());
 
 const selectedType = ref("");
 const description = ref("");
@@ -90,12 +98,12 @@ onMounted(() => tripStore.getMyTrips());
     <p class="text-subtitle-2 font-weight-bold mb-2">Tipo</p>
     <div class="type-grid mb-4">
       <v-card
-        v-for="t in incidentTypeOptions"
-        :key="t.value"
-        :color="selectedType === t.value ? t.color : undefined"
-        :variant="selectedType === t.value ? 'flat' : 'outlined'"
+        v-for="t in tiposDeIncidente"
+        :key="t.key"
+        :color="selectedType === t.key ? t.color : undefined"
+        :variant="selectedType === t.key ? 'flat' : 'outlined'"
         class="pa-3 text-center"
-        @click="selectedType = t.value"
+        @click="selectedType = t.key"
       >
         <v-icon size="28">{{ t.icon }}</v-icon>
         <div class="text-caption mt-1">{{ t.label }}</div>

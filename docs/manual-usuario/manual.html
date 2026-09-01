@@ -1,0 +1,2367 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de Usuario · FleetLog</title>
+<style>
+/* ==========================================================================
+   MANUAL DE USUARIO — FLEETLOG
+   --------------------------------------------------------------------------
+   Este archivo es la fuente del manual Y, a la vez, lo que ve el usuario:
+   Nitro sirve esta carpeta en /docs/manual (ver `nitro.publicAssets` en
+   nuxt.config.ts) y la página pages/manual-usuario.vue lo muestra dentro de un
+   iframe. Se edita acá y se publica con el deploy: no hay PDF que exportar ni
+   nada que subir a ningún lado.
+
+   CÓMO ACTUALIZARLO cuando se suma una funcionalidad:
+     1. Buscar la sección que corresponda. Las secciones se numeran solas por
+        CSS: al insertar, mover o borrar una, NO hay que renumerar nada.
+     2. Escribir el texto. Si la funcionalidad depende del plan, etiquetar el
+        h2/h3 con la etiqueta que corresponda:
+           <span class="plan todos">Todos los planes</span>
+           <span class="plan operacion">Desde Operación</span>
+           <span class="plan gestion">Desde Gestión</span>
+           <span class="plan corporate">Corporate</span>
+        Espejan los grupos del enum `Feature` de `types/plan.ts` y el gating
+        real del backend. Si cambia el gating en el código, cambia la etiqueta.
+     3. Si la funcionalidad va en la tabla comparativa (sección «Los planes»),
+        agregar también la fila ahí.
+     4. El índice se arma solo al abrir el archivo: no hay que tocarlo.
+     5. Actualizar la versión en la portada y en el cierre.
+
+   REGLA DE ALCANCE: este manual es para el cliente. El panel de plataforma
+   (superadmin) NO se documenta acá ni se menciona.
+   ========================================================================== */
+
+:root {
+  --primary:   #2563EB;
+  --secondary: #0E9F9A;
+  --success:   #16A34A;
+  --warning:   #F59E0B;
+  --error:     #DC2626;
+  --accent:    #6366F1;
+
+  --l-primary:   #E8EEFD;
+  --l-secondary: #E4F5F4;
+  --l-success:   #E8F6EE;
+  --l-warning:   #FEF3E2;
+  --l-error:     #FBEAEA;
+  --l-accent:    #EDEBFD;
+
+  --ink:      #1E293B;
+  --ink-soft: #475569;
+  --ink-mute: #78889B;
+  --rule:     #E2E8F0;
+  --bg-soft:  #F8FAFC;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.62;
+  color: var(--ink);
+  background: #EBEFF6;
+  counter-reset: seccion;
+}
+
+/* --- Hoja ---------------------------------------------------------------- */
+.hoja {
+  width: 210mm;
+  margin: 0 auto;
+  padding: 20mm 18mm;
+  background: #fff;
+  box-shadow: 0 2px 18px rgba(30, 41, 59, .13);
+}
+
+/* --- Tipografía ---------------------------------------------------------- */
+h1, h2, h3, h4 { line-height: 1.25; color: var(--ink); }
+
+h2 {
+  font-size: 17pt;
+  margin: 0 0 1.1em;
+  padding-bottom: .35em;
+  border-bottom: 2.5px solid var(--primary);
+  counter-increment: seccion;
+  counter-reset: sub;
+}
+h2::before {
+  content: counter(seccion) ".";
+  color: var(--primary);
+  font-weight: 700;
+  margin-right: .4em;
+}
+
+h3 {
+  font-size: 12.5pt;
+  margin: 2em 0 .7em;
+  counter-increment: sub;
+}
+h3::before {
+  content: counter(seccion) "." counter(sub);
+  color: var(--primary);
+  font-weight: 700;
+  margin-right: .5em;
+}
+
+h4 {
+  margin: 1.6em 0 .45em;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: 9pt;
+  color: var(--ink-soft);
+}
+
+p  { margin: 0 0 .85em; }
+ul, ol { margin: 0 0 .95em; padding-left: 1.35em; }
+li { margin-bottom: .3em; }
+li > ul, li > ol { margin-top: .3em; margin-bottom: .45em; }
+
+strong { font-weight: 650; }
+code {
+  font-family: "Consolas", "SF Mono", monospace;
+  font-size: .88em;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: .05em .35em;
+}
+a { color: var(--primary); text-decoration: none; }
+
+/* Nombre literal de un botón, una pestaña o un campo de la pantalla. */
+.ui {
+  font-weight: 650;
+  color: #33415C;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: .03em .34em;
+  white-space: nowrap;
+}
+/* Camino de navegación dentro del sistema. */
+.ruta { font-weight: 650; color: #33415C; white-space: nowrap; }
+
+/* --- Eyebrow de parte ---------------------------------------------------- */
+.parte {
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin: 2.6em 0 .5em;
+}
+
+/* --- Etiquetas de plan --------------------------------------------------- */
+.plan {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: .18em .6em .22em;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+  margin-left: .5em;
+  position: relative;
+  top: -1px;
+}
+.plan.todos     { background: var(--l-success); border-color: #9BD9B3; color: #14713A; }
+.plan.operacion { background: var(--l-primary); border-color: #AFC6F8; color: #1D4FD7; }
+.plan.gestion   { background: var(--l-warning); border-color: #F6CE8A; color: #97620A; }
+.plan.corporate { background: var(--l-accent);  border-color: #BFB8F5; color: #4B44C0; }
+h2 .plan, h3 .plan { top: -2px; }
+
+/* --- Quién lo usa -------------------------------------------------------- */
+.quien {
+  margin: -.5em 0 1.3em;
+  font-size: 9pt;
+  color: var(--ink-soft);
+}
+.quien .et {
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-right: .4em;
+}
+.rol {
+  display: inline-block;
+  font-size: 8.2pt;
+  font-weight: 650;
+  padding: .1em .55em .14em;
+  margin-right: .3em;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  color: #33415C;
+  white-space: nowrap;
+}
+
+/* --- Recuadros ----------------------------------------------------------- */
+.nota, .aviso, .clave {
+  margin: 1.1em 0;
+  padding: .8em 1em .8em 1.05em;
+  border-left: 3.5px solid;
+  border-radius: 0 5px 5px 0;
+  font-size: 9.8pt;
+}
+.nota  { background: var(--bg-soft);   border-color: #CBD5E1; }
+.aviso { background: var(--l-warning); border-color: var(--warning); }
+.clave { background: var(--l-primary); border-color: var(--primary); }
+
+.nota > :last-child, .aviso > :last-child, .clave > :last-child { margin-bottom: 0; }
+.nota .et, .aviso .et, .clave .et {
+  display: block;
+  font-weight: 700;
+  font-size: 8.5pt;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin-bottom: .25em;
+}
+.nota .et  { color: var(--ink-mute); }
+.aviso .et { color: #97620A; }
+.clave .et { color: #1D4FD7; }
+
+/* --- Tablas -------------------------------------------------------------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.1em 0 1.3em;
+  font-size: 9.6pt;
+}
+th, td {
+  border: 1px solid var(--rule);
+  padding: .5em .65em;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--bg-soft);
+  font-weight: 650;
+  font-size: 9pt;
+  color: var(--ink-soft);
+}
+tbody tr:nth-child(even) td { background: #FCFDFE; }
+td.c, th.c { text-align: center; }
+.tabla-scroll { overflow-x: auto; }
+
+.comparativa th:first-child, .comparativa td:first-child { width: 40%; }
+.comparativa th:not(:first-child) { text-align: center; width: 15%; }
+.comparativa td:not(:first-child) { text-align: center; vertical-align: middle; }
+.comparativa .grupo td {
+  background: var(--l-primary) !important;
+  font-weight: 700;
+  font-size: 9pt;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #1D4FD7;
+}
+.si  { color: var(--success); font-weight: 700; }
+.no  { color: #CBD5E1; font-weight: 700; }
+.val { font-size: 8.6pt; font-weight: 650; color: var(--ink-soft); }
+.pista {
+  display: block;
+  font-size: 8.4pt;
+  color: var(--ink-mute);
+  line-height: 1.45;
+  margin-top: .15em;
+}
+
+/* Puntito de color: representa el chip de estado que muestra el sistema. */
+.punto {
+  display: inline-block;
+  width: .62em;
+  height: .62em;
+  border-radius: 50%;
+  margin-right: .4em;
+}
+.punto.rojo     { background: var(--error); }
+.punto.naranja  { background: var(--warning); }
+.punto.amarillo { background: #F1C85A; }
+.punto.verde    { background: var(--success); }
+.punto.azul     { background: var(--primary); }
+.punto.gris     { background: #94A3B8; }
+
+/* --- Figuras ------------------------------------------------------------- */
+figure { margin: 1.2em 0; text-align: center; }
+figure img {
+  max-width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+}
+figure.angosta img { max-width: 62%; }
+figcaption {
+  font-size: 8.6pt;
+  color: var(--ink-mute);
+  margin-top: .45em;
+  font-style: italic;
+}
+
+/* --- Pasos numerados ----------------------------------------------------- */
+ol.pasos { list-style: none; padding-left: 0; counter-reset: paso; }
+ol.pasos > li {
+  counter-increment: paso;
+  position: relative;
+  padding-left: 2.1em;
+  margin-bottom: .7em;
+}
+ol.pasos > li::before {
+  content: counter(paso);
+  position: absolute;
+  left: 0; top: .08em;
+  width: 1.5em; height: 1.5em;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 8.5pt;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Diagrama del recorrido ---------------------------------------------- */
+pre.flujo {
+  font-family: "Consolas", "SF Mono", monospace;
+  font-size: 8.4pt;
+  line-height: 1.45;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1em 1.1em;
+  overflow-x: auto;
+  color: var(--ink-soft);
+}
+
+/* --- Portada ------------------------------------------------------------- */
+.portada {
+  min-height: 252mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+.portada .marca img { width: 68mm; max-width: 80%; }
+.portada h1 { font-size: 30pt; letter-spacing: .02em; margin: .5em 0 .25em; }
+.portada .version {
+  display: inline-block;
+  font-size: 9.5pt;
+  font-weight: 650;
+  color: #1D4FD7;
+  background: var(--l-primary);
+  border: 1px solid #AFC6F8;
+  border-radius: 999px;
+  padding: .3em 1.1em;
+}
+.portada .bajada {
+  max-width: 130mm;
+  margin: 1.5em auto 0;
+  font-size: 11pt;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.portada .pie { font-size: 9pt; color: var(--ink-mute); }
+.portada .pie strong { color: var(--ink-soft); }
+
+.leyenda-planes {
+  margin: 2em auto 0;
+  max-width: 150mm;
+  text-align: left;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  padding: 1em 1.2em;
+  background: var(--bg-soft);
+  font-size: 9.3pt;
+}
+.leyenda-planes .tit {
+  font-weight: 700;
+  font-size: 8.5pt;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: .6em;
+}
+.leyenda-planes .fila { margin-bottom: .4em; display: flex; gap: .6em; align-items: baseline; }
+.leyenda-planes .fila:last-child { margin-bottom: 0; }
+.leyenda-planes .plan { margin-left: 0; flex: 0 0 34mm; text-align: center; }
+
+/* --- Índice -------------------------------------------------------------- */
+/* El índice no consume número: la sección 1 tiene que ser la primera real. */
+#indice h2 { counter-increment: none; }
+#indice h2::before { content: none; }
+.toc { font-size: 10pt; }
+.toc .toc-parte {
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin: 1.5em 0 .55em;
+  padding-bottom: .25em;
+  border-bottom: 1px solid var(--rule);
+}
+.toc .toc-parte:first-child { margin-top: .4em; }
+.toc a { display: block; color: var(--ink); padding: .17em 0; }
+.toc a .n { display: inline-block; min-width: 2.4em; color: var(--primary); font-weight: 650; }
+
+/* --- Cierre -------------------------------------------------------------- */
+.cierre {
+  margin-top: 2.5em;
+  padding-top: 1em;
+  border-top: 1px solid var(--rule);
+  font-size: 8.6pt;
+  color: var(--ink-mute);
+  text-align: center;
+}
+
+/* --- Impresión ----------------------------------------------------------- */
+@page { size: A4; margin: 16mm 15mm; }
+
+@media print {
+  body { background: #fff; font-size: 10pt; }
+  .hoja { width: auto; margin: 0; padding: 0; box-shadow: none; }
+  .solo-pantalla { display: none !important; }
+
+  /* Cada sección arranca en página nueva. La portada NO lleva break-after: el
+     break-before del índice ya la corta, y poner los dos deja una página en
+     blanco en el medio. */
+  section.seccion { break-before: page; }
+  .parte { margin-top: 0; }
+  .portada { min-height: 0; height: 245mm; }
+
+  h2, h3, h4 { break-after: avoid; }
+  figure, table, .nota, .aviso, .clave, pre.flujo { break-inside: avoid; }
+  tr, li { break-inside: avoid; }
+  thead { display: table-header-group; }
+  a, .toc a { color: var(--ink); }
+}
+
+/* --- Barra de ayuda en pantalla ------------------------------------------ */
+.solo-pantalla {
+  max-width: 210mm;
+  margin: 14px auto;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-left: 3.5px solid var(--primary);
+  border-radius: 5px;
+  font-size: 9.5pt;
+  color: var(--ink-soft);
+  box-shadow: 0 1px 6px rgba(30, 41, 59, .08);
+}
+.solo-pantalla b { color: var(--ink); }
+
+@media (max-width: 900px) {
+  .hoja { width: auto; padding: 22px 18px; }
+  .solo-pantalla { margin: 12px; }
+  figure.angosta img { max-width: 100%; }
+  .leyenda-planes .plan { flex: 0 0 auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="solo-pantalla" id="barra-pantalla">
+  <b>¿Lo querés en papel o en PDF?</b> Ctrl+P → Destino <b>Guardar como PDF</b> → Tamaño <b>A4</b> → en «Más opciones» activá <b>Gráficos de fondo</b> y desactivá <b>Encabezados y pies de página</b>. Este recuadro no sale impreso.
+</div>
+<script>
+  /* Dentro de la app el manual va en un iframe: ahí Ctrl+P imprimiría la app,
+     no el manual, así que la barra confundiría. Sólo se muestra cuando el
+     archivo se abre solo, en su propia pestaña. */
+  try {
+    if (window.self !== window.top) {
+      document.getElementById("barra-pantalla").style.display = "none";
+    }
+  } catch (e) {
+    /* origen distinto: se asume embebido */
+    document.getElementById("barra-pantalla").style.display = "none";
+  }
+</script>
+
+<div class="hoja">
+
+<!-- ======================= PORTADA ======================= -->
+<div class="portada">
+  <div class="marca"><img src="/images/logos/FletLog.png" alt="FleetLog"></div>
+
+  <div>
+    <h1>Manual de Usuario</h1>
+    <span class="version">Versión 1.9.2026</span>
+    <p class="bajada">
+      FleetLog reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp:
+      viajes, gastos, vencimientos y mantenimiento en un solo lugar. Este manual
+      explica <strong>cómo se usa el sistema todos los días</strong>, qué puede hacer
+      cada rol y en qué plan está disponible cada funcionalidad.
+    </p>
+
+    <div class="leyenda-planes">
+      <div class="tit">Cómo leer las etiquetas de plan</div>
+      <div class="fila"><span class="plan todos">Todos los planes</span> <span>Está incluido en Control, Operación, Gestión y Corporate.</span></div>
+      <div class="fila"><span class="plan operacion">Desde Operación</span> <span>Incluido en Operación, Gestión y Corporate.</span></div>
+      <div class="fila"><span class="plan gestion">Desde Gestión</span> <span>Incluido en Gestión y Corporate.</span></div>
+      <div class="fila"><span class="plan corporate">Corporate</span> <span>Sólo en el plan Corporate.</span></div>
+    </div>
+  </div>
+
+  <div class="pie">
+    <div>Sistema desarrollado y administrado por <strong>NorthAr Consulting</strong></div>
+    <div>info@northar.com.ar · WhatsApp +54 362 456-9542</div>
+  </div>
+</div>
+
+<!-- ======================= ÍNDICE ======================= -->
+<section class="seccion" id="indice">
+  <h2>Contenido</h2>
+  <nav class="toc" id="toc"></nav>
+  <div class="nota" style="margin-top:2em">
+    <span class="et">Atajos</span>
+    ¿Sos chofer? Andá directo a la parte <em>La app del chofer</em>.
+    ¿Querés saber qué puede hacer cada persona del equipo? Está la tabla
+    <em>Quién ve qué</em>, al final del manual.
+  </div>
+</section>
+
+<!-- ==========================================================
+     PARTE 1 — PRIMEROS PASOS
+     ========================================================== -->
+
+<section class="seccion">
+  <p class="parte">Parte 1 · Primeros pasos</p>
+  <h2>Qué es FleetLog</h2>
+
+  <p>
+    FleetLog es un sistema para <strong>gestionar una flota de transporte de carga</strong>:
+    los viajes, la plata que se gasta en la ruta, los vencimientos de la documentación,
+    el mantenimiento de las unidades y la comunicación con los choferes.
+  </p>
+
+  <p>Dicho en criollo, reemplaza tres cosas que hoy conviven mal:</p>
+
+  <ul>
+    <li>el <strong>cuaderno del chofer</strong>, con los gastos anotados a mano;</li>
+    <li>el <strong>Excel de la oficina</strong>, que siempre está desactualizado;</li>
+    <li>los <strong>grupos de WhatsApp</strong>, donde la información importante se pierde entre mensajes.</li>
+  </ul>
+
+  <h3>Tres puertas, un mismo sistema</h3>
+
+  <p>
+    Según quién sea, FleetLog se ve de una manera distinta. No hay que instalar nada
+    diferente: es la misma aplicación, que se acomoda al rol de cada uno.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Puerta</th><th>Para quién</th><th>Cómo es</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Sitio público</strong></td>
+        <td>Cualquiera</td>
+        <td>Qué hace el sistema, planes y precios, y el alta de la cuenta.</td>
+      </tr>
+      <tr>
+        <td><strong>App del chofer</strong></td>
+        <td>Choferes</td>
+        <td>Pantalla de celular, con barra inferior, botones grandes, dictado por voz y fotos. <strong>Funciona sin señal</strong> y se sincroniza sola al recuperar conexión.</td>
+      </tr>
+      <tr>
+        <td><strong>Backoffice</strong></td>
+        <td>Oficina, taller, gerencia, RRHH y auditoría</td>
+        <td>Panel de escritorio con menú lateral, tablas, filtros, gráficos y exportación.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="clave">
+    <span class="et">Lo importante</span>
+    Al iniciar sesión <strong>el sistema te lleva solo</strong> a la pantalla que te
+    corresponde: el chofer entra a su app y el resto al backoffice. No hay que
+    acordarse de ninguna dirección.
+  </div>
+
+  <h3>Cada empresa ve sólo lo suyo</h3>
+
+  <p>
+    FleetLog es un servicio en la nube <strong>multi-empresa</strong>: cada empresa tiene su
+    propia cuenta y sus datos están separados de los del resto. Lo que carga tu equipo lo
+    ve tu equipo, nadie más.
+  </p>
+
+  <h3>Qué necesito para usarlo</h3>
+
+  <ul>
+    <li><strong>En la oficina:</strong> una computadora con navegador (Chrome, Edge, Firefox) e internet. No se instala nada.</li>
+    <li><strong>En la ruta:</strong> un celular Android o iPhone. La app se instala desde el mismo navegador (ver la parte <em>La app del chofer</em>) y anda aunque se corte la señal.</li>
+  </ul>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 1 · Primeros pasos</p>
+  <h2>Los planes y qué incluye cada uno</h2>
+
+  <p>
+    La empresa contrata un <strong>plan</strong> y eso define qué módulos quedan
+    habilitados. Son cuatro, de menor a mayor: <strong>Control</strong>,
+    <strong>Operación</strong>, <strong>Gestión</strong> y <strong>Corporate</strong>.
+  </p>
+
+  <div class="clave">
+    <span class="et">Por qué ves módulos con candado</span>
+    Los módulos que tu plan no incluye <strong>no se esconden</strong>: siguen en el menú,
+    en gris y con un <strong>candado</strong>. Si hacés clic, se abre una pantalla que
+    explica qué incluye ese módulo y con qué plan viene. Nada se rompe y nada se pierde:
+    simplemente todavía no está activado.
+  </div>
+
+  <h3>Qué trae cada plan</h3>
+
+  <div class="tabla-scroll">
+  <table class="comparativa">
+    <thead>
+      <tr><th>Funcionalidad</th><th>Control</th><th>Operación</th><th>Gestión</th><th>Corporate</th></tr>
+    </thead>
+    <tbody>
+      <tr class="grupo"><td colspan="5">Base</td></tr>
+      <tr><td>Flota, Documentos y Alertas</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Viajes y checklist pre-viaje</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Mensajes con los choferes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Incidentes y app del chofer</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+
+      <tr class="grupo"><td colspan="5">Operación</td></tr>
+      <tr><td>Bitácora en ruta y <strong>Rendiciones</strong></td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Combustible, Mantenimiento y Planillas OEA</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Tablero de incidentes (kanban)</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>RRHH: legajo y habilitaciones</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Exportación a Excel</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td><strong>Configuración</strong>: ajustes, checklist y catálogos propios</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+
+      <tr class="grupo"><td colspan="5">Gestión</td></tr>
+      <tr><td><strong>Indicadores</strong> gerenciales (costo por km)</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>RRHH: historial laboral y estados automáticos</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Ranking de consumo y umbrales de alerta</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Checklist distinto por tipo de unidad</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Rol Auditor</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
+
+      <tr class="grupo"><td colspan="5">Corporate</td></tr>
+      <tr><td>Multi-empresa, API y acceso único (SSO)</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Los límites de la cuenta</h3>
+
+  <div class="tabla-scroll">
+  <table class="comparativa">
+    <thead>
+      <tr><th>Límite</th><th>Control</th><th>Operación</th><th>Gestión</th><th>Corporate</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Historial que se puede consultar</strong></td><td class="val">6 meses</td><td class="val">24 meses</td><td class="val">60 meses</td><td class="val">Sin límite</td></tr>
+      <tr><td><strong>Espacio para adjuntos</strong> (fotos, PDF)</td><td class="val">2 GB</td><td class="val">50 GB</td><td class="val">250 GB</td><td class="val">Sin límite</td></tr>
+      <tr><td>Reglas de alerta activas</td><td class="val">3</td><td class="val">10</td><td class="val">Sin límite</td><td class="val">Sin límite</td></tr>
+      <tr><td>Planes de mantenimiento activos</td><td class="val">—</td><td class="val">10</td><td class="val">Sin límite</td><td class="val">Sin límite</td></tr>
+      <tr><td>Roles disponibles</td><td class="val">4</td><td class="val">6</td><td class="val">7</td><td class="val">7</td></tr>
+      <tr><td><strong>Usuarios y choferes</strong></td><td class="val" colspan="4">Ilimitados en todos los planes</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="aviso">
+    <span class="et">Sobre el historial</span>
+    Cuando el plan recorta lo que se muestra, los listados avisan en pantalla.
+    <strong>El dato no se borra nunca:</strong> si más adelante subís de plan, el historial
+    vuelve a verse completo. La flota, los choferes, los legajos y los documentos
+    <strong>no se recortan</strong> jamás.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 1 · Primeros pasos</p>
+  <h2>Los roles: quién hace qué</h2>
+
+  <p>
+    Cada persona entra con su propio usuario y <strong>ve solamente lo que su rol
+    necesita</strong>. Eso no es una limitación: es lo que hace que nadie se pierda entre
+    pantallas que no le sirven, y que la información sensible quede donde tiene que quedar.
+  </p>
+
+  <div class="tabla-scroll">
+  <table>
+    <thead>
+      <tr><th>Rol</th><th>Quién suele serlo</th><th>Para qué usa el sistema</th><th>Disponible desde</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Administrador</strong></td>
+        <td>El dueño o quien administra el sistema</td>
+        <td>Ve y hace todo: flota, viajes, personal, rendiciones, plan y pagos.</td>
+        <td class="val">Control</td>
+      </tr>
+      <tr>
+        <td><strong>Gerente</strong></td>
+        <td>Dirección, socios</td>
+        <td>Mira el panel y los indicadores, controla toda la operación y cierra rendiciones.</td>
+        <td class="val">Control</td>
+      </tr>
+      <tr>
+        <td><strong>Despachante</strong></td>
+        <td>Quien coordina el día a día</td>
+        <td>Carga y sigue los viajes, atiende incidentes y alertas, habla con los choferes.</td>
+        <td class="val">Control</td>
+      </tr>
+      <tr>
+        <td><strong>Chofer</strong></td>
+        <td>El conductor</td>
+        <td>Usa la app del celular: sus viajes, checklist, bitácora, combustible, OEA e incidentes.</td>
+        <td class="val">Control</td>
+      </tr>
+      <tr>
+        <td><strong>Taller</strong> (Mantenimiento)</td>
+        <td>Mecánico, jefe de taller</td>
+        <td>Planes de mantenimiento, órdenes de trabajo y documentación de las unidades.</td>
+        <td class="val">Operación</td>
+      </tr>
+      <tr>
+        <td><strong>RRHH</strong></td>
+        <td>Recursos Humanos, administración de personal</td>
+        <td>Legajos, habilitaciones que vencen, licencias y altas/bajas del personal.</td>
+        <td class="val">Operación</td>
+      </tr>
+      <tr>
+        <td><strong>Auditor</strong></td>
+        <td>Contador, auditoría externa</td>
+        <td>Sólo consulta: bitácoras, rendiciones, indicadores y planillas OEA.</td>
+        <td class="val">Gestión</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="nota">
+    <span class="et">Dato</span>
+    Los <strong>choferes no consumen usuarios</strong>: son ilimitados en todos los planes.
+    Lo que se paga por plan son los módulos y los vehículos activos, no la gente.
+  </div>
+
+  <p>
+    Al final del manual hay una tabla completa —<em>Quién ve qué</em>— con cada sección
+    del menú y los roles que la ven.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 1 · Primeros pasos</p>
+  <h2>Crear la cuenta e ingresar</h2>
+
+  <h3>Crear la cuenta de la empresa</h3>
+
+  <p>
+    Se hace una sola vez, desde el sitio público, con el botón <span class="ui">Crear cuenta</span>.
+    Quien la crea queda como <strong>Administrador</strong>.
+  </p>
+
+  <ol class="pasos">
+    <li>Cargá el <strong>nombre de la empresa</strong>. El <strong>CUIT</strong> y el teléfono son opcionales y se pueden completar después.</li>
+    <li>Cargá tus datos: <strong>nombre y apellido</strong>, <strong>email</strong> y una <strong>contraseña</strong>. Ese email va a ser tu usuario.</li>
+    <li>Botón <span class="ui">Crear mi cuenta</span>.</li>
+    <li>Revisá tu correo: llega un mail con un <strong>link para confirmar la casilla</strong>. Hasta confirmarla, el sistema no deja entrar.</li>
+  </ol>
+
+  <div class="aviso">
+    <span class="et">Si no llega el mail</span>
+    Fijate en <strong>correo no deseado / spam</strong>. En la pantalla de ingreso hay un
+    botón para <strong>reenviarlo</strong>. Si la casilla quedó mal escrita, escribinos y
+    la corregimos.
+  </div>
+
+  <h3>La prueba gratis</h3>
+
+  <p>
+    La cuenta arranca con <strong>30 días de prueba</strong>, <strong>sin tarjeta</strong> y
+    con acceso completo al plan <strong>Operación</strong> —no al plan de entrada—. Durante
+    ese mes están habilitadas las rendiciones, el combustible, el mantenimiento, las
+    planillas OEA y el RRHH básico, para que puedas probar el sistema entero.
+  </p>
+
+  <p>
+    El sistema avisa cuando la prueba se está por terminar (en el menú lateral, sobre
+    <span class="ruta">Mi plan</span>). Si termina y no se contrata ningún plan, la cuenta
+    queda suspendida después de unos días de gracia: <strong>los datos no se borran</strong>
+    y vuelven a estar disponibles apenas se activa un plan.
+  </p>
+
+  <h3>Ingresar todos los días</h3>
+
+  <ol class="pasos">
+    <li>Entrá a la dirección del sistema y tocá <span class="ui">Iniciar sesión</span>.</li>
+    <li>Escribí tu <strong>email</strong> y tu <strong>contraseña</strong>.</li>
+    <li>Listo: el sistema te lleva a tu pantalla según tu rol.</li>
+  </ol>
+
+  <p>
+    ¿Olvidaste la contraseña? En la pantalla de ingreso está el link
+    <span class="ui">¿Olvidaste tu contraseña?</span>: se pide el email, llega un correo con
+    un link y desde ahí se define una nueva.
+  </p>
+
+  <h3>Cuando te invitan a una empresa</h3>
+
+  <p>
+    Si alguien de tu empresa te da acceso, vas a recibir un <strong>mail de invitación</strong>
+    con un link. Al abrirlo se ve el nombre de la empresa y el rol que te asignaron; sólo
+    hay que elegir una contraseña y confirmar.
+  </p>
+
+  <div class="nota">
+    <span class="et">Tener en cuenta</span>
+    La invitación <strong>dura 7 días</strong> y se usa una sola vez. Si venció, quien te
+    invitó la puede volver a enviar desde <span class="ruta">Equipo</span>.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 1 · Primeros pasos</p>
+  <h2>Puesta en marcha: los primeros pasos</h2>
+
+  <p class="quien"><span class="et">Quién lo hace</span>
+    <span class="rol">Administrador</span></p>
+
+  <p>
+    Apenas se crea la cuenta, el sistema muestra una guía de <strong>tres pasos</strong>.
+    Se pueden saltear y retomar cuando quieras: están para no dejarte frente a un sistema
+    vacío.
+  </p>
+
+  <ol class="pasos">
+    <li>
+      <strong>Cargá tu flota.</strong> Los camiones y los acoplados, con patente, número
+      interno y kilometraje actual. Es lo primero porque todo lo demás —viajes,
+      documentos, mantenimiento— cuelga de una unidad.
+    </li>
+    <li>
+      <strong>Sumá a tu equipo.</strong> Los choferes y el personal de taller u oficina.
+      Los choferes son ilimitados en todos los planes.
+    </li>
+    <li>
+      <strong>Creá tu primer viaje.</strong> Con camión y chofer asignados. La app del
+      chofer lo recibe al instante, sin que nadie tenga que avisarle.
+    </li>
+  </ol>
+
+  <p>
+    En esa misma pantalla podés subir el <strong>logo de tu empresa</strong>, que después
+    aparece dentro del sistema.
+  </p>
+
+  <div class="clave">
+    <span class="et">Consejo</span>
+    Si tenés muchas unidades para cargar, no las tipees de a una: pedinos la
+    <strong>carga asistida</strong> desde tu planilla y te las subimos nosotros.
+  </div>
+
+  <h3>Dos caminos para darle acceso a una persona</h3>
+
+  <p>Según de quién se trate, el camino es distinto:</p>
+
+  <table>
+    <thead>
+      <tr><th>Camino</th><th>Cuándo se usa</th><th>Dónde</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>RRHH → Choferes</strong></td>
+        <td>Personal propio, en relación de dependencia. Además del acceso, arma el <strong>legajo</strong> con sus habilitaciones y vencimientos.</td>
+        <td><span class="ruta">RRHH</span> y <span class="ruta">Choferes</span></td>
+      </tr>
+      <tr>
+        <td><strong>Equipo (invitación por email)</strong></td>
+        <td>Gente sin legajo: el contador, un despachante tercerizado, un auditor externo.</td>
+        <td><span class="ruta">Equipo</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ==========================================================
+     PARTE 2 — EL DÍA A DÍA EN LA OFICINA
+     ========================================================== -->
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Cómo moverse por el sistema</h2>
+
+  <p>
+    Todas las pantallas del backoffice están armadas igual. Con entender una, se entienden
+    todas.
+  </p>
+
+  <h3>El menú lateral</h3>
+
+  <p>A la izquierda está el menú, agrupado por temas:</p>
+
+  <table>
+    <thead>
+      <tr><th>Sección</th><th>Qué hay adentro</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Inicio</strong></td><td>Panel gerencial e Indicadores.</td></tr>
+      <tr><td><strong>Operación</strong></td><td>Viajes, Incidentes, Alertas y Mensajes.</td></tr>
+      <tr><td><strong>Flota</strong></td><td>Flota, Mantenimiento, Combustible y Documentos.</td></tr>
+      <tr><td><strong>Personal</strong></td><td>RRHH, Choferes y Equipo.</td></tr>
+      <tr><td><strong>Administración</strong></td><td>Rendiciones y Planillas OEA.</td></tr>
+      <tr><td><strong>Cuenta</strong></td><td>Mi plan (qué tenés contratado y qué hay que pagar) y Configuración.</td></tr>
+      <tr><td><strong>Ayuda</strong></td><td>Este manual.</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    El menú se puede ocultar con el botón de las tres líneas, arriba a la izquierda, para
+    ganar pantalla. El sistema <strong>recuerda tu preferencia</strong> para la próxima vez.
+    En celular o tablet el menú aparece por encima y se cierra al elegir.
+  </p>
+
+  <div class="nota">
+    <span class="et">Vas a ver menos ítems que los de la lista</span>
+    Es normal: el menú <strong>se acomoda a tu rol</strong>. Si además tu plan no incluye un
+    módulo, lo vas a ver en gris y con candado.
+  </div>
+
+  <h3>La barra de arriba</h3>
+
+  <ul>
+    <li><span class="ui">+ Crear</span> — atajo para dar de alta lo más frecuente (viaje, incidente, camión, chofer, empleado, rendición) desde cualquier pantalla.</li>
+    <li><strong>Buscador</strong> — abre con <span class="ui">Ctrl + K</span>. Escribís el nombre de una sección o de una acción y te lleva ahí. Es la forma más rápida de moverse.</li>
+    <li><strong>Campanita</strong> — el centro de alertas. Muestra en vivo, con un contador, los avisos que genera el sistema.</li>
+    <li><strong>Sol / luna</strong> — cambia entre tema claro y oscuro. Queda guardado en tu usuario.</li>
+    <li><strong>Tu foto</strong> — el menú de la cuenta, con <span class="ui">Cerrar sesión</span>.</li>
+  </ul>
+
+  <h3>Los filtros y las tablas</h3>
+
+  <ul>
+    <li>Los filtros están en una fila arriba de cada listado y <strong>se aplican solos</strong>: no hay botón «Aplicar».</li>
+    <li>El campo de búsqueda espera un momento mientras escribís y después filtra. No hay que apretar Enter.</li>
+    <li>Las columnas con flechita <strong>ordenan</strong> al hacer clic.</li>
+    <li>La paginación está abajo de cada tabla.</li>
+    <li>Donde hay un botón <span class="ui">Excel</span>, lo que se descarga es <strong>lo que estás viendo</strong>, ya filtrado. <span class="plan operacion">Desde Operación</span></li>
+  </ul>
+
+  <h3>Los colores de los estados</h3>
+
+  <p>
+    En todo el sistema los estados se muestran como pastillas de color, y el color siempre
+    quiere decir lo mismo:
+  </p>
+
+  <table>
+    <thead><tr><th>Color</th><th>Significa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="punto verde"></span> Verde</td><td>Todo en orden, vigente, resuelto o finalizado.</td></tr>
+      <tr><td><span class="punto azul"></span> Azul</td><td>En curso, en uso, en viaje.</td></tr>
+      <tr><td><span class="punto naranja"></span> Naranja</td><td>Atención: algo por vencer, pendiente o demorado.</td></tr>
+      <tr><td><span class="punto rojo"></span> Rojo</td><td>Urgente o vencido: hay que hacer algo hoy.</td></tr>
+      <tr><td><span class="punto gris"></span> Gris</td><td>Inactivo, cancelado o sin novedad.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Panel: cómo viene el día <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span></p>
+
+  <p>
+    Es la pantalla de entrada. Está pensada para mirarla treinta segundos a la mañana y
+    saber si hay algo que apaga incendios. Muestra, en tiempo real:
+  </p>
+
+  <ul>
+    <li><strong>Camiones</strong>, con cuántos están disponibles, en viaje o parados.</li>
+    <li><strong>Incidentes abiertos</strong> y <strong>alertas activas</strong> sin resolver.</li>
+    <li><strong>Viajes demorados</strong> respecto de lo planificado.</li>
+    <li><strong>Gasto del día</strong>, según lo que van cargando los choferes.</li>
+    <li><strong>Mantenimientos próximos</strong> y <strong>choferes con novedades</strong> (licencias, vencimientos).</li>
+  </ul>
+
+  <p>
+    Abajo hay dos gráficos —<em>Flota por estado</em> y <em>Alertas por nivel</em>— y una
+    lista de lo pendiente. <strong>Cada tarjeta es un acceso directo:</strong> al hacer clic
+    te lleva a la pantalla correspondiente ya filtrada.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Flota: camiones y acoplados <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">Taller</span></p>
+
+  <p>
+    Es el padrón de las unidades. Tiene tres pestañas: <span class="ui">Camiones</span>,
+    <span class="ui">Acoplados</span> y <span class="ui">Flotas</span>.
+  </p>
+
+  <h3>Cargar un camión</h3>
+
+  <ol class="pasos">
+    <li>Pestaña <span class="ui">Camiones</span> → botón <span class="ui">Nuevo camión</span>.</li>
+    <li>Completá la <strong>patente</strong> (lo único obligatorio) y, si los tenés a mano, el <strong>N° interno</strong>, marca, modelo, año, tipo y capacidad.</li>
+    <li>Cargá el <strong>odómetro actual</strong>: es el número desde el cual el sistema va a contar los kilómetros y avisar los mantenimientos.</li>
+    <li>Elegí el <strong>estado</strong> y, si usás flotas, a cuál pertenece.</li>
+  </ol>
+
+  <table>
+    <thead><tr><th>Estado del camión</th><th>Cuándo se usa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="punto verde"></span> Disponible</td><td>Listo para salir.</td></tr>
+      <tr><td><span class="punto azul"></span> En viaje</td><td>Lo pone el sistema cuando el chofer inicia un viaje.</td></tr>
+      <tr><td><span class="punto naranja"></span> Detenido</td><td>Parado por algún motivo, sin estar en taller.</td></tr>
+      <tr><td><span class="punto azul"></span> En taller</td><td>En reparación o service.</td></tr>
+      <tr><td><span class="punto rojo"></span> Fuera de servicio</td><td>No se puede usar.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="clave">
+    <span class="et">Atajo útil</span>
+    En cada fila hay un botón <span class="ui">Ver documentos</span>: abre el Centro
+    Documental <strong>ya filtrado por esa unidad</strong>, con el seguro, la VTV y todo lo
+    demás. Es la forma más rápida de contestar «¿este camión está en regla?».
+  </div>
+
+  <h3>Acoplados y flotas</h3>
+
+  <p>
+    Los <strong>acoplados</strong> se cargan igual que los camiones y tienen sus propios
+    estados. Las <strong>flotas</strong> son agrupaciones para organizar unidades (por base,
+    por tipo de servicio, por cliente): son opcionales, pero después permiten filtrar los
+    listados y los indicadores por grupo.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Viajes <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">Auditor (sólo consulta)</span></p>
+
+  <p>
+    El viaje es el corazón del sistema: todo lo que pasa en la ruta —gastos, checklist,
+    incidentes, combustible— cuelga de él.
+  </p>
+
+  <h3>Dar de alta un viaje</h3>
+
+  <ol class="pasos">
+    <li>Menú <span class="ruta">Operación → Viajes</span> → botón <span class="ui">Nuevo viaje</span>.</li>
+    <li>Elegí el <strong>camión</strong> y el <strong>chofer</strong> (obligatorios). Los dos selectores <strong>buscan mientras escribís</strong>: patente, nombre o DNI.</li>
+    <li>Si corresponde, sumá el <strong>acoplado</strong>.</li>
+    <li>Cargá <strong>origen</strong> y <strong>destino</strong> (obligatorios).</li>
+    <li>Opcional pero muy recomendable: la <strong>carga</strong>, la <strong>salida planificada</strong> y la <strong>llegada planificada</strong>. Son los datos con los que después el sistema detecta las demoras.</li>
+    <li>Guardá. El viaje queda <strong>Asignado</strong> y <strong>aparece en el celular del chofer al instante</strong>.</li>
+  </ol>
+
+  <div class="aviso">
+    <span class="et">El sistema controla que el chofer esté disponible</span>
+    Antes de asignar, mira el legajo del chofer <strong>en la fecha de inicio del viaje</strong>:
+    <ul>
+      <li>si está <strong>de licencia</strong>, te ofrece <em>finalizar la licencia y asignar igual</em> (queda registrado y le avisa a RRHH) o reprogramar el viaje;</li>
+      <li>si está <strong>suspendido o dado de baja</strong>, <strong>no deja asignarlo</strong>: primero hay que resolverlo desde RRHH.</li>
+    </ul>
+  </div>
+
+  <h3>Seguir los viajes</h3>
+
+  <p>El listado se filtra por texto (código o destino), <strong>estado</strong>, <strong>chofer</strong> y rango de fechas. En cada fila:</p>
+
+  <ul>
+    <li><span class="ui">Hoja de ruta (PDF)</span> — un comprobante imprimible con la unidad, el chofer, la carga y la ruta, para entregarle al conductor.</li>
+    <li><span class="ui">Editar</span> — corregir datos del viaje.</li>
+    <li><span class="ui">Cancelar</span> — si el viaje no se hace.</li>
+  </ul>
+
+  <p>Con el botón <span class="ui">Excel</span> bajás el listado tal como lo estás viendo. <span class="plan operacion">Desde Operación</span></p>
+
+  <h3>Los estados del viaje</h3>
+
+  <table>
+    <thead><tr><th>Estado</th><th>Qué significa</th><th>Quién lo cambia</th></tr></thead>
+    <tbody>
+      <tr><td><span class="punto gris"></span> <strong>Asignado</strong></td><td>Cargado y enviado al chofer. Todavía no salió.</td><td>La oficina, al crearlo.</td></tr>
+      <tr><td><span class="punto azul"></span> <strong>En curso</strong></td><td>El chofer salió: hay odómetro de salida y ubicación.</td><td>El chofer, con <span class="ui">Iniciar</span>.</td></tr>
+      <tr><td><span class="punto verde"></span> <strong>Finalizado</strong></td><td>Llegó. Quedan los km recorridos y la bitácora cerrada.</td><td>El chofer, con <span class="ui">Finalizar</span>.</td></tr>
+      <tr><td><span class="punto rojo"></span> <strong>Cancelado</strong></td><td>No se hizo.</td><td>La oficina.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Incidentes: problemas en la ruta <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">Taller</span></p>
+
+  <p>
+    Los incidentes <strong>los reporta el chofer desde la app</strong> cuando pasa algo:
+    una rotura, un accidente, un retraso, un problema con la carga o con el cliente. Llegan
+    acá <strong>en el momento</strong>, con las fotos, el audio y la ubicación.
+  </p>
+
+  <h3>El tablero</h3>
+
+  <p>
+    Los incidentes se ordenan en tres columnas según cómo van:
+    <strong>Pendiente</strong> → <strong>En proceso</strong> → <strong>Resuelto</strong>.
+    Cada tarjeta muestra el tipo, la severidad, el camión y hace cuánto se reportó. La
+    pantalla se actualiza sola: un incidente nuevo aparece sin recargar nada
+    (por eso está el cartelito <span class="ui">En vivo</span>).
+  </p>
+
+  <p>Arriba se filtra por <strong>tipo</strong>, <strong>severidad</strong>, <strong>responsable</strong> y fechas.</p>
+
+  <div class="nota">
+    <span class="et">Según el plan</span>
+    Reportar y ver incidentes está en <strong>todos los planes</strong>. El tablero completo
+    —con filtros y asignación de responsable— se habilita <strong>desde Operación</strong>.
+  </div>
+
+  <h3>Atender un incidente</h3>
+
+  <p>Al hacer clic en una tarjeta se abre el detalle, y ahí podés:</p>
+
+  <ol class="pasos">
+    <li>Leer la descripción y ver la <strong>evidencia</strong>: fotos, audio, video y la ubicación desde donde se reportó.</li>
+    <li>Asignar un <strong>responsable</strong>: la persona del equipo que se va a ocupar.</li>
+    <li>Ajustar la <strong>severidad</strong> (Baja, Media, Alta, Crítica) si en la ruta se vio peor o mejor de lo que parecía.</li>
+    <li>Cambiar el <strong>estado</strong> a medida que avanza.</li>
+    <li>Dejar <strong>comentarios</strong>: quedan en el historial, con quién los escribió y cuándo.</li>
+  </ol>
+
+  <div class="nota">
+    <span class="et">Queda todo registrado</span>
+    Cada cambio se guarda en el <strong>historial</strong> del incidente: quién lo asignó,
+    quién cambió la severidad, quién lo resolvió. Si un incidente resuelto vuelve a
+    aparecer, se puede <strong>reabrir explicando el motivo</strong>; el motivo es
+    obligatorio y también queda guardado.
+  </div>
+
+  <h3>Los tipos de incidente</h3>
+
+  <table>
+    <thead><tr><th>Tipo</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Rotura mecánica</td><td>Se rompió una cubierta, falla el motor.</td></tr>
+      <tr><td>Accidente</td><td>Choque, despiste.</td></tr>
+      <tr><td>Falta de dinero</td><td>El chofer se quedó sin efectivo para seguir.</td></tr>
+      <tr><td>Retraso</td><td>Corte de ruta, demora en la carga o descarga.</td></tr>
+      <tr><td>Problema con carga</td><td>Faltante, rotura o mal acondicionamiento.</td></tr>
+      <tr><td>Problema con cliente</td><td>No reciben, discusión en la entrega.</td></tr>
+      <tr><td>Emergencia</td><td>Cualquier cosa urgente que no entra en las anteriores.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Alertas: lo que el sistema te avisa <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">RRHH</span></p>
+
+  <p>
+    Las alertas <strong>no se cargan a mano: las genera el sistema</strong>. Son la bandeja
+    donde aparece todo lo que hay que mirar, ordenado por urgencia. Es lo que reemplaza los
+    cien mensajes de WhatsApp donde lo importante se pierde.
+  </p>
+
+  <table>
+    <thead><tr><th>Nivel</th><th>Qué es</th><th>Ejemplos</th></tr></thead>
+    <tbody>
+      <tr><td><span class="punto rojo"></span> <strong>Crítica</strong></td><td>Atención inmediata.</td><td>Un accidente.</td></tr>
+      <tr><td><span class="punto naranja"></span> <strong>Alta</strong></td><td>Importante, hoy.</td><td>Camión detenido demasiado tiempo; se cerró una licencia para poder asignar un viaje.</td></tr>
+      <tr><td><span class="punto amarillo"></span> <strong>Media</strong></td><td>Para revisar.</td><td>Un gasto fuera de lo esperado; un viaje asignado a un chofer que venía de licencia.</td></tr>
+      <tr><td><span class="punto verde"></span> <strong>Aviso</strong></td><td>Informativa.</td><td>Un documento o una habilitación que está por vencer.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Cómo se trabaja una alerta</h3>
+
+  <p>
+    Cada alerta se va marcando con botones, así el equipo sabe qué está atendido y qué no:
+  </p>
+
+  <ol class="pasos">
+    <li><span class="ui">Visto</span> — la leíste. Deja de figurar como nueva.</li>
+    <li><span class="ui">Atender</span> — alguien se está ocupando. (Con <span class="ui">Desatender</span> se vuelve atrás.)</li>
+    <li><span class="ui">Resolver</span> — el tema está cerrado.</li>
+  </ol>
+
+  <div class="nota">
+    <span class="et">Diferencia con los incidentes</span>
+    Un incidente <strong>se asigna a una persona</strong>; una alerta no: le llega al rol que
+    corresponde y la gestiona quien la vea primero. Si una alerta resuelta vuelve a hacer
+    ruido, se puede <strong>reabrir indicando el motivo</strong>.
+  </div>
+
+  <p>
+    Las alertas llegan también a la <strong>campanita</strong> de la barra superior, en
+    tiempo real. En la pantalla <span class="ruta">Alertas</span> se filtran por nivel,
+    estado y fechas.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Mensajes con los choferes <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span></p>
+
+  <p>
+    Un chat directo entre la base y cada chofer, dentro del mismo sistema donde está el
+    viaje. A la izquierda están las conversaciones (con buscador), a la derecha el hilo.
+    Se escribe abajo y se envía con el botón o con Enter.
+  </p>
+
+  <p>
+    ¿Por qué no seguir con WhatsApp? Porque acá <strong>la conversación queda atada a la
+    empresa, no al teléfono de una persona</strong>: si el despachante se toma vacaciones o
+    cambia de celular, el historial sigue estando.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Mantenimiento <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Taller</span><span class="rol">Administrador</span><span class="rol">Gerente</span></p>
+
+  <p>
+    Sirve para dos cosas: <strong>que no se pase un service</strong> y <strong>saber cuánto
+    cuesta mantener cada camión</strong>. Tiene tres pestañas.</p>
+
+  <h3><span class="ui">Próximos</span> — qué hay que hacer</h3>
+
+  <p>
+    La lista de servicios que están por vencer o ya vencidos, con la patente, el nombre del
+    plan y el motivo («faltan 1.200 km», por ejemplo). En naranja los próximos, en rojo los
+    vencidos. Es la pestaña que conviene mirar todas las semanas.
+  </p>
+
+  <h3><span class="ui">Planes</span> — cada cuánto se hace cada cosa</h3>
+
+  <p>Un plan es una regla del tipo «a este camión, cambio de aceite cada 15.000 km».</p>
+
+  <ol class="pasos">
+    <li>Botón <span class="ui">Nuevo plan</span>.</li>
+    <li>Elegí el <strong>camión</strong> y ponele un <strong>nombre</strong> claro («Service de aceite y filtros»).</li>
+    <li>Elegí el <strong>disparador</strong>: por <strong>kilómetros</strong>, por <strong>horas de uso</strong> o por <strong>fecha</strong>.</li>
+    <li>Cargá el <strong>intervalo</strong> (cada cuántos km, horas o días) y el <strong>último service</strong> hecho, para que el sistema sepa desde dónde contar.</li>
+    <li>Guardá. A partir de ahí el aviso aparece solo en <span class="ui">Próximos</span> y en el Panel.</li>
+  </ol>
+
+  <p>Un plan se puede <strong>pausar</strong> cuando no se quiere que siga avisando, sin borrarlo.</p>
+
+  <h3><span class="ui">Órdenes</span> — lo que efectivamente se hizo</h3>
+
+  <p>
+    Cada intervención del taller se registra como una <strong>orden de trabajo</strong>: fecha,
+    camión, descripción, <strong>costo</strong>, odómetro y, si corresponde, el plan al que
+    responde. Se le pueden adjuntar archivos, y con el botón
+    <span class="ui">Orden de trabajo (PDF)</span> se imprime como comprobante para el
+    taller.
+  </p>
+
+  <p>
+    La orden pasa por <strong>Abierta</strong> → <strong>En proceso</strong> →
+    <strong>Finalizada</strong>. Una orden ya finalizada se puede
+    <strong>reabrir explicando el motivo</strong> si hay que corregirla.
+  </p>
+
+  <div class="clave">
+    <span class="et">Por qué conviene cargar el costo</span>
+    Es lo que después permite comparar unidades y decidir con números si conviene reparar o
+    renovar. Sin ese dato, el mantenimiento es una sensación.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Combustible <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">Taller</span><span class="rol">Auditor</span></p>
+
+  <p>
+    El chofer carga cada abastecimiento desde su celular (litros, monto, kilómetros y foto
+    del ticket) y acá se convierte en un tablero de consumo. La oficina no tipea nada.
+  </p>
+
+  <h3>Qué muestra</h3>
+
+  <ul>
+    <li><strong>Rendimiento (km/l)</strong> y <strong>consumo (l/100 km)</strong> de toda la flota.</li>
+    <li><strong>Costo por km</strong>, gasto total, litros totales y km recorridos del período.</li>
+    <li><strong>Precio promedio del litro</strong> y cantidad de cargas.</li>
+    <li>Gráficos de <strong>rendimiento por camión</strong> y <strong>gasto por camión</strong>.</li>
+    <li>Detalle <strong>por camión</strong>, con km y días entre cargas.</li>
+    <li><strong>Ranking de consumo:</strong> la comparativa <strong>por chofer</strong>, para ver quién rinde mejor con el mismo camión. <span class="plan gestion">Desde Gestión</span></li>
+  </ul>
+
+  <div class="clave">
+    <span class="et">Cómo se lee</span>
+    Dos camiones iguales que hacen la misma ruta y rinden distinto, o el mismo camión que
+    empeora mes a mes, son las dos señales que valen la pena mirar. La primera suele ser
+    manejo; la segunda, mecánica.
+  </div>
+
+  <div class="aviso">
+    <span class="et">Para que los números salgan bien</span>
+    El rendimiento se calcula con los <strong>kilómetros del odómetro</strong>. Si el chofer
+    no carga el km en cada abastecimiento, el sistema puede mostrar el gasto pero no el
+    rendimiento. Insistí con ese dato: es un número y son dos segundos.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Centro Documental <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">Taller</span></p>
+
+  <p>
+    Todos los papeles en un solo lugar, con su <strong>fecha de vencimiento</strong> y el
+    archivo adjunto: seguro, VTV, licencias, habilitaciones, cartas de porte, remitos.
+    Pueden ser de un <strong>camión</strong>, un <strong>acoplado</strong>, un
+    <strong>chofer</strong> o de la <strong>empresa</strong>.
+  </p>
+
+  <h3>Cargar un documento</h3>
+
+  <ol class="pasos">
+    <li>Pestaña <span class="ui">Gestor</span>: elegí la <strong>entidad</strong> (camión, acoplado, chofer o empresa) y cuál en particular.</li>
+    <li>Botón <span class="ui">Nuevo documento</span>.</li>
+    <li>Elegí la <strong>categoría</strong>, cargá el <strong>número</strong>, la fecha de <strong>emisión</strong> y la de <strong>vencimiento</strong>.</li>
+    <li>Adjuntá la <strong>foto o el PDF</strong>. Con eso, el papel deja de vivir en la guantera.</li>
+  </ol>
+
+  <h3>La pestaña <span class="ui">Por vencer</span></h3>
+
+  <p>
+    Es la que evita la multa. Muestra todo lo que está por vencer o vencido, con
+    <strong>buscador y filtros</strong> por estado y por entidad, y un
+    <strong>contador</strong> en la pestaña con cuántos documentos están en esa situación.
+    El listado se puede bajar a Excel. <span class="plan operacion">Desde Operación</span>
+  </p>
+
+  <table>
+    <thead><tr><th>Estado</th><th>Qué significa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="punto verde"></span> Vigente</td><td>En regla.</td></tr>
+      <tr><td><span class="punto naranja"></span> Por vencer</td><td>Se está por caer: hay tiempo de renovarlo.</td></tr>
+      <tr><td><span class="punto rojo"></span> Vencido</td><td>Ya venció.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nota">
+    <span class="et">No hay que acordarse</span>
+    El sistema genera una <strong>alerta automática</strong> antes de cada vencimiento. Con
+    cargar bien la fecha una sola vez, el aviso llega solo todos los años.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>RRHH: el legajo del personal <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">RRHH</span><span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span></p>
+
+  <p>
+    Acá vive la gente: sus datos, sus habilitaciones con vencimiento y su historia laboral.
+    Es el módulo que evita que salga a la ruta alguien con el carnet vencido o de licencia.
+  </p>
+
+  <h3>Dar de alta a un empleado</h3>
+
+  <ol class="pasos">
+    <li>Menú <span class="ruta">Personal → RRHH</span> → botón <span class="ui">Nuevo empleado</span>.</li>
+    <li>Cargá <strong>nombre</strong>, <strong>apellido</strong> y <strong>DNI / CUIL</strong> (obligatorios), más teléfono, domicilio y contacto de emergencia.</li>
+    <li>Elegí el <strong>puesto</strong> (chofer, mecánico, despachante, gerente, administrativo) y la <strong>fecha de ingreso</strong>, que es obligatoria: es la que abre el historial laboral.</li>
+    <li>Si esa persona va a usar el sistema, activá <span class="ui">Crear acceso a la app</span> y cargá su email y una contraseña inicial. El <strong>rol se deduce del puesto</strong>, y se puede cambiar.</li>
+  </ol>
+
+  <h3>Las cuatro pestañas del legajo</h3>
+
+  <table>
+    <thead><tr><th>Pestaña</th><th>Qué se hace ahí</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ui">Datos</span></td><td>Los datos personales y de contacto.</td></tr>
+      <tr><td><span class="ui">Historial laboral</span></td><td>Ingresos, licencias, suspensiones, reincorporaciones y bajas. <span class="plan gestion">Desde Gestión</span></td></tr>
+      <tr><td><span class="ui">Permisos</span></td><td>Habilitaciones con vencimiento: carnet, LiNTI, psicofísico, carga peligrosa, manejo defensivo…</td></tr>
+      <tr><td><span class="ui">Asignación</span></td><td>Qué camión tiene asignado.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Los permisos y habilitaciones</h3>
+
+  <p>
+    Cada permiso se carga con su <strong>tipo</strong>, número, quién lo emitió, la fecha de
+    emisión y —lo más importante— el <strong>vencimiento</strong>. Se le puede adjuntar la
+    <strong>foto o el PDF del certificado</strong>. Igual que con los documentos, el sistema
+    avisa solo antes de que caduque.
+  </p>
+
+  <h3>El historial laboral <span class="plan gestion">Desde Gestión</span></h3>
+
+  <p>
+    Es una línea de tiempo con los movimientos de la persona. Cada uno admite un
+    <strong>archivo de respaldo</strong> (por ejemplo, el certificado médico).
+  </p>
+
+  <table>
+    <thead><tr><th>Movimiento</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ingreso</strong></td><td>El alta. Se crea sola con la fecha de ingreso.</td></tr>
+      <tr><td><strong>Licencia</strong></td><td>Con su motivo: vacaciones, enfermedad, accidente laboral, parental, estudio, sin goce de sueldo…</td></tr>
+      <tr><td><strong>Suspensión</strong></td><td>Con fecha de inicio y de fin.</td></tr>
+      <tr><td><strong>Reincorporación</strong></td><td>La vuelta al trabajo.</td></tr>
+      <tr><td><strong>Baja</strong></td><td>La desvinculación.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="clave">
+    <span class="et">El estado no se toca a mano</span>
+    <strong>Activo · Licencia · Suspendido · Baja</strong> los <strong>calcula el
+    sistema</strong> a partir del historial, y se corrigen solos cuando una licencia o una
+    suspensión llega a su fecha de fin. Si alguien vuelve antes de lo previsto, se cierra el
+    período con el botón de <strong>reincorporación anticipada</strong>.
+  </div>
+
+  <div class="aviso">
+    <span class="et">Un chofer con viajes abiertos no se puede poner de licencia</span>
+    Si intentás cargar una licencia, suspensión o baja y esa persona tiene <strong>viajes sin
+    cerrar</strong> en ese período, el sistema no lo deja y te ofrece un acceso directo a esos
+    viajes para cancelarlos o finalizarlos. Es a propósito: evita que quede un viaje en curso
+    a nombre de alguien que no está trabajando.
+  </div>
+
+  <p>
+    En el listado principal hay un panel <strong>«Fuera de servicio hoy»</strong>: de un
+    vistazo, quién está de licencia o suspensión en el día de hoy.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Choferes <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">RRHH</span></p>
+
+  <p>
+    Mientras el legajo de RRHH es la persona, acá está el <strong>perfil operativo</strong>:
+    el número y la clase de <strong>licencia de conducir</strong>, su <strong>vencimiento</strong>
+    y el estado (Activo, En viaje, Inactivo).
+  </p>
+
+  <ol class="pasos">
+    <li>Botón <span class="ui">Nuevo chofer</span>.</li>
+    <li>Elegí el <strong>empleado</strong> del legajo. El selector muestra el <strong>DNI junto al nombre</strong> —así no se confunden dos personas que se llaman igual— y también se puede buscar por documento.</li>
+    <li>Cargá la licencia y su vencimiento.</li>
+  </ol>
+
+  <div class="nota">
+    <span class="et">El orden importa</span>
+    Primero el <strong>empleado</strong> en RRHH, después el <strong>chofer</strong>. Así una
+    misma persona tiene un solo legajo, aunque cambie de puesto.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Equipo: quién tiene acceso <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span></p>
+
+  <p>
+    Es la lista de usuarios del sistema, con su rol y su <strong>última conexión</strong>
+    (o «Nunca entró», que suele explicar por qué alguien «no ve» algo). Desde acá se invita a
+    gente que <strong>no tiene legajo</strong>: el contador, un despachante tercerizado, un
+    auditor externo.
+  </p>
+
+  <h3>Invitar a alguien</h3>
+
+  <ol class="pasos">
+    <li>Botón <span class="ui">Invitar</span>.</li>
+    <li>Escribí el <strong>email</strong> y elegí el <strong>rol</strong>. Los roles disponibles dependen del plan contratado.</li>
+    <li>Enviá. La persona recibe un mail y define su contraseña al aceptar.</li>
+  </ol>
+
+  <div class="clave">
+    <span class="et">Si el mail no llega</span>
+    La pantalla muestra además un <strong>link copiable</strong> de la invitación: se lo podés
+    pasar por WhatsApp y funciona igual. Es la salida cuando el correo cae en spam o la
+    casilla quedó mal escrita.
+  </div>
+
+  <p>
+    Las invitaciones pendientes se ven en una tabla aparte, con su fecha de vencimiento
+    (<strong>7 días</strong>) y la opción de <strong>reenviarlas</strong> o
+    <strong>cancelarlas</strong>.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Rendiciones <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Auditor</span></p>
+
+  <p>
+    Es el cierre de la plata del viaje, y probablemente lo que más tiempo ahorra: la
+    rendición <strong>se arma sola</strong> con lo que el chofer fue cargando en la ruta.
+    Nadie vuelve a tipear tickets.
+  </p>
+
+  <div class="clave">
+    <span class="et">La cuenta</span>
+    <strong>Neto a rendir = gastos rendidos − adelantos.</strong> Si el resultado es positivo,
+    la empresa le debe al chofer; si es negativo, el chofer tiene que devolver la diferencia.
+  </div>
+
+  <h3>Generar una rendición</h3>
+
+  <ol class="pasos">
+    <li>Menú <span class="ruta">Administración → Rendiciones</span> → botón <span class="ui">Generar rendición</span>.</li>
+    <li>Filtrá por <strong>chofer</strong> o <strong>camión</strong> si te ayuda a encontrarlo, y elegí el <strong>viaje finalizado</strong>.</li>
+    <li>Confirmá: el sistema toma la bitácora completa y arma el detalle.</li>
+    <li>Revisá. La rendición nace en <strong>Borrador</strong>, así que se puede mirar con calma.</li>
+    <li>Si el chofer cargó algo tarde, usá <span class="ui">Recalcular</span>: vuelve a leer la bitácora y actualiza los totales.</li>
+    <li>Con todo conforme, <span class="ui">Cerrar</span>. Queda como comprobante definitivo.</li>
+  </ol>
+
+  <p>
+    En cualquier momento se puede descargar el <span class="ui">PDF</span> de la rendición,
+    que es lo que se firma o se archiva.
+  </p>
+
+  <div class="aviso">
+    <span class="et">Reabrir una rendición cerrada</span>
+    Una rendición cerrada es plata rendida, así que volver atrás está reservado a
+    <strong>Administrador y Gerente</strong>, y <strong>exige escribir el motivo</strong>, que
+    queda registrado. El Auditor puede ver y cerrar, pero no revertir cierres.
+  </div>
+
+  <h3>Qué entra en la rendición</h3>
+
+  <p>Todo lo que el chofer cargó en la bitácora, clasificado por tipo:</p>
+
+  <table>
+    <thead><tr><th>Suman como gasto</th><th>Restan</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Combustible, peaje, gasto, reparación, multa, viático y otros.</td>
+        <td><strong>Adelantos</strong> de dinero que recibió el chofer.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="nota">
+    <span class="et">Alcance de hoy</span>
+    El sistema <strong>suma y resta lo que está cargado</strong>. No calcula viáticos
+    automáticos por convenio: si se paga un viático fijo, se carga como un movimiento más.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Planillas OEA <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">Auditor</span></p>
+
+  <p>
+    La planilla de control de seguridad del <strong>Operador Económico Autorizado</strong>: la
+    inspección de los <strong>7 puntos</strong> del vehículo más los <strong>precintos</strong>,
+    con fotos y firma. La completa el chofer desde la app; acá queda el archivo consultable.
+  </p>
+
+  <p>
+    El listado muestra fecha, camión, chofer, viaje y <strong>resultado</strong>
+    (<span class="punto verde"></span> Conforme / <span class="punto rojo"></span> No conforme /
+    <span class="punto gris"></span> Pendiente), con buscador por patente, chofer o viaje.
+    Al abrir una planilla se ve punto por punto, con las fotos que sacó el chofer y su firma.
+  </p>
+
+  <div class="clave">
+    <span class="et">Para qué sirve</span>
+    Es la evidencia que se muestra en una auditoría o un control: quién revisó qué, cuándo, con
+    foto y firma. Sin el sistema, eso es una carpeta de papeles que nadie encuentra.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Indicadores <span class="plan gestion">Desde Gestión</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Auditor</span></p>
+
+  <p>
+    Es la mirada gerencial: los números de la operación, con filtros por
+    <strong>flota</strong>, <strong>camión</strong>, <strong>chofer</strong> y
+    <strong>rango de fechas</strong>, y exportación a Excel.
+  </p>
+
+  <table>
+    <thead><tr><th>Indicador</th><th>Qué te dice</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gasto por km</strong></td><td>Cuánto cuesta mover un kilómetro. Es el número para poner precio a un flete.</td></tr>
+      <tr><td><strong>Rendimiento (l/100 km)</strong></td><td>Cuánto consume la flota.</td></tr>
+      <tr><td><strong>Gastos totales</strong> y <strong>distancia</strong></td><td>El volumen del período.</td></tr>
+      <tr><td><strong>Costos extraordinarios</strong></td><td>Reparaciones y multas: lo que no debería repetirse.</td></tr>
+      <tr><td><strong>Resolución de incidentes (h)</strong></td><td>Cuánto tarda el equipo en resolver un problema.</td></tr>
+      <tr><td><strong>Disponibilidad de flota</strong></td><td>Qué porcentaje de las unidades está en condiciones de trabajar.</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Abajo hay gráficos de <strong>gasto por camión</strong> y <strong>por chofer</strong>. Al
+    hacer clic en un gráfico se abre en grande, con el detalle.
+  </p>
+
+  <div class="nota">
+    <span class="et">Si un período se ve corto</span>
+    Cuando el rango que pediste excede el historial que incluye tu plan, la pantalla lo avisa.
+    El dato está: se recupera al subir de plan.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Configuración: adaptar el sistema a tu empresa <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span></p>
+
+  <p>
+    No todas las empresas trabajan igual, y el sistema no tiene por qué obligarte a
+    cambiar tu forma de trabajar. En <span class="ruta">Cuenta → Configuración</span>
+    se ajusta qué exige FleetLog y qué deja pasar.
+  </p>
+
+  <div class="clave">
+    <span class="et">Cómo funciona</span>
+    Cada opción viene con <strong>el comportamiento que el sistema ya tenía</strong>:
+    si no tocás nada, todo sigue igual. Lo que cambies aplica a
+    <strong>toda la empresa</strong> —incluida la app de los choferes— y queda
+    registrado con tu nombre y la fecha.
+  </div>
+
+  <div class="nota">
+    <span class="et">Si tenés plan Control</span>
+    Vas a ver esta sección con candado. El sistema funciona igual, con los valores
+    de fábrica —que son los que se describen acá como «viene»—: lo que suma
+    Operación es poder cambiarlos.
+  </div>
+
+  <h3>Viajes</h3>
+
+  <table>
+    <thead><tr><th>Opción</th><th>Qué cambia</th><th>Viene</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Exigir checklist para iniciar</strong></td>
+        <td>El chofer no puede iniciar el viaje hasta completar y firmar el checklist. Si tu operación no usa checklist, desactivalo y el botón <span class="ui">Iniciar</span> deja de pedirlo.</td>
+        <td class="val">Activado</td>
+      </tr>
+      <tr>
+        <td><strong>Exigir planilla OEA conforme</strong></td>
+        <td>Para operaciones bajo OEA: sin la planilla del viaje firmada y conforme, no se puede iniciar.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Bloquear si hay documentación vencida</strong></td>
+        <td>Impide asignar el viaje cuando el camión, el acoplado o el chofer tienen un documento vencido, y dice cuál. Desactivado, el sistema igual avisa por alerta.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Prefijo del número de viaje</strong></td>
+        <td>Con qué empieza el código visible: <code>V-</code> genera V-00001. Sólo afecta a los viajes nuevos.</td>
+        <td class="val"><code>V-</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Rendiciones</h3>
+
+  <p>
+    <strong>Permitir reabrir una rendición cerrada.</strong> Desactivado, una rendición
+    cerrada es definitiva para todos, incluido el administrador. Activado —como viene—,
+    la pueden reabrir Administrador y Gerente, siempre con motivo escrito.
+  </p>
+
+  <h3>Combustible</h3>
+
+  <p>
+    <strong>Exigir odómetro en cada carga.</strong> Recomendado: sin el kilometraje no
+    se puede calcular el rendimiento ni el costo por kilómetro. Al activarlo, la app del
+    chofer pasa a pedir el dato antes de guardar.
+  </p>
+
+  <div class="nota">
+    <span class="et">Cómo se guarda</span>
+    Los cambios no se aplican solos: al modificar algo aparece abajo una barra con
+    <span class="ui">Guardar</span> y <span class="ui">Descartar</span>. Nada cambia
+    hasta que guardes.
+  </div>
+
+  <h3>Tu propio checklist</h3>
+
+  <p>
+    En la pestaña <span class="ui">Checklist</span> armás los puntos que revisa el
+    chofer antes de salir. Mientras no crees ninguna plantilla, el sistema usa los
+    siete de siempre (luces, frenos, cubiertas, aceite, matafuego, documentación y
+    acoplado).
+  </p>
+
+  <ol class="pasos">
+    <li>Botón <span class="ui">Nueva plantilla</span>. Viene <strong>precargada con los siete puntos por defecto</strong>: se ajusta lo que haga falta en vez de escribir todo de cero.</li>
+    <li>Agregá, renombrá o quitá puntos, y ordenálos con las flechitas.</li>
+    <li>Marcá cada punto que lo merezca como <strong>Crítico</strong> o con <strong>Foto</strong> (ver abajo).</li>
+    <li>Guardá.</li>
+  </ol>
+
+  <table>
+    <thead><tr><th>Marca</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Crítico</strong></td>
+        <td>Si el chofer marca <span class="ui">Falla</span> en ese punto, el checklist queda <strong>rechazado</strong>. Con la opción «Exigir checklist para iniciar» activada, ese camión no sale hasta que se resuelva.</td>
+      </tr>
+      <tr>
+        <td><strong>Foto si falla</strong></td>
+        <td>Si ese punto falla, el chofer <strong>no puede firmar</strong> hasta adjuntar la foto. Es lo que evita la falla anotada que después nadie puede reconstruir.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Plantillas por tipo de unidad <span class="plan gestion">Desde Gestión</span></h4>
+
+  <p>
+    La plantilla <strong>general</strong> aplica a todas las unidades y está incluida
+    desde Operación. Desde <strong>Gestión</strong> podés además cargar plantillas con
+    un <strong>tipo de unidad</strong> (el mismo que pusiste en la ficha del camión):
+    esa se usa para esos camiones y el resto sigue con la general. Sirve cuando un
+    tractor con cisterna no se revisa como un furgón.
+  </p>
+
+  <div class="aviso">
+    <span class="et">Lo ya firmado no se toca</span>
+    Los cambios valen para los <strong>viajes nuevos</strong>. Un checklist ya
+    firmado conserva los puntos con los que se revisó la unidad ese día: si no fuera
+    así, la firma no probaría nada.
+  </div>
+
+  <h3>Tus propias listas <span class="plan operacion">Desde Operación</span></h3>
+
+  <p>
+    En la pestaña <span class="ui">Catálogos</span> se editan las listas que el
+    sistema ofrece al cargar algo. Hoy son dos: los <strong>tipos de gasto</strong>
+    de la bitácora y los <strong>tipos de incidente</strong>.
+  </p>
+
+  <ol class="pasos">
+    <li>Elegí el catálogo y tocá <span class="ui">Editar</span>.</li>
+    <li>Renombrá lo que quieras: si en tu empresa al peaje le dicen «tasa», ponele así.</li>
+    <li>Sumá los tuyos con <span class="ui">Agregar</span>: balanza, lavadero, estacionamiento, guía.</li>
+    <li>Ordenálos con las flechitas —los primeros son los que más se usan— y desactivá los que no uses.</li>
+    <li>Guardá. Los choferes lo ven enseguida en su app.</li>
+  </ol>
+
+  <div class="clave">
+    <span class="et">Ojo con esto: los adelantos</span>
+    Al crear un tipo de gasto propio podés marcarlo como <strong>Adelanto</strong>.
+    Eso significa que <strong>resta</strong> en la rendición, igual que el adelanto
+    que trae el sistema. Si creás «Adelanto por transferencia» y no lo marcás, va a
+    sumar como un gasto más y la rendición te va a dar otra cosa.
+  </div>
+
+  <div class="nota">
+    <span class="et">Los que trae el sistema</span>
+    Combustible, peaje, adelanto y los demás <strong>no se pueden eliminar</strong>:
+    se renombran, se reordenan y, si no los usás, se desactivan. Es lo que permite
+    que los viajes del año pasado se sigan leyendo bien.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 2 · El día a día en la oficina</p>
+  <h2>Mi plan: cuenta y pagos <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Gerente</span></p>
+
+  <p>
+    En <span class="ruta">Cuenta → Mi plan</span> está todo lo comercial: qué plan tenés, qué
+    estás consumiendo, cuánto es el total del mes y qué está pendiente de pago.
+  </p>
+
+  <ul>
+    <li><strong>Plan actual</strong> y estado de la cuenta.</li>
+    <li><strong>Consumo</strong>: camiones y acoplados activos del mes.</li>
+    <li><strong>Períodos</strong>: los meses facturados, pagos y pendientes.</li>
+    <li><span class="ui">Pagar</span> — abre el pago por <strong>Mercado Pago</strong> del período.</li>
+    <li><span class="ui">Activar débito automático</span> — para no tener que acordarse todos los meses. Se puede cancelar cuando quieras.</li>
+  </ul>
+
+  <div class="clave">
+    <span class="et">El menú te avisa</span>
+    El propio ítem <span class="ruta">Mi plan</span> muestra una etiqueta cuando hay algo que
+    resolver: <strong>«Pago pendiente»</strong> en naranja, <strong>«Suspendida»</strong> en
+    rojo, o los <strong>días que quedan de prueba</strong> en la última semana. Con la cuenta
+    al día no muestra nada.
+  </div>
+
+  <h3>Cómo se factura</h3>
+
+  <p>
+    Es <strong>abono del plan + un precio por vehículo activo</strong>, con los acoplados al
+    50 %. <strong>No hay mínimo de vehículos</strong>: se factura lo que tenés. Se toma el
+    <strong>máximo de unidades activas del mes</strong>, no las del último día.
+  </p>
+
+  <p>
+    Subir de plan o agregar unidades tiene efecto <strong>inmediato</strong> y se prorratea;
+    bajar de plan o quitar unidades se aplica en la <strong>renovación</strong> del período.
+  </p>
+
+  <h3>Estados de la cuenta</h3>
+
+  <table>
+    <thead><tr><th>Estado</th><th>Qué pasa</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Prueba</strong></td><td>Acceso completo al plan Operación por 30 días. Avisos antes de que termine.</td></tr>
+      <tr><td><strong>Activa</strong></td><td>Todo normal.</td></tr>
+      <tr><td><strong>En mora</strong></td><td>Se sigue trabajando igual, con el aviso de deuda a la vista.</td></tr>
+      <tr><td><strong>Suspendida</strong></td><td><strong>Sólo lectura</strong>: se puede ver todo y pagar, pero no cargar nada nuevo.</td></tr>
+      <tr><td><strong>Dada de baja</strong></td><td>Sin acceso.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nota">
+    <span class="et">Tus datos son tuyos</span>
+    Ni la suspensión ni el fin de la prueba borran información. Al regularizar, vuelve a estar
+    todo como estaba.
+  </div>
+</section>
+
+<!-- ==========================================================
+     PARTE 3 — LA APP DEL CHOFER
+     ========================================================== -->
+
+<section class="seccion">
+  <p class="parte">Parte 3 · La app del chofer</p>
+  <h2>Cómo es la app del chofer <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién la usa</span>
+    <span class="rol">Chofer</span></p>
+
+  <p>
+    Está hecha para usarse <strong>con una mano, en la cabina y con poca señal</strong>:
+    botones grandes, pocas pantallas y dictado por voz para no tener que tipear.
+  </p>
+
+  <h3>Instalarla en el celular</h3>
+
+  <ol class="pasos">
+    <li>Abrí la dirección del sistema en el navegador del celular (Chrome en Android, Safari en iPhone).</li>
+    <li>Iniciá sesión con tu email y tu contraseña.</li>
+    <li>Cuando aparezca el botón <span class="ui">Instalar</span>, arriba a la derecha, tocalo. En iPhone: <strong>Compartir → Agregar a inicio</strong>.</li>
+    <li>Listo: queda como una app más, con su ícono. Al abrirla entrás directo a tus viajes.</li>
+  </ol>
+
+  <h3>La pantalla</h3>
+
+  <ul>
+    <li>Arriba, tu <strong>nombre</strong> y cuántos viajes tenés en curso.</li>
+    <li>Abajo, una barra con cuatro botones: <strong>Inicio</strong>, <strong>Incidentes</strong>, <strong>Docs</strong> y <strong>Mensajes</strong>.</li>
+    <li>En Inicio, dos accesos rápidos: <strong>Combustible</strong> y <strong>Planilla OEA</strong>.</li>
+  </ul>
+
+  <h3>Sin señal también funciona</h3>
+
+  <div class="clave">
+    <span class="et">Esto es importante</span>
+    Si estás en una zona sin datos, <strong>seguí cargando igual</strong>. La app guarda todo en
+    el celular y lo <strong>sincroniza sola</strong> cuando vuelve la señal. Arriba vas a ver
+    <span class="ui">Sin conexión</span> y un contador de registros
+    <span class="ui">pendientes</span>: cuando ese contador llega a cero, ya está todo enviado.
+    <strong>No hace falta repetir la carga</strong>, y no se pierde nada.
+  </div>
+
+  <h3>Dictar en vez de escribir</h3>
+
+  <p>
+    En los campos de texto largos hay un <strong>micrófono</strong>: lo tocás, hablás y el
+    texto se escribe solo. Sirve para las observaciones de un gasto, la descripción de un
+    incidente o la falla de un ítem del checklist.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 3 · La app del chofer</p>
+  <h2>Mi viaje, paso a paso <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Chofer</span></p>
+
+  <p>
+    Cuando la oficina te asigna un viaje, <strong>te aparece solo</strong> en la pantalla de
+    inicio. No hay que aceptar nada.
+  </p>
+
+  <h3>Antes de salir: el checklist</h3>
+
+  <ol class="pasos">
+    <li>Abrí el viaje y tocá <span class="ui">Checklist</span>.</li>
+    <li>Recorré los puntos (luces, frenos, cubiertas, aceite, matafuego, documentación, acoplado… o los que haya definido tu empresa). Todos empiezan en <strong>N/A</strong>: marcá <span class="ui">OK</span> o <span class="ui">Falla</span> en los que revises.</li>
+    <li>Si algo está mal, marcá <span class="ui">Falla</span> y describí el problema —podés dictarlo—. En los puntos que lo pidan, <strong>sacá la foto</strong>: sin ella no vas a poder firmar, y la pantalla te avisa.</li>
+    <li>Firmá con el dedo en el recuadro y tocá <span class="ui">Aprobar y firmar</span>.</li>
+  </ol>
+
+  <p>El checklist queda con tu firma y la hora, como <strong>aprobado</strong> o <strong>rechazado</strong>.</p>
+
+  <div class="aviso">
+    <span class="et">Los puntos marcados «Crítico»</span>
+    Algunos puntos vienen con la etiqueta <strong>Crítico</strong> en rojo. Si marcás
+    <span class="ui">Falla</span> en uno de ellos, el checklist queda
+    <strong>rechazado</strong> y el viaje no se puede iniciar: avisale al despacho.
+    No es un error tuyo —es exactamente para lo que sirve el checklist—.
+  </div>
+
+  <h3>Salir: <span class="ui">Iniciar</span></h3>
+
+  <p>
+    Tocá <span class="ui">Iniciar</span> y cargá el <strong>odómetro de salida</strong> (el
+    sistema te sugiere el último kilometraje conocido del camión). Se guarda también tu
+    <strong>ubicación</strong>. El viaje pasa a <strong>En curso</strong> y en la oficina lo ven
+    al instante.
+  </p>
+
+  <h3>En la ruta: la bitácora <span class="plan operacion">Desde Operación</span></h3>
+
+  <p>
+    Cada cosa que pasa o que se gasta se carga con el botón <span class="ui">+</span> de la
+    pantalla del viaje. Cada movimiento guarda fecha, hora y ubicación automáticamente.
+  </p>
+
+  <ol class="pasos">
+    <li>Tocá <span class="ui">+</span>.</li>
+    <li>Elegí el <strong>tipo</strong>: combustible, peaje, gasto, <strong>adelanto</strong>, reparación, multa, viático u otro.</li>
+    <li>Cargá el <strong>monto</strong>. Si es combustible, agregá litros y odómetro.</li>
+    <li><strong>Sacale una foto al ticket</strong>. Es lo que después evita cualquier discusión.</li>
+    <li>Si hace falta, dictá una observación y guardá.</li>
+  </ol>
+
+  <div class="aviso">
+    <span class="et">La diferencia entre gasto y adelanto</span>
+    Un <strong>gasto</strong> es plata que pusiste vos y la empresa te tiene que devolver. Un
+    <strong>adelanto</strong> es plata que te dieron antes de salir. Cargarlos bien es lo que
+    hace que la rendición cierre sin vueltas.
+  </div>
+
+  <p>
+    Arriba del todo, la pantalla del viaje muestra siempre tres números:
+    <strong>Gastos</strong>, <strong>Adelantos</strong> y <strong>Diferencia</strong>. Ese
+    último es lo que se te debe (o lo que tenés que devolver) hasta ese momento.
+  </p>
+
+  <h3>Llegar: <span class="ui">Finalizar</span></h3>
+
+  <p>
+    Al terminar, tocá <span class="ui">Finalizar</span> y cargá el <strong>odómetro de
+    llegada</strong>. El sistema calcula los kilómetros del viaje y lo cierra. A partir de ahí
+    la bitácora <strong>queda cerrada</strong>: si te falta cargar algo, avisale a la oficina
+    antes de finalizar.
+  </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 3 · La app del chofer</p>
+  <h2>Cargar combustible <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Chofer</span></p>
+
+  <ol class="pasos">
+    <li>En Inicio, tocá el acceso <span class="ui">Combustible</span>.</li>
+    <li>Cargá los <strong>litros</strong> y el <strong>precio por litro</strong> o el monto total.</li>
+    <li>Cargá el <strong>odómetro</strong>: sin ese número no se puede calcular el rendimiento.</li>
+    <li>Marcá <span class="ui">Tanque lleno</span> si corresponde, y poné la estación.</li>
+    <li>Sacale la <strong>foto al ticket</strong> y guardá.</li>
+  </ol>
+
+  <div class="nota">
+    <span class="et">Por qué importa</span>
+    Con esos cuatro datos la oficina obtiene el consumo del camión sin pedirte nada más. Son
+    veinte segundos en la playa de carga.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 3 · La app del chofer</p>
+  <h2>Reportar un incidente <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Chofer</span></p>
+
+  <p>
+    Si pasa cualquier cosa —una rotura, un choque, un corte de ruta, un problema con la
+    carga— se reporta desde la app y en la oficina lo ven <strong>en el momento</strong>, con
+    la ubicación.
+  </p>
+
+  <ol class="pasos">
+    <li>Barra inferior → <span class="ui">Incidentes</span> → botón para reportar uno nuevo.</li>
+    <li>Elegí el <strong>tipo</strong> (rotura mecánica, accidente, falta de dinero, retraso, problema con carga, problema con cliente, emergencia).</li>
+    <li>Contá qué pasó: podés <strong>dictarlo por voz</strong>.</li>
+    <li>Sumá evidencia: <strong>foto</strong>, <strong>audio</strong> o <strong>video</strong>.</li>
+    <li>Enviá. El despachante lo recibe al instante y te va a contestar por Mensajes.</li>
+  </ol>
+
+  <div class="clave">
+    <span class="et">Consejo</span>
+    Ante un accidente o algo grave, primero resolvé lo urgente y ponete a salvo. El reporte
+    puede esperar cinco minutos; las fotos del lugar, en cambio, después no se pueden sacar.
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 3 · La app del chofer</p>
+  <h2>Planilla OEA <span class="plan operacion">Desde Operación</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Chofer</span></p>
+
+  <p>
+    Es el control de seguridad de los <strong>7 puntos</strong> del vehículo y los
+    <strong>precintos</strong>, para las empresas que trabajan bajo la figura de Operador
+    Económico Autorizado.
+  </p>
+
+  <ol class="pasos">
+    <li>En Inicio, tocá <span class="ui">Planilla OEA</span> y abrí la planilla del viaje.</li>
+    <li>Completá los datos de la carga: N° de viaje, peso, origen, destino, descripción, <strong>precinto aduanero</strong> y <strong>precinto de seguridad</strong>.</li>
+    <li>Recorré cada punto marcando <span class="ui">OK</span>, <span class="ui">Observado</span> o <span class="ui">N/A</span>, con <strong>foto</strong> donde haga falta.</li>
+    <li>Firmá y cerrá la planilla. Queda con resultado <strong>Conforme</strong> o <strong>No conforme</strong>.</li>
+  </ol>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 3 · La app del chofer</p>
+  <h2>Documentos y mensajes <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Chofer</span></p>
+
+  <h3><span class="ui">Docs</span></h3>
+
+  <p>
+    Todos los papeles que podés necesitar en un control, en el celular: los del
+    <strong>camión</strong>, los del <strong>acoplado</strong> y los <strong>tuyos</strong>
+    (seguro, VTV, licencia, habilitaciones). Se abren y se muestran; no hace falta llevar
+    copias.
+  </p>
+
+  <h3><span class="ui">Mensajes</span></h3>
+
+  <p>
+    El chat con la base. Escribís y te contestan desde la oficina. Todo lo operativo conviene
+    hablarlo por acá y no por WhatsApp: queda junto al viaje y no se pierde.
+  </p>
+</section>
+
+<!-- ==========================================================
+     PARTE 4 — REFERENCIA
+     ========================================================== -->
+
+<section class="seccion">
+  <p class="parte">Parte 4 · Referencia</p>
+  <h2>El viaje de punta a punta</h2>
+
+  <p>
+    Este es el circuito completo, con quién hace cada cosa. Si entendés este dibujo,
+    entendiste el sistema.
+  </p>
+
+<pre class="flujo">
+OFICINA                          CHOFER (celular)                OFICINA
+───────                          ────────────────                ───────
+Flota, personal
+y choferes cargados
+      │
+Alta del VIAJE   ────────────►  Le aparece el viaje
+(Despachante)                          │
+                                 Checklist + firma
+                                 Planilla OEA
+                                       │
+                                 INICIAR (odómetro + ubicación)
+                                       │
+                                 Bitácora en ruta
+                                 (gastos, adelantos,
+                                  combustible, fotos)
+                                       │
+                                 Incidente  ───────────────►  Tablero + Alertas
+                                       │                      (se atiende y se resuelve)
+                                 FINALIZAR (odómetro)
+                                       │
+                                       └───────────────────►  RENDICIÓN
+                                                              gastos − adelantos
+                                                              Borrador → PDF → Cerrada
+</pre>
+
+  <h3>Los tres hábitos que hacen que funcione</h3>
+
+  <ol class="pasos">
+    <li><strong>Cargar el viaje antes de que salga el camión.</strong> Todo lo demás cuelga de ahí.</li>
+    <li><strong>Foto del ticket, siempre.</strong> Es lo que convierte la rendición en un trámite de dos minutos.</li>
+    <li><strong>Odómetro en cada carga de combustible.</strong> Sin ese número no hay costo por kilómetro.</li>
+  </ol>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 4 · Referencia</p>
+  <h2>Los estados, de un vistazo</h2>
+
+  <table>
+    <thead><tr><th>Qué</th><th>Recorrido</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Viaje</strong></td><td>Asignado → En curso → Finalizado (o Cancelado)</td></tr>
+      <tr><td><strong>Rendición</strong></td><td>Borrador → Cerrada (se puede reabrir con motivo)</td></tr>
+      <tr><td><strong>Alerta</strong></td><td>Nueva → Vista → Atendida → Resuelta</td></tr>
+      <tr><td><strong>Incidente</strong></td><td>Pendiente → En proceso → Resuelto</td></tr>
+      <tr><td><strong>Orden de taller</strong></td><td>Abierta → En proceso → Finalizada</td></tr>
+      <tr><td><strong>Documento o permiso</strong></td><td>Vigente → Por vencer → Vencido</td></tr>
+      <tr><td><strong>Camión</strong></td><td>Disponible · En viaje · Detenido · En taller · Fuera de servicio</td></tr>
+      <tr><td><strong>Empleado</strong></td><td>Activo · Licencia · Suspendido · Baja <span class="pista">Lo calcula el sistema desde el historial laboral.</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 4 · Referencia</p>
+  <h2>Quién ve qué</h2>
+
+  <p>
+    Qué secciones del menú ve cada rol. El <strong>chofer</strong> no aparece en la tabla
+    porque no usa el backoffice: tiene su propia app.
+  </p>
+
+  <div class="tabla-scroll">
+  <table class="comparativa">
+    <thead>
+      <tr>
+        <th>Sección</th>
+        <th>Admin</th>
+        <th>Gerente</th>
+        <th>Despach.</th>
+        <th>Taller</th>
+        <th>RRHH</th>
+        <th>Auditor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Panel</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Indicadores <span class="plan gestion">Gestión</span></td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+      <tr><td>Viajes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+      <tr><td>Incidentes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Alertas</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="si">✓</td><td class="no">—</td></tr>
+      <tr><td>Mensajes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Flota</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Mantenimiento <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Combustible <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="si">✓</td></tr>
+      <tr><td>Documentos</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>RRHH <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="si">✓</td><td class="no">—</td></tr>
+      <tr><td>Choferes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="si">✓</td><td class="no">—</td></tr>
+      <tr><td>Equipo</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Rendiciones <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+      <tr><td>Planillas OEA <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+      <tr><td>Mi plan</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Configuración <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="nota">
+    <span class="et">Dos filtros, no uno</span>
+    Que un rol vea una sección no alcanza: además el <strong>plan</strong> tiene que incluirla.
+    Por eso las filas marcadas llevan su etiqueta de plan.
+  </div>
+
+  <h3>Acciones reservadas</h3>
+
+  <table>
+    <thead><tr><th>Acción</th><th>Quién puede</th></tr></thead>
+    <tbody>
+      <tr><td>Reabrir una <strong>rendición cerrada</strong></td><td>Administrador y Gerente, con motivo escrito.</td></tr>
+      <tr><td>Reabrir una <strong>alerta resuelta</strong></td><td>Administrador, Gerente y Despachante, con motivo.</td></tr>
+      <tr><td><strong>Invitar</strong> usuarios</td><td>Administrador (la sección la ve también el Gerente).</td></tr>
+      <tr><td>Ver y pagar el <strong>plan</strong></td><td>Administrador y Gerente.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 4 · Referencia</p>
+  <h2>Preguntas frecuentes</h2>
+
+  <h3>«No veo una sección que sí tiene mi compañero»</h3>
+  <p>
+    Puede ser por dos motivos: tu <strong>rol</strong> no la incluye, o tu <strong>plan</strong>
+    no la tiene. Si la ves en gris con un candado, es el plan; si directamente no aparece, es
+    el rol. En el primer caso, hacé clic en el candado y vas a ver qué incluye y con qué plan
+    viene.
+  </p>
+
+  <h3>«Un chofer dice que no le llega el viaje»</h3>
+  <ul>
+    <li>Verificá que el viaje esté asignado <strong>a ese</strong> chofer (ojo con los homónimos: el selector muestra el DNI).</li>
+    <li>Que haya iniciado sesión en la app con su usuario.</li>
+    <li>Que tenga señal. Si estuvo sin datos, el viaje le aparece al reconectar.</li>
+  </ul>
+
+  <h3>«Cargué cosas sin señal, ¿se perdieron?»</h3>
+  <p>
+    No. Quedan guardadas en el celular y se envían solas al volver la conexión. El contador de
+    <span class="ui">pendientes</span>, arriba, muestra cuántas faltan: cuando llega a cero,
+    está todo sincronizado.
+  </p>
+
+  <h3>«La rendición no me da lo que esperaba»</h3>
+  <ul>
+    <li>Fijate que no haya movimientos cargados como <strong>gasto</strong> siendo <strong>adelantos</strong> (o al revés): es el error más común.</li>
+    <li>Si el chofer cargó algo después de que generaste la rendición, usá <span class="ui">Recalcular</span>.</li>
+    <li>Si ya estaba cerrada, sólo Administrador o Gerente pueden reabrirla, indicando el motivo.</li>
+  </ul>
+
+  <h3>«No me deja poner a un chofer de licencia»</h3>
+  <p>
+    Es porque tiene <strong>viajes sin cerrar</strong> en ese período. El sistema te ofrece ir a
+    esos viajes: cancelalos o finalizalos y volvé a cargar la licencia.
+  </p>
+
+  <h3>«Olvidé mi contraseña» / «No me llega el mail»</h3>
+  <p>
+    Usá <span class="ui">¿Olvidaste tu contraseña?</span> en la pantalla de ingreso. Si el correo
+    no aparece, revisá <strong>spam</strong>. Para las invitaciones, quien te invitó puede
+    pasarte el <strong>link copiable</strong> por WhatsApp.
+  </p>
+
+  <h3>«¿Cómo saco la información a Excel?»</h3>
+  <p>
+    Donde haya botón <span class="ui">Excel</span> (viajes, documentos por vencer, combustible,
+    indicadores) se descarga <strong>lo que estás viendo</strong>, con los filtros aplicados.
+    Está disponible desde el plan Operación.
+  </p>
+
+  <h3>«¿Puedo imprimir este manual?»</h3>
+  <p>
+    Sí. Abrilo en una pestaña aparte con el botón <span class="ui">Abrir en una pestaña nueva</span>
+    y hacé <strong>Ctrl + P</strong>. Elegí <em>Guardar como PDF</em>, tamaño A4, y activá
+    <em>Gráficos de fondo</em>.
+  </p>
+
+  <h3>«Necesito ayuda con algo que no está acá»</h3>
+  <p>
+    Escribinos a <strong>info@northar.com.ar</strong> o por WhatsApp al
+    <strong>+54 362 456-9542</strong>.
+  </p>
+
+  <div class="cierre">
+    <strong>Manual de Usuario · FleetLog</strong> — Versión 1.9.2026<br>
+    NorthAr Consulting · info@northar.com.ar · www.northar.com.ar
+  </div>
+</section>
+
+</div><!-- /.hoja -->
+
+<script>
+/* ---------------------------------------------------------------------------
+   Índice automático.
+   Recorre las secciones (section.seccion) en orden, las numera igual que el CSS
+   (que arranca en 1 porque #indice no incrementa el contador) y arma el listado
+   agrupado por parte. No hay que tocar nada al agregar una sección.
+   --------------------------------------------------------------------------- */
+(function () {
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+
+  /** Texto del encabezado sin la etiqueta de plan. */
+  function tituloDe(el) {
+    var copia = el.cloneNode(true);
+    var etiquetas = copia.querySelectorAll(".plan");
+    for (var i = 0; i < etiquetas.length; i++) {
+      etiquetas[i].parentNode.removeChild(etiquetas[i]);
+    }
+    return copia.textContent.replace(/\s+/g, " ").trim();
+  }
+
+  var secciones = document.querySelectorAll("section.seccion");
+  var n = 0;
+  var parteActual = null;
+
+  for (var s = 0; s < secciones.length; s++) {
+    var sec = secciones[s];
+    if (sec.id === "indice") continue;
+
+    var h2 = sec.querySelector("h2");
+    if (!h2) continue;
+
+    n++;
+    if (!sec.id) sec.id = "seccion-" + n;
+
+    var eyebrow = sec.querySelector(".parte");
+    var parte = eyebrow ? eyebrow.textContent.trim() : "";
+    if (parte && parte !== parteActual) {
+      parteActual = parte;
+      var titParte = document.createElement("div");
+      titParte.className = "toc-parte";
+      titParte.textContent = parte;
+      toc.appendChild(titParte);
+    }
+
+    var enlace = document.createElement("a");
+    enlace.href = "#" + sec.id;
+
+    var numero = document.createElement("span");
+    numero.className = "n";
+    numero.textContent = n + ".";
+    enlace.appendChild(numero);
+    enlace.appendChild(document.createTextNode(tituloDe(h2)));
+
+    toc.appendChild(enlace);
+  }
+})();
+</script>
+
+</body>
+</html>

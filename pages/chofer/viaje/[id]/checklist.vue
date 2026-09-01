@@ -23,7 +23,8 @@ const tripStore = useTripStore();
 const checklistStore = useChecklistStore();
 const general = useGeneralStore();
 const { trip } = storeToRefs(tripStore);
-const { checklist, loading, saving, isApproved } = storeToRefs(checklistStore);
+const { checklist, loading, saving, isApproved, isSigned, isRejected } =
+  storeToRefs(checklistStore);
 
 const pad = ref<InstanceType<typeof SignaturePad> | null>(null);
 const hasSignature = ref(false);
@@ -71,6 +72,20 @@ onMounted(async () => {
       Checklist aprobado. Ya podés iniciar el viaje.
     </v-alert>
 
+    <!-- Falló un punto que la empresa marcó como crítico: el checklist queda
+         firmado igual —es el registro de lo que se encontró— pero rechazado, y
+         el viaje no arranca hasta que lo resuelvan. -->
+    <v-alert
+      v-else-if="isRejected"
+      type="error"
+      variant="tonal"
+      density="compact"
+      class="mb-3"
+    >
+      Checklist rechazado: falló un punto crítico. Avisá al despacho; el viaje no
+      se puede iniciar así.
+    </v-alert>
+
     <div v-if="loading && !checklist" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
@@ -83,7 +98,7 @@ onMounted(async () => {
         lo que el chofer marcó como OK o Falla.
       -->
       <v-card
-        v-if="!isApproved"
+        v-if="!isSigned"
         border
         flat
         rounded="lg"
@@ -113,10 +128,10 @@ onMounted(async () => {
         v-for="item in checklist.items"
         :key="item.id"
         :item="item"
-        :disabled="isApproved"
+        :disabled="isSigned"
       />
 
-      <template v-if="!isApproved">
+      <template v-if="!isSigned">
         <p class="text-subtitle-2 font-weight-bold mt-4 mb-1">Firma del chofer</p>
         <SignaturePad ref="pad" @change="hasSignature = $event" />
 
@@ -135,7 +150,7 @@ onMounted(async () => {
 
       <v-btn
         v-else
-        color="success"
+        :color="isRejected ? 'error' : 'success'"
         block
         size="large"
         class="mt-4"

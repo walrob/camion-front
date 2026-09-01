@@ -2,16 +2,16 @@
 import PageHeader from "~/components/shared/PageHeader.vue";
 import ErrorState from "~/components/shared/ErrorState.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
 import { useTheme } from "vuetify";
 import { useIncidentStore } from "~/stores/incident";
 import {
-  incidentTypeOptions,
   incidentSeverityOptions,
   incidentStatusOptions,
   useIncidentStatus,
 } from "~/composables/useIncidentStatus";
+import { useCatalogStore, CATALOG } from "~/stores/catalog";
 import { useIncidentSocket } from "~/composables/useIncidentSocket";
 import IncidentDetailDialog from "~/components/incident/IncidentDetailDialog.vue";
 import type { Incident } from "~/types/incident";
@@ -64,9 +64,16 @@ const socket = useIncidentSocket((incident) => {
   incidentStore.upsert(incident);
 });
 
+// Los tipos salen del catálogo de la empresa (docs/CONFIGURACION.md §5).
+const catalogStore = useCatalogStore();
+const tiposDeIncidente = computed(() =>
+  catalogStore.todos(CATALOG.INCIDENT_TYPE),
+);
+
 onMounted(() => {
   incidentStore.getIncidents();
   if (!staffUsers.value.length) incidentStore.loadStaffUsers();
+  catalogStore.load();
   socket.connect();
 });
 onBeforeUnmount(() => socket.disconnect());
@@ -91,9 +98,9 @@ onBeforeUnmount(() => socket.disconnect());
     <div class="d-flex flex-wrap ga-2 align-center mb-4">
       <v-select
         v-model="incidentStore.filterType"
-        :items="incidentTypeOptions"
+        :items="tiposDeIncidente"
         item-title="label"
-        item-value="value"
+        item-value="key"
         label="Tipo"
         clearable
         style="min-width: 220px; max-width: 260px"

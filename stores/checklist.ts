@@ -7,6 +7,9 @@ export interface ChecklistItem {
   label: string;
   status: string;
   notes?: string;
+  /** Copiados de la plantilla de la empresa al crear el checklist. */
+  isCritical?: boolean;
+  requiresPhotoOnFail?: boolean;
 }
 export interface Checklist {
   id: string;
@@ -28,6 +31,13 @@ export const useChecklistStore = defineStore("checklist", {
 
   getters: {
     isApproved: (state) => state.checklist?.result === "approved",
+    /**
+     * Firmado, sin importar el resultado. Un checklist con una falla en un
+     * punto crítico queda **rechazado**: sigue firmado y no se puede volver a
+     * firmar, así que la pantalla tiene que mirar esto y no `isApproved`.
+     */
+    isSigned: (state) => !!state.checklist?.signedAt,
+    isRejected: (state) => state.checklist?.result === "rejected",
   },
 
   actions: {

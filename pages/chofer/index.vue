@@ -220,6 +220,23 @@ onMounted(() => tripStore.getMyTrips());
       </template>
     </template>
 
+    <!-- El chofer no entra al backoffice, así que su única puerta al manual es
+         esta: el archivo estático directo, que no pasa por el middleware. -->
+    <div class="text-center mt-8 mb-2">
+      <v-btn
+        variant="text"
+        size="small"
+        color="medium-emphasis"
+        prepend-icon="mdi-help-circle-outline"
+        href="/docs/manual/manual.html"
+        target="_blank"
+        rel="noopener"
+        class="text-none"
+      >
+        ¿Cómo se usa la app? Ver el manual
+      </v-btn>
+    </div>
+
     <OdometerDialog
       v-model="odoDialog"
       :trip-id="odoTripId"

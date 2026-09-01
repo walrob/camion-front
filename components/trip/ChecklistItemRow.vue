@@ -43,8 +43,13 @@ const onPhoto = async (e: Event) => {
     :class="`checklist-item--${status}`"
   >
     <v-card-text class="pa-4">
-      <div class="d-flex align-center ga-2 mb-3">
+      <div class="d-flex align-center ga-2 mb-3 flex-wrap">
         <span class="text-subtitle-1 font-weight-bold">{{ item.label }}</span>
+        <!-- La empresa marcó este punto como crítico: si falla, el checklist
+             queda rechazado y el camión no sale. Se avisa antes, no después. -->
+        <v-chip v-if="item.isCritical" size="x-small" color="error" label>
+          Crítico
+        </v-chip>
         <v-spacer />
         <v-chip
           v-if="photoLoaded"
@@ -85,6 +90,18 @@ const onPhoto = async (e: Event) => {
           {{ o.label }}
         </v-btn>
       </div>
+
+      <!-- La foto es obligatoria para firmar: mejor enterarse acá que cuando el
+           backend rechaza la firma, que en la ruta puede ser mucho después. -->
+      <v-alert
+        v-if="item.requiresPhotoOnFail && status === 'fail' && !photoLoaded"
+        type="warning"
+        variant="tonal"
+        density="compact"
+        class="mt-3"
+      >
+        Sacale una foto a esta falla: sin la foto no vas a poder firmar.
+      </v-alert>
 
       <div class="d-flex ga-2 align-center mt-3">
         <VoiceTextField

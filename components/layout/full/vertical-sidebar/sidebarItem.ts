@@ -15,6 +15,8 @@ import {
   GasStationIcon,
   ClipboardCheckIcon,
   CreditCardIcon,
+  HelpIcon,
+  SettingsIcon,
 } from "vue-tabler-icons";
 import { Role } from "~/types/enums";
 import { Feature } from "~/types/plan";
@@ -174,6 +176,27 @@ const sidebarItem: menu[] = [
     icon: CreditCardIcon,
     to: "/estado-plan",
     roles: [Role.ADMIN, Role.MANAGER],
+  },
+  {
+    // Ajustes de operación: qué exige el sistema antes de que salga un camión,
+    // si una rendición cerrada se puede reabrir, etc. Sólo `admin` porque
+    // cambian el comportamiento para toda la empresa, choferes incluidos.
+    title: "Configuración",
+    icon: SettingsIcon,
+    to: "/configuracion",
+    feature: Feature.SETTINGS,
+    roles: [Role.ADMIN],
+  },
+
+  { header: "Ayuda" },
+  {
+    // Sin `roles` ni `feature`: el manual lo lee cualquiera, con cualquier plan.
+    // Va último a propósito — es consulta, no operación —, pero visible todos
+    // los días: un manual que hay que pedir por email no lo abre nadie.
+    title: "Manual de Usuario",
+    icon: HelpIcon,
+    to: "/manual-usuario",
+    external: false,
   },
 ];
 

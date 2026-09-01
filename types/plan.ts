@@ -25,12 +25,20 @@ export enum Feature {
   INCIDENTS_KANBAN = 'incidents_kanban',
   HR_BASIC = 'hr_basic',
   EXPORT_EXCEL = 'export_excel',
+  /** Cambiar los ajustes de operación de la empresa. Leerlos no se gatea. */
+  SETTINGS = 'settings',
+  /** Plantilla propia del checklist pre-viaje. */
+  CHECKLIST_TEMPLATES = 'checklist_templates',
+  /** Editar los catálogos de negocio: tipos de gasto, de incidente, etc. */
+  CATALOGS = 'catalogs',
 
   // Gestión
   FUEL_RANKING = 'fuel_ranking',
   INDICATORS = 'indicators',
   HR_FULL = 'hr_full',
   ALERT_THRESHOLDS = 'alert_thresholds',
+  /** Una plantilla de checklist distinta por tipo de unidad. */
+  CHECKLIST_BY_TYPE = 'checklist_by_type',
   AUDITOR_ROLE = 'auditor_role',
   SCHEDULED_REPORTS = 'scheduled_reports',
 
@@ -157,5 +165,45 @@ export const FEATURE_INFO: Record<
     plan: 'Operación',
     pitch: 'Bajate cualquier listado filtrado para trabajarlo aparte.',
     detalle: ['Viajes, combustible y documentos'],
+  },
+  [Feature.SETTINGS]: {
+    titulo: 'Configuración de la operación',
+    plan: 'Operación',
+    pitch: 'Que el sistema se adapte a cómo trabajás, y no al revés.',
+    detalle: [
+      'Elegí qué se exige antes de que salga un camión',
+      'Bloqueá la asignación si hay documentación vencida',
+      'Definí si una rendición cerrada se puede reabrir',
+      'Tu propio prefijo para el número de viaje',
+    ],
+  },
+  [Feature.CHECKLIST_TEMPLATES]: {
+    titulo: 'Checklist a tu medida',
+    plan: 'Operación',
+    pitch: 'El chofer revisa lo que vos decidís, no una lista genérica.',
+    detalle: [
+      'Agregá, renombrá y ordená los puntos a revisar',
+      'Puntos críticos: si fallan, el camión no sale',
+      'Puntos que exigen foto de la falla para poder firmar',
+    ],
+  },
+  [Feature.CATALOGS]: {
+    titulo: 'Catálogos a tu medida',
+    plan: 'Operación',
+    pitch: 'Que las listas del sistema hablen como habla tu operación.',
+    detalle: [
+      'Tus propios tipos de gasto (balanza, lavadero, estacionamiento)',
+      'Marcá cuáles son adelantos: restan solos en la rendición',
+      'Tus tipos de incidente, con el nombre que usan tus choferes',
+    ],
+  },
+  [Feature.CHECKLIST_BY_TYPE]: {
+    titulo: 'Checklist por tipo de unidad',
+    plan: 'Gestión',
+    pitch: 'Un tractor con cisterna no se revisa como un furgón.',
+    detalle: [
+      'Una plantilla distinta por tipo de camión',
+      'La general sigue aplicando al resto de la flota',
+    ],
   },
 }

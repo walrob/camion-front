@@ -101,6 +101,20 @@ export default defineNuxtConfig({
     serveStatic: true,
 
     /**
+     * El manual de usuario se sirve tal cual desde `docs/manual-usuario`, que
+     * sigue siendo su única fuente: se edita ahí y se publica con el deploy.
+     */
+    publicAssets: [
+      {
+        dir: resolve(process.cwd(), "docs/manual-usuario"),
+        // Bajo /docs/manual y no /manual: Nitro matchea los publicAssets por
+        // prefijo, y "/manual" se comería también la ruta /manual-usuario.
+        baseURL: "/docs/manual",
+        maxAge: 60 * 60, // 1 h: se actualiza con cada release
+      },
+    ],
+
+    /**
      * Con `ssr: false` no hay HTML pre-renderizado. Los crawlers modernos
      * ejecutan JS, pero WhatsApp y LinkedIn NO: las previsualizaciones al
      * compartir el link salen vacías. Es inaceptable para algo que se comparte

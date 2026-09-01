@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useValidations } from "~/composables/useValidations";
-import { expenseTypeOptions } from "~/composables/useTripStatus";
+import { useCatalogStore, CATALOG } from "~/stores/catalog";
 import { useGeolocation } from "~/composables/useGeolocation";
 import { useTripLogStore } from "~/stores/tripLog";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -32,6 +32,13 @@ const emptyForm = () => ({
 
 const form = ref(emptyForm());
 
+// Los tipos salen del catálogo de la empresa, no de una lista fija. El store
+// resuelve servidor → caché → constante, así que en la ruta sin señal el
+// selector igual tiene con qué trabajar (docs/CONFIGURACION.md §11).
+const catalogStore = useCatalogStore();
+const tiposDeGasto = computed(() => catalogStore.activos(CATALOG.EXPENSE_TYPE));
+onMounted(() => catalogStore.load());
+
 const isFuel = computed(() => form.value.type === "fuel");
 
 watch(
@@ -39,6 +46,11 @@ watch(
   (open) => {
     if (open) {
       form.value = emptyForm();
+      // El default es el primer tipo activo: si la empresa desactivó
+      // «Combustible», arrancar en él dejaría el formulario en un valor que el
+      // backend rechaza.
+      const primero = tiposDeGasto.value[0]?.key;
+      if (primero) form.value.type = primero;
       file.value = null;
     }
   },
@@ -85,9 +97,9 @@ const submit = async () => {
         <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
           <v-select
             v-model="form.type"
-            :items="expenseTypeOptions"
+            :items="tiposDeGasto"
             item-title="label"
-            item-value="value"
+            item-value="key"
             label="Tipo *"
             variant="outlined"
             density="comfortable"

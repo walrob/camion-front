@@ -252,6 +252,11 @@ Basada en lo efectivamente desarrollado en la plataforma hoy.
 | Adjuntos de audio y video en incidentes | — | ✅ | ✅ | ✅ |
 | Motor de alertas automáticas | 3 reglas | 10 reglas | Ilimitadas | Ilimitadas |
 | Umbrales de alerta personalizables | — | — | ✅ | ✅ |
+| **CONFIGURACIÓN** | | | | |
+| Ajustes de operación: qué se exige antes de salir, reapertura de rendiciones | — | ✅ | ✅ | ✅ |
+| Checklist propio: puntos, críticos y foto obligatoria | — | ✅ | ✅ | ✅ |
+| Catálogos propios: tipos de gasto y de incidente | — | ✅ | ✅ | ✅ |
+| Una plantilla de checklist por tipo de unidad | — | — | ✅ | ✅ |
 | **COMPLIANCE** | | | | |
 | Planillas OEA (7 puntos AFIP + precintos) | — | ✅ | ✅ | ✅ |
 | Firma digital en planillas e inspecciones | ✅ | ✅ | ✅ | ✅ |

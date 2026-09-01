@@ -21,6 +21,18 @@ const { canInstall, isOnline, promptInstall } = usePwa();
 import { useOfflineQueue } from "~/composables/useOfflineQueue";
 const { pendingCount } = useOfflineQueue();
 
+// Catálogos de la empresa (tipos de gasto, de incidente) y ajustes: se cargan
+// una vez al entrar y quedan cacheados, para que la bitácora y el reporte de
+// incidentes funcionen cuando el chofer se queda sin señal en la ruta.
+import { useCatalogStore } from "~/stores/catalog";
+import { useSettingsStore } from "~/stores/settings";
+const catalogStore = useCatalogStore();
+const settingsStore = useSettingsStore();
+onMounted(() => {
+  catalogStore.load();
+  settingsStore.load();
+});
+
 const page = useDriverPageState();
 
 // Navegación inferior del chofer: una mano, objetivos táctiles grandes (≥48px).

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { fuelTypeOptions } from "~/composables/useFuelStatus";
 import { useGeolocation } from "~/composables/useGeolocation";
 import { useFuelStore } from "~/stores/fuel";
+import { useSettingsStore } from "~/stores/settings";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 
 const props = defineProps<{
@@ -18,6 +19,15 @@ const r = useValidations();
 const { moneyFixed: money } = useFormatters();
 const fuelStore = useFuelStore();
 const { getPosition } = useGeolocation();
+
+// El backend rechaza la carga sin odómetro cuando la empresa lo exige; acá se
+// pide antes para que el chofer no descubra la validación después de guardar,
+// que en la ruta puede ser un rato largo después.
+const settingsStore = useSettingsStore();
+const odometroObligatorio = computed(() =>
+  settingsStore.bool("fuel.requireOdometer"),
+);
+onMounted(() => settingsStore.load());
 
 const formRef = ref();
 const valid = ref(true);
@@ -146,7 +156,8 @@ const submit = async () => {
 
           <v-text-field
             v-model="form.odometerKm"
-            label="Odómetro (km)"
+            :label="odometroObligatorio ? 'Odómetro (km) *' : 'Odómetro (km)'"
+            :rules="odometroObligatorio ? [r.isRequired] : []"
             type="number"
             suffix="km"
             variant="outlined"
