@@ -20,7 +20,7 @@ const ACTUALIZADO = "17 de agosto de 2026";
 const SECCIONES = [
   { id: "prestador", titulo: "Quiénes prestamos el servicio" },
   { id: "aceptacion", titulo: "Aceptación y capacidad" },
-  { id: "objeto", titulo: "Qué es FleetLog y qué no es" },
+  { id: "objeto", titulo: "Qué es CamioNex y qué no es" },
   { id: "cuentas", titulo: "Cuenta, usuarios y credenciales" },
   { id: "prueba", titulo: "Prueba gratuita de 30 días" },
   { id: "planes", titulo: "Planes, unidades y precios" },
@@ -43,16 +43,27 @@ const SECCIONES = [
 useSeoMeta({
   title: "Términos y Condiciones",
   description:
-    "Condiciones de contratación del servicio FleetLog para empresas de " +
+    "Condiciones de contratación del servicio CamioNex para empresas de " +
     "transporte de carga en Argentina y el Mercosur.",
   robots: "index, follow",
 });
+
+useCanonical("/terminos-y-condiciones");
+
+// Las migas le dan al buscador la jerarquía del sitio y se muestran debajo del
+// título del resultado, en lugar de la URL cruda.
+useDatosEstructurados(
+  migasJsonLd([
+    { nombre: "Inicio", ruta: "/" },
+    { nombre: "Términos y Condiciones", ruta: "/terminos-y-condiciones" },
+  ]),
+);
 </script>
 
 <template>
   <LegalDocumentoLegal
     titulo="Términos y Condiciones del Servicio"
-    bajada="Las reglas del acuerdo entre tu empresa y FleetLog: qué contratás,
+    bajada="Las reglas del acuerdo entre tu empresa y CamioNex: qué contratás,
             qué se paga, de quién son los datos y qué pasa si algo sale mal.
             Está escrito para que se entienda sin abogado al lado."
     :actualizado="ACTUALIZADO"
@@ -60,7 +71,7 @@ useSeoMeta({
   >
     <h2 id="prestador">1. Quiénes prestamos el servicio</h2>
     <p>
-      FleetLog (en adelante, «FleetLog», «el Servicio» o «nosotros») es una
+      CamioNex (en adelante, «CamioNex», «el Servicio» o «nosotros») es una
       plataforma de gestión de flotas operada por
       <strong>NorthAr Consulting</strong>,
       <span class="legal-completar">[completar: razón social]</span>, CUIT
@@ -98,22 +109,22 @@ useSeoMeta({
       aplicables si en un caso concreto se configurara.
     </p>
 
-    <h2 id="objeto">3. Qué es FleetLog y qué no es</h2>
+    <h2 id="objeto">3. Qué es CamioNex y qué no es</h2>
     <p>
-      FleetLog es un servicio de software en la nube (SaaS) que permite
+      CamioNex es un servicio de software en la nube (SaaS) que permite
       administrar flotas de transporte de carga: unidades, viajes, checklists,
       documentación y vencimientos, gastos de ruta, rendiciones, combustible,
       mantenimiento, legajos del personal e indicadores de gestión. Se accede
       por navegador y por la aplicación móvil del chofer.
     </p>
     <p>
-      FleetLog otorga al Cliente una licencia de uso no exclusiva,
+      CamioNex otorga al Cliente una licencia de uso no exclusiva,
       intransferible y revocable, limitada al plazo contratado y al alcance del
       plan elegido. No se vende software ni se cede código fuente.
     </p>
 
     <div class="legal-nota">
-      <p><strong>Lo que FleetLog no hace:</strong></p>
+      <p><strong>Lo que CamioNex no hace:</strong></p>
       <ul>
         <li>
           No presta servicios de transporte, logística, seguros ni
@@ -270,7 +281,7 @@ useSeoMeta({
         >Toda la información que el Cliente carga en el Servicio es de su
         propiedad</strong
       >: viajes, gastos, comprobantes, fotografías, legajos, mantenimientos e
-      indicadores. FleetLog sólo la utiliza para prestar el Servicio, brindar
+      indicadores. CamioNex sólo la utiliza para prestar el Servicio, brindar
       soporte y cumplir obligaciones legales.
     </p>
     <p>
@@ -297,7 +308,7 @@ useSeoMeta({
     <p>
       Respecto de los datos personales de choferes, empleados y terceros que
       carga en el sistema, <strong>el Cliente es el responsable del
-      tratamiento</strong> y FleetLog actúa como encargado, conforme la
+      tratamiento</strong> y CamioNex actúa como encargado, conforme la
       <a href="/politica-de-privacidad">Política de Privacidad</a>.
     </p>
 
@@ -328,7 +339,7 @@ useSeoMeta({
     </div>
 
     <p>
-      El Cliente mantendrá indemne a FleetLog frente a reclamos de terceros
+      El Cliente mantendrá indemne a CamioNex frente a reclamos de terceros
       derivados del incumplimiento de estas obligaciones.
     </p>
 
@@ -353,8 +364,8 @@ useSeoMeta({
 
     <h2 id="propiedad">12. Propiedad intelectual</h2>
     <p>
-      El software, su código, la marca «FleetLog», el diseño de las pantallas y
-      la documentación son de titularidad de FleetLog o de sus licenciantes, y
+      El software, su código, la marca «CamioNex», el diseño de las pantallas y
+      la documentación son de titularidad de CamioNex o de sus licenciantes, y
       están protegidos por la Ley 11.723 de Propiedad Intelectual y por la Ley
       22.362 de Marcas. Estos términos no transfieren ningún derecho de
       propiedad intelectual al Cliente.
@@ -472,7 +483,7 @@ useSeoMeta({
         facturación en dólares estadounidenses, la facturación se realiza en
         pesos argentinos. Los tributos, retenciones o percepciones que graven la
         operación en el país del Cliente son a su exclusivo cargo y no reducen
-        el importe neto a percibir por FleetLog.
+        el importe neto a percibir por CamioNex.
       </li>
       <li>
         <strong>Idioma.</strong> La versión en español de estos términos es la
@@ -484,7 +495,7 @@ useSeoMeta({
     <h2 id="generales">19. Cláusulas generales</h2>
     <p>
       <strong>Cesión.</strong> El Cliente no puede ceder su posición contractual
-      sin nuestra conformidad previa por escrito. FleetLog puede cederla en caso
+      sin nuestra conformidad previa por escrito. CamioNex puede cederla en caso
       de reorganización societaria, fusión o transferencia de fondo de comercio,
       manteniendo las condiciones vigentes.
     </p>

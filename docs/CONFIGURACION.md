@@ -1,6 +1,6 @@
 # Configuración por empresa
 
-> Cómo FleetLog se adapta a la forma de trabajar de cada cliente, en vez de
+> Cómo CamioNex se adapta a la forma de trabajar de cada cliente, en vez de
 > obligarlo a trabajar como el sistema. Documento de diseño: qué se configura,
 > qué no, con qué modelo de datos y en qué orden se construye.
 

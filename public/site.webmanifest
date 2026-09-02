@@ -1,7 +1,8 @@
 {
-  "name": "FleetLog",
-  "short_name": "FleetLog",
-  "description": "Gestión de flotas para transporte de carga",
+  "id": "/chofer",
+  "name": "CamioNex — Gestión de flotas",
+  "short_name": "CamioNex",
+  "description": "Gestión de flotas para empresas de transporte de carga: viajes, rendiciones, vencimientos y costo por kilómetro.",
   "start_url": "/chofer",
   "scope": "/",
   "display": "standalone",
@@ -9,6 +10,8 @@
   "theme_color": "#2563EB",
   "background_color": "#ffffff",
   "lang": "es-AR",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

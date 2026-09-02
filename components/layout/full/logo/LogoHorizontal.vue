@@ -32,6 +32,16 @@ const src = computed(() => {
 </script>
 <template>
   <div style="padding-top: 5px">
-    <img :src="src" :height="height" alt="logo" />
+    <!--
+      El `alt` nombra la marca y lo que hace: es el único texto que el buscador
+      (y un lector de pantalla) obtiene de la imagen, y en la cabecera de la
+      landing es además el primer enlace de la página. "logo" no dice nada.
+    -->
+    <img
+      :src="src"
+      :height="height"
+      alt="CamioNex — software de gestión de flotas de camiones"
+      decoding="async"
+    />
   </div>
 </template>

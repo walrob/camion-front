@@ -466,20 +466,103 @@ const vReveal = {
   },
 };
 
+/**
+ * SEO de la landing.
+ *
+ * El título arranca con la consulta que realmente se escribe en el buscador
+ * ("software de gestión de flotas") y recién después dice la marca: nadie busca
+ * "CamioNex" todavía, y el título es lo que decide si el resultado se lee. El
+ * "camiones" y el "Argentina" acotan la intención — es la búsqueda de una
+ * empresa de transporte de carga, no la de un gerente de flota de autos.
+ */
 useSeoMeta({
-  title: "Gestión de flotas para transporte de carga",
+  title: "Software de gestión de flotas de camiones",
   description:
-    "FleetLog reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp. " +
-    "Rendiciones automáticas, control de vencimientos y costo por kilómetro. " +
-    `Probalo gratis ${DIAS_DE_PRUEBA} días.`,
-  ogTitle: "FleetLog — Gestión de flotas para transporte de carga",
+    "Software de gestión de flotas para empresas de transporte de carga en " +
+    "Argentina. Rendiciones de viaje automáticas, control de vencimientos y " +
+    `costo por kilómetro. Probalo gratis ${DIAS_DE_PRUEBA} días, sin tarjeta.`,
+  ogTitle: "CamioNex — Software de gestión de flotas de camiones",
   ogDescription:
     "Rendiciones que se arman solas, vencimientos bajo control y el costo por " +
     `kilómetro de tu flota. Probalo gratis ${DIAS_DE_PRUEBA} días, sin tarjeta.`,
   ogType: "website",
-  ogImage: "/og-fleetlog.png",
+  ogImage: `${SITIO.origen}${SITIO.imagenSocial}`,
   twitterCard: "summary_large_image",
 });
+
+useCanonical("/");
+
+/**
+ * Datos estructurados de la portada.
+ *
+ * Es lo que le permite al buscador entender *qué* es esto y no sólo qué
+ * palabras tiene: una aplicación de software, de una organización concreta, con
+ * planes y precios. Va en un solo `@graph` —y no en tres bloques sueltos— para
+ * poder referenciar la organización desde el producto con `@id` en vez de
+ * repetirla.
+ *
+ * Los precios salen de `planes`, la misma fuente que dibuja las tarjetas. No
+ * pueden salir de una constante aparte: si el JSON-LD dice un precio y la
+ * página muestra otro, Google descarta el marcado por inconsistente.
+ */
+const datosEstructurados = computed(() => ({
+  "@context": "https://schema.org",
+  "@graph": [
+    organizacionJsonLd(),
+    {
+      "@type": "WebSite",
+      "@id": `${SITIO.origen}/#sitio`,
+      url: SITIO.origen,
+      name: SITIO.marca,
+      inLanguage: "es-AR",
+      publisher: { "@id": `${SITIO.origen}/#organizacion` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITIO.origen}/#producto`,
+      name: SITIO.marca,
+      applicationCategory: "BusinessApplication",
+      applicationSubCategory: "Software de gestión de flotas",
+      operatingSystem: "Web, Android, iOS",
+      url: SITIO.origen,
+      inLanguage: "es-AR",
+      description:
+        "Software de gestión de flotas para empresas de transporte de carga: " +
+        "rendiciones de viaje, control de vencimientos de documentación, " +
+        "checklists, combustible, mantenimiento y costo por kilómetro.",
+      publisher: { "@id": `${SITIO.origen}/#organizacion` },
+      screenshot: `${SITIO.origen}${SITIO.imagenSocial}`,
+      // Sin `aggregateRating`: no hay reseñas publicadas y declarar una
+      // inventada es motivo de penalización manual, además de ser mentira.
+      offers: planesCotizables.value.map((p) => ({
+        "@type": "Offer",
+        name: `Plan ${p.name}`,
+        price: p.baseFee,
+        priceCurrency: "ARS",
+        category: "SaaS",
+        // El abono es de dos partes. Se dice en la descripción para que el
+        // precio declarado no se lea como el total final.
+        description:
+          `${p.description} Abono base mensual más ` +
+          `${money(p.pricePerVehicle)} por vehículo. Prueba gratis de ` +
+          `${DIAS_DE_PRUEBA} días.`,
+        url: `${SITIO.origen}/#planes`,
+        availability: "https://schema.org/InStock",
+      })),
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${SITIO.origen}/#faq`,
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+  ],
+}));
+
+useDatosEstructurados(datosEstructurados);
 </script>
 
 <template>
@@ -502,10 +585,19 @@ useSeoMeta({
               ser una caja negra.
             </h1>
 
+            <!--
+              El primer párrafo nombra la marca y dice, en castellano llano, qué
+              es el producto: "software de gestión de flotas para empresas de
+              transporte de carga". El titular de arriba es la promesa y no se
+              toca, pero por sí solo no contiene ninguna de las palabras con las
+              que alguien busca esto. Acá se dicen, una sola vez y sin forzar la
+              frase, que es lo que el buscador lee primero del cuerpo.
+            -->
             <p v-reveal="140" class="lp-lead lp-tenue lp-medida mb-8">
-              Cada gasto del viaje, cada vencimiento y el costo real por
-              kilómetro. El chofer lo carga desde la ruta, vos lo ves en el
-              tablero al instante.
+              CamioNex es el software de gestión de flotas para empresas de
+              transporte de carga: cada gasto del viaje, cada vencimiento y el
+              costo real por kilómetro. El chofer lo carga desde la ruta, vos lo
+              ves en el tablero al instante.
             </p>
 
             <div v-reveal="200" class="d-flex flex-wrap ga-3">

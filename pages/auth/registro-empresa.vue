@@ -134,7 +134,7 @@ const reenviar = async () => {
 
               <template v-else>
               <h2 class="text-h5 font-weight-bold text-center mb-1">
-                Probá FleetLog 30 días
+                Probá CamioNex 30 días
               </h2>
               <p class="text-body-2 text-center text-medium-emphasis mb-6">
                 Sin tarjeta de crédito. Acceso completo al plan Operación.

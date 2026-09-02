@@ -32,7 +32,7 @@ const salir = async () => {
     <v-app-bar flat height="60" color="grey-darken-4" theme="dark">
       <v-container class="d-flex align-center py-0" fluid>
         <v-icon class="mr-2">mdi-shield-crown-outline</v-icon>
-        <span class="text-subtitle-1 font-weight-bold">FleetLog</span>
+        <span class="text-subtitle-1 font-weight-bold">CamioNex</span>
         <v-chip size="x-small" color="amber" variant="flat" class="ml-2">
           PLATAFORMA
         </v-chip>

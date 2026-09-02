@@ -1,4 +1,4 @@
-# FleetLog — Modelo Comercial SaaS
+# CamioNex — Modelo Comercial SaaS
 
 > Diseño de monetización para escalar de 1 a 1.000+ empresas de transporte de carga.
 > Mercado: Argentina. Moneda de lista: ARS + IVA.
@@ -34,7 +34,7 @@
 
 ### 1.1 La tesis comercial
 
-FleetLog no compite por ser el software de flota más completo. Compite por ser **el
+CamioNex no compite por ser el software de flota más completo. Compite por ser **el
 primero que una empresa de transporte argentina puede poner a andar en dos semanas y
 que el chofer efectivamente usa**.
 
@@ -353,7 +353,7 @@ invisible y no recuperable. Se venden como add-on con precio propio.
 | **Integración GPS / telemetría** | $ 4.900 por vehículo conectado | Operación+ | Add-on (1ª integración incluida) |
 | **Integración ERP / contable** (Tango, Bejerman, SAP, Xubio, Colppy) | $ 89.000 + setup | Gestión+ | ✅ Incluida (1 sistema) |
 | **API REST + Webhooks** | $ 119.000 | Gestión | ✅ Incluida |
-| **FleetLog IA** — OCR de tickets, resumen de viaje, detección de gastos anómalos, consultas en lenguaje natural | $ 149.000 + $ 1.900 por vehículo | Operación+ | Add-on |
+| **CamioNex IA** — OCR de tickets, resumen de viaje, detección de gastos anómalos, consultas en lenguaje natural | $ 149.000 + $ 1.900 por vehículo | Operación+ | Add-on |
 | **Soporte Premium** — SLA 4h, canal directo, 24/7 | $ 179.000 | Todos | ✅ Incluido |
 | **Portal del dador de carga** — seguimiento de carga para el cliente final | $ 129.000 | Gestión+ | Add-on |
 | **Reportes personalizados / BI** — dataset y conector Power BI | $ 99.000 | Gestión+ | Add-on |
@@ -532,7 +532,7 @@ USD 6.000 – 10.000 por mes (combustible, chofer, cubiertas, mantenimiento, pea
 seguro). El plan Operación cuesta el equivalente a **USD 12 – 16 por vehículo/mes**:
 
 ```
-Costo de FleetLog / Costo operativo del camión  ≈  0,15% – 0,25%
+Costo de CamioNex / Costo operativo del camión  ≈  0,15% – 0,25%
 ```
 
 **Referencia local de mercado**: un proveedor argentino de radar y control de
@@ -611,7 +611,7 @@ Tres mecanismos, ninguno de ellos una tabla de tramos:
 2. **Salto obligatorio a Corporate a partir de 100 vehículos.** Precio por vehículo
    **plano negociado** (desde $ 10.900, típicamente 25-35% por debajo de la lista de
    Gestión) más un **tope de facturación mensual** acordado. El cliente gana
-   predecibilidad; FleetLog gana un contrato de 24-36 meses. El descuento se **cambia
+   predecibilidad; CamioNex gana un contrato de 24-36 meses. El descuento se **cambia
    por compromiso**, que es como debe otorgarse.
 3. **Prepago anual o bianual** (−15% / −22%), disponible para cualquier tamaño.
 
@@ -734,7 +734,7 @@ por IPC.
 | **Verizon Connect** | Telemática, venta directa | ~$ 20 – 40 | Ilimitados | Largos, rígidos | Sí |
 | **Geotab** | Canal de partners, 4 tiers de capacidad | ~$ 10 – 45 según tier | Ilimitados | Variable por partner | Sí (GO device) |
 | **Linxup** | GPS low-cost, autoservicio | ~$ 15 – 25 | Ilimitados | **Sin contrato** | Sí |
-| **FleetLog** | **SaaS puro, abono + vehículo plano, 4 tiers** | **~$ 9 – 20** equivalente | **Ilimitados** | Mensual → 36 meses | **No** |
+| **CamioNex** | **SaaS puro, abono + vehículo plano, 4 tiers** | **~$ 9 – 20** equivalente | **Ilimitados** | Mensual → 36 meses | **No** |
 
 **Referencia local**: un proveedor argentino de radar y control de combustible cobra
 del orden de **$ 25.000 (≈ USD 16,5) por camión/mes** por una solución con hardware,
@@ -744,16 +744,16 @@ referentes internacionales.
 
 ### 8.2 Qué copiar de cada uno
 
-| De | Estrategia | Aplicación en FleetLog |
+| De | Estrategia | Aplicación en CamioNex |
 |---|---|---|
 | **Fleetio** | Usuarios ilimitados + precio por vehículo **público en la web** + tiers definidos por módulo, no por límites arbitrarios | Adoptar íntegro. Publicar precios es la mayor ventaja competitiva en un mercado donde todos cotizan "a consultar". |
 | **Geotab** | Tiers nombrados por **capacidad progresiva**, donde cada escalón agrega un dominio funcional completo | Es exactamente la lógica Control → Operación → Gestión → Corporate. |
-| **Samsara / Motive** | El hardware es el ancla de retención: el cliente no se va porque tiene equipos instalados | FleetLog **no tiene hardware**. Hay que reemplazar ese ancla con: implementación paga + *data gravity* (histórico, legajos, rendiciones) + contrato anual. **Este es el punto estratégico más importante del documento.** |
+| **Samsara / Motive** | El hardware es el ancla de retención: el cliente no se va porque tiene equipos instalados | CamioNex **no tiene hardware**. Hay que reemplazar ese ancla con: implementación paga + *data gravity* (histórico, legajos, rendiciones) + contrato anual. **Este es el punto estratégico más importante del documento.** |
 | **Linxup** | Autoservicio sin contrato, ciclo de venta corto | Aplicar al plan **Control**: alta con tarjeta, sin llamada comercial, sin contrato. Es el motor de volumen. |
-| **Verizon Connect** | ⚠️ **Qué NO copiar**: contratos rígidos, precios opacos, penalidades de salida | En la PyME argentina, la opacidad y la letra chica matan la venta. FleetLog debe ser lo opuesto. |
+| **Verizon Connect** | ⚠️ **Qué NO copiar**: contratos rígidos, precios opacos, penalidades de salida | En la PyME argentina, la opacidad y la letra chica matan la venta. CamioNex debe ser lo opuesto. |
 | **Todos** | **Ninguno cobra por chofer o por usuario.** El vehículo es la unidad universal de la industria. | Confirma que la decisión de "choferes ilimitados" no es una concesión: es el estándar del sector. |
 
-### 8.3 El espacio en blanco que ocupa FleetLog
+### 8.3 El espacio en blanco que ocupa CamioNex
 
 Ninguno de los seis referentes resuelve tres cosas que en Argentina son obligatorias:
 
@@ -764,7 +764,7 @@ Ninguno de los seis referentes resuelve tres cosas que en Argentina son obligato
    peligrosa — con vencimientos y bloqueo de asignación.
 3. **Planilla OEA / 7 puntos AFIP** firmada digitalmente.
 
-Eso justifica que FleetLog cobre **por encima de Fleetio** (que en producto crudo tiene
+Eso justifica que CamioNex cobre **por encima de Fleetio** (que en producto crudo tiene
 más años de desarrollo) y **muy por debajo de Samsara** (que exige hardware y 36 meses).
 La posición es: *"más completo que el barato, sin el compromiso del caro, y hecho para
 cómo se trabaja acá"*.
@@ -826,7 +826,7 @@ cómo se trabaja acá"*.
 | Abono base Gestión | $ 249.000 |
 | 80 vehículos × $ 18.900 | $ 1.512.000 |
 | Integración ERP | $ 89.000 |
-| FleetLog IA ($ 149.000 + 80 × $ 1.900) | $ 301.000 |
+| CamioNex IA ($ 149.000 + 80 × $ 1.900) | $ 301.000 |
 | API + Webhooks | $ 119.000 |
 | Soporte Premium | $ 179.000 |
 | **Total mensual** | **$ 2.449.000** (≈ USD 1.611) |
@@ -843,7 +843,7 @@ cómo se trabaja acá"*.
 | Abono base Corporate | $ 490.000 |
 | 250 vehículos × $ 10.900 (plano negociado) | $ 2.725.000 |
 | GPS 250 unidades (−30% por volumen) | $ 857.500 |
-| FleetLog IA (con descuento de volumen) | $ 481.500 |
+| CamioNex IA (con descuento de volumen) | $ 481.500 |
 | **Total mensual** | **$ 4.554.000** (≈ USD 2.996) |
 | Por vehículo | $ 18.216 (≈ USD 12,0) |
 
@@ -915,7 +915,7 @@ El pago de implementación reduce el payback real entre 1 y 3 meses adicionales.
 |---|---|---|
 | 1 | **Se cotiza con dos números y una multiplicación** | "Abono + (camiones × tarifa)". Sin tramos, sin planilla, sin explicar qué es un escalón marginal. Un vendedor lo hace de memoria frente al cliente y este lo verifica en su cabeza. Esto solo ya acorta el ciclo de venta. |
 | 2 | **La adopción no tiene costo** | Choferes y usuarios ilimitados: nadie tiene que pedir permiso para sumar gente. La adopción total es la mejor defensa contra el churn. |
-| 3 | **Ingreso alineado al crecimiento del cliente** | Si el cliente compra camiones, FleetLog factura más automáticamente. Expansión sin esfuerzo comercial. |
+| 3 | **Ingreso alineado al crecimiento del cliente** | Si el cliente compra camiones, CamioNex factura más automáticamente. Expansión sin esfuerzo comercial. |
 | 4 | **Cuatro vectores de expansión independientes** | Plan, vehículos, add-ons y servicios. Si uno se estanca, los otros tres siguen. |
 | 5 | **Margen bruto protegido por diseño** | Lo que tiene costo marginal (IA, GPS, storage) nunca entra en un plan. |
 | 6 | **Sin hardware** | Cero capital de trabajo, cero logística, cero inventario, márgenes de software puro y despliegue en días en vez de semanas. |

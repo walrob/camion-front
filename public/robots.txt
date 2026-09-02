@@ -1,17 +1,42 @@
-# FleetLog — reglas de rastreo
-User-agent: *
-Allow: /$
-Allow: /politica-de-privacidad
-Allow: /terminos-y-condiciones
+# CamioNex — reglas de rastreo
+# https://www.camionex.com.ar
+#
+# Si cambia el dominio, cambia también en `nuxt.config.ts` (ORIGEN),
+# `composables/useSeoSitio.ts` (SITIO.origen) y `public/sitemap.xml`.
 
-# El sistema de gestión no se indexa: son pantallas privadas y sin valor de
-# búsqueda, y aparecer en Google sólo genera intentos de acceso.
+User-agent: *
+
+# El sistema de gestión no se rastrea: son pantallas detrás de login, sin valor
+# de búsqueda, y aparecer en Google sólo genera intentos de acceso.
+#
+# Ojo con lo que esto NO hace: `Disallow` pide no rastrear, pero no impide que
+# el buscador indexe la URL si la encuentra enlazada desde otro sitio. Lo que
+# realmente las mantiene fuera del índice es la cabecera `X-Robots-Tag:
+# noindex` que sirve Nitro para estos mismos prefijos (ver `routeRules` en
+# nuxt.config.ts). Las dos cosas van juntas.
 Disallow: /admin
 Disallow: /chofer
+Disallow: /superadmin
 Disallow: /auth
 Disallow: /invite
 Disallow: /initial
 Disallow: /estado-plan
 Disallow: /upgrade
+Disallow: /configuracion
+# `/manual-usuario` es el visor dentro del backoffice y exige sesión. El manual
+# en sí se sirve suelto en `/docs/manual/manual.html` y **sí** se indexa: es el
+# texto más extenso y específico del sitio, y responde consultas de cola larga
+# que la landing no cubre.
+Disallow: /manual-usuario
 
-Sitemap: https://www.fleetlog.com.ar/sitemap.xml
+# Parámetros de campaña: la misma página con `?utm_source=...` es contenido
+# duplicado. El canonical ya resuelve cuál indexar; esto evita además gastar
+# presupuesto de rastreo en variantes.
+Disallow: /*?utm_
+
+# No se bloquea /_nuxt: Google necesita descargar el CSS y el JavaScript para
+# renderizar la página. Bloquearlos es el error clásico que la hace ver rota
+# en el informe de cobertura y hunde la evaluación de "apta para móviles".
+Allow: /_nuxt/
+
+Sitemap: https://www.camionex.com.ar/sitemap.xml

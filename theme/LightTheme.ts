@@ -1,6 +1,6 @@
 import type { ThemeTypes } from "@/types/themeTypes/ThemeType";
 
-// Tema claro corporativo de FleetLog.
+// Tema claro corporativo de CamioNex.
 // Azul profundo (confianza/logística) + teal de apoyo + semánticos accesibles (AA).
 // Se conservan TODAS las claves que consumen scss y componentes.
 const FleetLight: ThemeTypes = {

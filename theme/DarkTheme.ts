@@ -1,6 +1,6 @@
 import type { ThemeTypes } from "@/types/themeTypes/ThemeType";
 
-// Tema oscuro corporativo de FleetLog (mismos acentos de marca sobre fondos slate).
+// Tema oscuro corporativo de CamioNex (mismos acentos de marca sobre fondos slate).
 const FleetDark: ThemeTypes = {
   name: "FleetDark",
   dark: true,

@@ -13,6 +13,11 @@ import { VColorInput } from "vuetify/labs/VColorInput";
 
 export default defineNuxtPlugin((nuxtApp) => {
   const vuetify = createVuetify({
+    // Necesario desde que las páginas públicas se renderizan en el servidor.
+    // Sin esto, `useDisplay()` resuelve el ancho de pantalla en el servidor
+    // (donde no hay ninguno) y el marcado que llega no coincide con el que
+    // arma el navegador: la hidratación falla y Vue vuelve a dibujar la página.
+    ssr: true,
     components: {
       ...components,
       VFileUpload,

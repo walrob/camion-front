@@ -127,7 +127,7 @@ const terminar = async () => {
   <div>
     <div class="mb-6">
       <h1 class="text-h5 font-weight-bold mb-1">
-        Bienvenido a FleetLog
+        Bienvenido a CamioNex
       </h1>
       <p class="text-body-2 text-medium-emphasis">
         Tres pasos para tener tu operación andando. Podés saltearlos y volver

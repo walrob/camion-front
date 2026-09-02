@@ -52,7 +52,7 @@ const SECCIONES = [
 ];
 
 useHead({
-  titleTemplate: (t?: string) => (t ? `${t} | FleetLog` : "FleetLog"),
+  titleTemplate: (t?: string) => (t ? `${t} | CamioNex` : "CamioNex"),
 });
 </script>
 
@@ -83,15 +83,35 @@ useHead({
           </v-btn>
         </div>
 
-        <template v-if="autenticado">
-          <v-btn color="primary" flat :to="destinoPanel">Ir al panel</v-btn>
-        </template>
-        <template v-else>
-          <v-btn variant="text" to="/auth/login" class="mr-1">Ingresar</v-btn>
-          <v-btn color="primary" flat to="/auth/registro-empresa">
-            Probar gratis
-          </v-btn>
-        </template>
+        <!--
+          Dentro de `ClientOnly` porque la sesión vive en el dispositivo: el
+          servidor siempre renderiza la variante anónima y el cliente, si hay
+          token, la reemplaza. Sin esto habría desajuste de hidratación en las
+          páginas pre-renderizadas.
+
+          El `fallback` no es un placeholder vacío a propósito: es el marcado que
+          queda en el HTML estático, y por lo tanto el que ven el buscador y el
+          visitante anónimo, que son casi todos. La llamada a la acción viaja en
+          el HTML, no aparece después de que corra el JavaScript.
+        -->
+        <ClientOnly>
+          <template v-if="autenticado">
+            <v-btn color="primary" flat :to="destinoPanel">Ir al panel</v-btn>
+          </template>
+          <template v-else>
+            <v-btn variant="text" to="/auth/login" class="mr-1">Ingresar</v-btn>
+            <v-btn color="primary" flat to="/auth/registro-empresa">
+              Probar gratis
+            </v-btn>
+          </template>
+
+          <template #fallback>
+            <v-btn variant="text" to="/auth/login" class="mr-1">Ingresar</v-btn>
+            <v-btn color="primary" flat to="/auth/registro-empresa">
+              Probar gratis
+            </v-btn>
+          </template>
+        </ClientOnly>
       </v-container>
     </v-app-bar>
 
@@ -141,6 +161,19 @@ useHead({
               >
                 Probar gratis
               </NuxtLink>
+              <!--
+                Enlace real (`<a>`, no NuxtLink: el manual es un HTML servido
+                por Nitro, fuera del router). Sin este enlace el manual sería
+                una página huérfana: está en el sitemap, pero nada del sitio
+                apunta a ella, y una página a la que no llega ningún enlace
+                interno se rastrea tarde y se posiciona peor.
+              -->
+              <a
+                href="/docs/manual/manual.html"
+                class="text-body-2 text-medium-emphasis"
+              >
+                Manual de usuario
+              </a>
             </div>
           </v-col>
 
@@ -186,7 +219,7 @@ useHead({
         <v-divider class="my-5" />
 
         <div class="text-caption text-medium-emphasis">
-          © {{ new Date().getFullYear() }} FleetLog. Todos los derechos
+          © {{ new Date().getFullYear() }} CamioNex. Todos los derechos
           reservados.
         </div>
       </v-container>

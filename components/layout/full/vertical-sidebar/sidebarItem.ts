@@ -165,7 +165,7 @@ const sidebarItem: menu[] = [
 
   { header: "Cuenta" },
   {
-    // La suscripción a FleetLog, no la plata de los viajes: por eso va en su
+    // La suscripción a CamioNex, no la plata de los viajes: por eso va en su
     // propia sección y no en Administración.
     //
     // Sin feature: nunca se bloquea por plan — es la pantalla donde se paga, y

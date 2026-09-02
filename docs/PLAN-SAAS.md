@@ -1,6 +1,6 @@
-# FleetLog — Plan de conversión a SaaS multi-tenant
+# CamioNex — Plan de conversión a SaaS multi-tenant
 
-> Documento de arquitectura y ejecución. Convierte FleetLog de una instalación
+> Documento de arquitectura y ejecución. Convierte CamioNex de una instalación
 > single-tenant en un SaaS multi-empresa con planes, facturación, onboarding
 > autoservicio y landing pública en la raíz.
 >
@@ -134,7 +134,7 @@
 - `test/app.e2e-spec.ts`: scaffold de NestJS que esperaba `Hello World!` en `/`.
   Nunca pudo pasar en este proyecto.
 - `test/auth-users.e2e-spec.example.ts`: ejemplo con roles (`Role.OPERATOR`,
-  `Role.USER`) que no existen en FleetLog. Era la causa de que el typecheck del
+  `Role.USER`) que no existen en CamioNex. Era la causa de que el typecheck del
   backend tuviera que correrse siempre filtrando errores.
 
 **Bug preexistente corregido**: `employment-movements.service.spec.ts` fallaba
@@ -186,7 +186,7 @@ anteriores):
 Aturna usa **MP Marketplace**: cada institución cobra a sus pacientes con su
 propia cuenta, y eso obliga a OAuth (`mp-auth/`), a guardar un token por
 institución, a refrescarlo cada 180 días y a resolver con qué credencial se
-consulta cada pago. FleetLog es lo contrario —**FleetLog le cobra a la
+consulta cada pago. CamioNex es lo contrario —**CamioNex le cobra a la
 empresa**, siempre con la misma cuenta—, así que **no hay `mp-auth/`, ni tokens
 por empresa, ni cifrado de credenciales**. Lo que quedó es la mitad que sí
 aplica: preferencias, suscripciones y confirmación de avisos.
@@ -243,7 +243,7 @@ en lugar de decirle que no pagó.
 #### El precio no es fijo, así que el débito tampoco
 
 Una suscripción de MP creada en marzo debitaría el importe de marzo para
-siempre, y como el precio de FleetLog depende de la flota del mes, la diferencia
+siempre, y como el precio de CamioNex depende de la flota del mes, la diferencia
 quedaría impaga sin que nadie se entere. Por eso hay un cron a las 4:30 que le
 informa a MP el importe vigente de cada empresa, después de la emisión de las 4.
 
@@ -308,7 +308,7 @@ nada: simplemente no quedaba registro. Ahora el criterio es **la herencia de
 
 El superadmin no pertenece a ninguna empresa, pero `user.companyId` es NOT NULL.
 Hacerlo nullable habría abierto un agujero: una fila sin empresa no la filtra nadie.
-En su lugar hay una empresa `isPlatform: true` que representa a FleetLog, **excluida de
+En su lugar hay una empresa `isPlatform: true` que representa a CamioNex, **excluida de
 los listados, del MRR, de la facturación y del cron de trials**. La invariante queda
 intacta.
 
@@ -384,9 +384,9 @@ Twitter en `app.head` de `nuxt.config.ts`**, que sí llegan al HTML servido. Ver
 sobre el build:
 
 ```
-<meta property="og:title" content="FleetLog — Gestión de flotas para transporte de carga">
+<meta property="og:title" content="CamioNex — Gestión de flotas para transporte de carga">
 <meta property="og:description" content="Rendiciones que se arman solas, …">
-<meta property="og:image" content="/og-fleetlog.png">
+<meta property="og:image" content="/og-camionex.png">
 <meta name="twitter:card" content="summary_large_image">
 ```
 
@@ -405,7 +405,7 @@ abierto a internet es una decisión declarada, no un descuido.
 
 #### Pendiente de Fase 7
 
-- **Falta la imagen `public/og-fleetlog.png`**: las meta la referencian pero el archivo
+- **Falta la imagen `public/og-camionex.png`**: las meta la referencian pero el archivo
   no existe. Sin ella la previsualización sale sin imagen.
 - **Sin Lighthouse**: no se midió el SEO ≥ 90 del criterio de aceptación.
 - **Sin prueba en un dispositivo real** con la PWA ya instalada, que es el caso difícil
@@ -413,7 +413,7 @@ abierto a internet es una decisión declarada, no un descuido.
 - **No hay landings por segmento** (`/para-transportistas`) ni página `/planes`
   independiente: los planes viven como sección de la landing.
 - El dominio de `robots.txt` y `sitemap.xml` está puesto como
-  `www.fleetlog.com.ar`: hay que confirmarlo antes de publicar.
+  `www.camionex.com.ar`: hay que confirmarlo antes de publicar.
 
 ### Fase 6 — cómo quedó implementada
 
@@ -787,16 +787,16 @@ Nuxt 3.16 (`ssr: false`) + Vuetify 3 + Pinia + Capacitor.
 
 **Se copia el patrón, no el código.**
 
-| De Aturna | Se adopta | Ajuste para FleetLog |
+| De Aturna | Se adopta | Ajuste para CamioNex |
 |---|---|---|
 | `company` (tenant id) en el JWT | Sí, es el mecanismo central | Se llama `companyId` |
 | `Institution` con `scheduledPlanId` / `scheduledNumberOfProfessionals` / `scheduledEffectiveAt` | Sí, íntegro | La unidad facturable es el vehículo, no el profesional |
 | `InstitutionSubscription` con `isProrated` | Sí, íntegro, incluido el comentario sobre el cron | Se agregan líneas de detalle (abono / vehículos / add-ons) |
 | `Plan.features` como `simple-json` + *"no hardcodear ids de planes"* | Sí | Se agrega `limits` para los límites cuantitativos |
-| `PaidPlanGuard` (consulta la base, no el token) | Sí, pero **con caché** | En Aturna se usa en rutas esporádicas; en FleetLog el guard corre en endpoints calientes |
+| `PaidPlanGuard` (consulta la base, no el token) | Sí, pero **con caché** | En Aturna se usa en rutas esporádicas; en CamioNex el guard corre en endpoints calientes |
 | `AccountStatusGuard` con lista blanca de rutas para cuentas bloqueadas | Sí | Adaptar rutas |
 | Filtrado manual `institutionId: user.company` en cada service | **No.** Es el punto débil del patrón | Se reemplaza por scoping por defecto + tripwire (fase 2) |
-| `service-plans` / `service-extras` | No aplica | En Aturna son el catálogo médico, no add-ons de facturación. Los add-ons de FleetLog se diseñan de cero. |
+| `service-plans` / `service-extras` | No aplica | En Aturna son el catálogo médico, no add-ons de facturación. Los add-ons de CamioNex se diseñan de cero. |
 
 ---
 
@@ -1093,7 +1093,7 @@ export class Company {
 ```
 
 > **Nota**: a diferencia de Aturna, la cantidad facturable **no** se guarda como
-> un número contratado en la empresa (`numberOfProfessionals`). En FleetLog los
+> un número contratado en la empresa (`numberOfProfessionals`). En CamioNex los
 > vehículos activos son un hecho observable de la base — se cuentan, no se
 > declaran. Ver [fase 5](#fase-5--facturación-suscripciones-y-add-ons).
 
@@ -1991,7 +1991,7 @@ const publicRoutes = [
 - Barra superior con `LogoHorizontal`, links a secciones, botones "Ingresar" y
   "Probar gratis".
 - Footer con datos de contacto, links legales y redes.
-- `titleTemplate` propio: `"%s | FleetLog"`.
+- `titleTemplate` propio: `"%s | CamioNex"`.
 - **No** carga el sidebar, ni los sockets, ni los stores del backoffice.
 
 ### 7.3 Secciones de la landing
@@ -2049,7 +2049,7 @@ la landing en lugar del login**.
 **Correcciones necesarias:**
 
 1. `public/site.webmanifest`: agregar `"start_url": "/chofer"`, `"scope": "/"`,
-   `"name": "FleetLog"`, `"short_name": "FleetLog"` (hoy están vacíos) y
+   `"name": "CamioNex"`, `"short_name": "CamioNex"` (hoy están vacíos) y
    `"theme_color": "#2563EB"` (hoy `#ffffff`, no coincide con el tema).
 2. `middleware/auth.global.ts`: si el usuario autenticado es `DRIVER` y cae en `/`,
    redirigir a `/chofer` **antes** de resolver la ruta pública.
@@ -2161,7 +2161,7 @@ Patrón directo de Aturna: `back-medicina/src/mp-auth/`, `mp-payments/`,
 `webhooks/` y `common/utils/mp-oauth.util.ts` / `payments.util.ts`.
 
 - **Diferencia importante**: Aturna usa MP Marketplace (cada institución cobra a
-  sus pacientes con su propia cuenta). FleetLog necesita lo contrario: **FleetLog
+  sus pacientes con su propia cuenta). CamioNex necesita lo contrario: **CamioNex
   le cobra a la empresa**. Es más simple — una sola cuenta de MP, con
   `preapproval` (suscripción recurrente) por empresa.
 - `Company.mpPreapprovalId` (ya previsto en el diseño de la fase 1).

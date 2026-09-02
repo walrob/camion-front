@@ -46,17 +46,28 @@ const SECCIONES = [
 useSeoMeta({
   title: "Política de Privacidad",
   description:
-    "Cómo FleetLog trata los datos personales de sus clientes y de los choferes " +
+    "Cómo CamioNex trata los datos personales de sus clientes y de los choferes " +
     "y empleados que ellos registran, conforme la Ley 25.326 y la normativa del " +
     "Mercosur.",
   robots: "index, follow",
 });
+
+useCanonical("/politica-de-privacidad");
+
+// Las migas le dan al buscador la jerarquía del sitio y se muestran debajo del
+// título del resultado, en lugar de la URL cruda.
+useDatosEstructurados(
+  migasJsonLd([
+    { nombre: "Inicio", ruta: "/" },
+    { nombre: "Política de Privacidad", ruta: "/politica-de-privacidad" },
+  ]),
+);
 </script>
 
 <template>
   <LegalDocumentoLegal
     titulo="Política de Privacidad"
-    bajada="Qué datos trata FleetLog, con qué finalidad, por cuánto tiempo y qué
+    bajada="Qué datos trata CamioNex, con qué finalidad, por cuánto tiempo y qué
             podés hacer al respecto. Incluye lo que corresponde a los datos de
             los choferes, que son los más sensibles de todo el sistema."
     :actualizado="ACTUALIZADO"
@@ -64,7 +75,7 @@ useSeoMeta({
   >
     <h2 id="alcance">1. Alcance y nuestros dos roles</h2>
     <p>
-      Esta política explica cómo FleetLog, operado por
+      Esta política explica cómo CamioNex, operado por
       <strong>NorthAr Consulting</strong>,
       <span class="legal-completar">[completar: razón social]</span>, CUIT
       <span class="legal-completar">[completar: CUIT]</span>, con domicilio en
@@ -73,7 +84,7 @@ useSeoMeta({
       web y a la aplicación móvil del chofer.
     </p>
     <p>
-      FleetLog trata datos personales en dos papeles distintos, y la diferencia
+      CamioNex trata datos personales en dos papeles distintos, y la diferencia
       importa mucho para saber a quién reclamar:
     </p>
     <ul>
@@ -153,7 +164,7 @@ useSeoMeta({
         <strong>Sobre estos datos, el responsable es la empresa empleadora.</strong>
         Es ella quien debe informar a su personal qué se registra y para qué,
         contar con base legal para hacerlo, y atender los pedidos de acceso,
-        rectificación o supresión. FleetLog actúa por su cuenta y orden, no
+        rectificación o supresión. CamioNex actúa por su cuenta y orden, no
         utiliza esos datos para fines propios y no los cede a terceros ajenos a
         la prestación del servicio.
       </p>

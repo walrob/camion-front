@@ -1,4 +1,4 @@
-# Manual de Usuario — FleetLog
+# Manual de Usuario — CamioNex
 
 Fuente del manual **y** lo que ve el usuario: no hay copia ni build intermedio.
 

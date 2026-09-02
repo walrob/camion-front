@@ -24,7 +24,7 @@ const URL_MANUAL = "/docs/manual/manual.html";
   <div>
     <PageHeader
       title="Manual de usuario"
-      subtitle="Cómo se usa FleetLog, paso a paso, según tu rol"
+      subtitle="Cómo se usa CamioNex, paso a paso, según tu rol"
     >
       <template #actions>
         <v-btn
@@ -44,7 +44,7 @@ const URL_MANUAL = "/docs/manual/manual.html";
     <v-card border flat rounded="lg" class="pa-2">
       <iframe
         :src="URL_MANUAL"
-        title="Manual de usuario de FleetLog"
+        title="Manual de usuario de CamioNex"
         class="manual-frame"
       ></iframe>
     </v-card>

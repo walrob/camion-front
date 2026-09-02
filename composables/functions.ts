@@ -174,10 +174,18 @@ export const generarHorasIntervalo = (
   return resultado;
 };
 
-const config = useRuntimeConfig();
-
+/**
+ * URL pública de un archivo subido.
+ *
+ * `useRuntimeConfig()` se llama **adentro** de la función y no al importar el
+ * módulo: los composables de Nuxt necesitan una instancia activa, y a nivel de
+ * módulo no hay ninguna. En el navegador el error pasaba desapercibido, pero al
+ * renderizar en el servidor tiraba "[nuxt] instance unavailable" e impedía
+ * pre-renderizar la landing entera.
+ */
 export const returnUrlImg = (value: string | undefined) => {
   if (!value) return undefined;
+  const config = useRuntimeConfig();
   return config.public.apiFilesUrl + value;
 };
 

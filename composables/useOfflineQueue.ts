@@ -2,6 +2,12 @@ import { ref } from "vue";
 
 // Cola local de acciones pendientes de sincronizar (offline-first del chofer).
 // Persistida en localStorage; cada ítem usa un clientId idempotente.
+//
+// ⚠️ El prefijo `fleetlog_` NO se renombró con el cambio de marca, y es a
+// propósito: la clave es la dirección de los datos que ya están guardados en el
+// teléfono de cada chofer. Cambiarla no los migra — los deja huérfanos, y acá
+// eso significa perder cargas hechas sin señal que todavía no se subieron.
+// Renombrarla exige escribir antes una migración que lea la clave vieja.
 const KEY = "fleetlog_offline_queue";
 const pendingCount = ref(0);
 
