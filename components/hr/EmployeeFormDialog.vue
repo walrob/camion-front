@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
-import {
-  positionOptions,
-  roleOptions,
-  roleForPosition,
-  useHrStatus,
-} from "~/composables/useHrStatus";
+import { roleOptions, useHrStatus } from "~/composables/useHrStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
 import { useHrStore } from "~/stores/hr";
 import { useGeneralStore } from "~/stores/general";
 import { useFormErrors } from "~/composables/useFormErrors";
@@ -26,7 +22,11 @@ const r = useValidations();
 const hrStore = useHrStore();
 const general = useGeneralStore();
 const formErrors = useFormErrors();
-const { employmentStatus } = useHrStatus();
+const { employmentStatus, roleForPosition } = useHrStatus();
+
+// Los puestos los define cada empresa (docs/CONFIGURACION.md §5), y de cada uno
+// sale el rol con el que la persona entra a la app.
+const puestos = useCatalogOptions(CATALOG.EMPLOYEE_POSITION);
 
 const formRef = ref();
 const valid = ref(true);
@@ -177,7 +177,7 @@ const submit = async () => {
           <v-col cols="12" sm="6">
             <v-select
               v-model="form.position"
-              :items="positionOptions"
+              :items="puestos"
               item-title="label"
               item-value="value"
               label="Puesto"

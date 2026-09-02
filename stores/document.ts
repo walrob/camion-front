@@ -44,7 +44,7 @@ export const useDocumentStore = defineStore("document", {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       return await $api
-        .get("documents/expiring/", { params: { days: 30 } })
+        .get("documents/expiring/")
         .then((resp) => (this.expiring = resp.data))
         .catch((e) => general.setErrorSnackbar(e));
     },
@@ -55,7 +55,6 @@ export const useDocumentStore = defineStore("document", {
       const general = useGeneralStore();
       try {
         const resp = await $api.get("documents/expiring/export/", {
-          params: { days: 30 },
           responseType: "blob",
         });
         const url = window.URL.createObjectURL(new Blob([resp.data]));

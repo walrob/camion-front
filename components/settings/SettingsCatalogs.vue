@@ -9,8 +9,9 @@ import {
 import { Feature } from "~/types/plan";
 
 /**
- * Editor de los catálogos de negocio: los tipos de gasto de la bitácora y los
- * tipos de incidente (docs/CONFIGURACION.md §5).
+ * Editor de los catálogos de negocio de la empresa: tipos de gasto, tipos de
+ * incidente, categorías de documento, permisos, puestos, motivos de licencia y
+ * tipos de combustible (docs/CONFIGURACION.md §5).
  *
  * Los elementos que trae el sistema se renombran, recolorean, reordenan y
  * desactivan, pero no se eliminan: el histórico los sigue nombrando y el código
@@ -94,9 +95,10 @@ onMounted(() => store.load(true));
       density="comfortable"
       class="mb-5"
     >
-      Las listas que el sistema ofrece al cargar un gasto o reportar un incidente.
-      Podés renombrarlas, reordenarlas y sumar las tuyas. Los cambios se ven
-      enseguida en la app de los choferes.
+      Las listas que el sistema ofrece al cargar un gasto, reportar un incidente,
+      guardar un documento o dar de alta a alguien. Podés renombrarlas,
+      reordenarlas y sumar las tuyas: los cambios se ven enseguida en la app de
+      los choferes.
     </v-alert>
 
     <v-card v-if="!puedeEditar" border flat rounded="lg" class="mb-4">
@@ -164,6 +166,18 @@ onMounted(() => store.load(true));
             >
               mdi-cash-minus
             </v-icon>
+            <!-- En puestos, el comportamiento es el rol de acceso: se muestra
+                 porque es lo que define con qué permisos entra la persona. -->
+            <span
+              v-else-if="c.comportamiento && item.behavior"
+              class="ms-1 text-caption"
+            >
+              ·
+              {{
+                c.comportamiento.opciones.find((o) => o.value === item.behavior)
+                  ?.label ?? item.behavior
+              }}
+            </span>
           </v-chip>
         </div>
       </v-card-text>
@@ -225,29 +239,22 @@ onMounted(() => store.load(true));
               class="flex-grow-1"
             />
 
-            <!-- Sólo en catálogos con comportamiento (gastos), y sólo en los
-                 elementos propios: el de fábrica es parte del producto. -->
-            <v-tooltip
-              v-if="defActual?.usaComportamiento && !item.isSystem"
-              text="Resta en la rendición, como el adelanto"
-              location="top"
-            >
-              <template #activator="{ props }">
-                <v-switch
-                  v-bind="props"
-                  :model-value="item.behavior === BEHAVIOR_ADVANCE"
-                  color="warning"
-                  density="compact"
-                  hide-details
-                  inset
-                  label="Adelanto"
-                  class="elemento__flag"
-                  @update:model-value="
-                    item.behavior = $event ? BEHAVIOR_ADVANCE : undefined
-                  "
-                />
-              </template>
-            </v-tooltip>
+            <!-- Sólo en catálogos que declaran comportamiento (gastos,
+                 puestos), y sólo en los elementos propios: el de fábrica es
+                 parte del producto. -->
+            <v-select
+              v-if="defActual?.comportamiento && !item.isSystem"
+              :model-value="item.behavior ?? defActual.comportamiento.porDefecto"
+              :items="defActual.comportamiento.opciones"
+              item-title="label"
+              item-value="value"
+              :label="defActual.comportamiento.label"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="elemento__comportamiento"
+              @update:model-value="item.behavior = $event"
+            />
 
             <v-tooltip text="Se puede seguir usando" location="top">
               <template #activator="{ props }">
@@ -310,6 +317,10 @@ onMounted(() => store.load(true));
 
   &__flag {
     flex: 0 0 auto;
+  }
+
+  &__comportamiento {
+    flex: 0 0 200px;
   }
 }
 </style>

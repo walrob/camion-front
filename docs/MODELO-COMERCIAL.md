@@ -254,9 +254,12 @@ Basada en lo efectivamente desarrollado en la plataforma hoy.
 | Umbrales de alerta personalizables | — | — | ✅ | ✅ |
 | **CONFIGURACIÓN** | | | | |
 | Ajustes de operación: qué se exige antes de salir, reapertura de rendiciones | — | ✅ | ✅ | ✅ |
-| Checklist propio: puntos, críticos y foto obligatoria | — | ✅ | ✅ | ✅ |
-| Catálogos propios: tipos de gasto y de incidente | — | ✅ | ✅ | ✅ |
+| Checklist y planilla OEA propios: puntos, críticos y foto obligatoria | — | ✅ | ✅ | ✅ |
+| Catálogos propios: gastos, incidentes, documentos, permisos, puestos, licencias y combustibles | — | ✅ | ✅ | ✅ |
+| Viático de monto fijo por viaje | — | ✅ | ✅ | ✅ |
+| Prender y apagar reglas de alerta | — | ✅ | ✅ | ✅ |
 | Una plantilla de checklist por tipo de unidad | — | — | ✅ | ✅ |
+| **Viajes internacionales**: multi-moneda con cotización por día | ✅ | ✅ | ✅ | ✅ |
 | **COMPLIANCE** | | | | |
 | Planillas OEA (7 puntos AFIP + precintos) | — | ✅ | ✅ | ✅ |
 | Firma digital en planillas e inspecciones | ✅ | ✅ | ✅ | ✅ |

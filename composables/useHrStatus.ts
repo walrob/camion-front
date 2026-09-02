@@ -1,5 +1,6 @@
 // Etiquetas/colores del dominio de RRHH (DRY entre tablas, chips y selects).
 import type { StatusOption } from "~/composables/useFleetStatus";
+import { useCatalogStore, CATALOG } from "~/stores/catalog";
 
 export const positionOptions: StatusOption[] = [
   { value: "driver", label: "Chofer", color: "primary" },
@@ -87,6 +88,21 @@ export const useHrStatus = () => {
   const find = (opts: StatusOption[], v?: string) =>
     opts.find((o) => o.value === v) ?? { value: v ?? "", label: v ?? "-", color: "grey" };
 
+  // Puestos, permisos y motivos de licencia los define cada empresa
+  // (docs/CONFIGURACION.md §5). Los estados —Activo, Licencia, Suspendido,
+  // Baja— y los roles del sistema, no: son la máquina de estados y el modelo de
+  // permisos (§8).
+  const catalogs = useCatalogStore();
+  const delCatalogo = (
+    catalog: string,
+    v: string | undefined,
+    respaldo: StatusOption[],
+  ): StatusOption => {
+    const item = catalogs.todos(catalog).find((i) => i.key === v);
+    if (item) return { value: item.key, label: item.label, color: item.color ?? "grey" };
+    return find(respaldo, v);
+  };
+
   return {
     positionOptions,
     employmentStatusOptions,
@@ -95,12 +111,25 @@ export const useHrStatus = () => {
     certificationTypeOptions,
     certificationStatusOptions,
     roleOptions,
-    roleForPosition,
-    position: (v?: string) => find(positionOptions, v),
+    /**
+     * Con qué rol entra a la app quien tenga este puesto. Sale del
+     * comportamiento que la empresa le dio al puesto en su catálogo.
+     */
+    roleForPosition: (p?: string) => {
+      const item = catalogs.todos(CATALOG.EMPLOYEE_POSITION).find((i) => i.key === p);
+      const rol = item?.behavior;
+      if (!rol) return roleForPosition(p);
+      return (
+        roleOptions.find((r) => r.value === rol) ?? { value: rol, label: rol, color: "grey" }
+      );
+    },
+    position: (v?: string) =>
+      delCatalogo(CATALOG.EMPLOYEE_POSITION, v, positionOptions),
     employmentStatus: (v?: string) => find(employmentStatusOptions, v),
     movementType: (v?: string) => find(movementTypeOptions, v),
-    leaveType: (v?: string) => find(leaveTypeOptions, v),
-    certificationType: (v?: string) => find(certificationTypeOptions, v),
+    leaveType: (v?: string) => delCatalogo(CATALOG.LEAVE_TYPE, v, leaveTypeOptions),
+    certificationType: (v?: string) =>
+      delCatalogo(CATALOG.CERTIFICATION_TYPE, v, certificationTypeOptions),
     certificationStatus: (v?: string) => find(certificationStatusOptions, v),
   };
 };

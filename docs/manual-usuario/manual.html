@@ -641,7 +641,7 @@ pre.flujo {
       <tr><td>Tablero de incidentes (kanban)</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>RRHH: legajo y habilitaciones</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>Exportación a Excel</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
-      <tr><td><strong>Configuración</strong>: ajustes, checklist y catálogos propios</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td><strong>Configuración</strong>: ajustes, checklist y planilla OEA propios, catálogos, viático fijo</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
 
       <tr class="grupo"><td colspan="5">Gestión</td></tr>
       <tr><td><strong>Indicadores</strong> gerenciales (costo por km)</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
@@ -652,6 +652,9 @@ pre.flujo {
 
       <tr class="grupo"><td colspan="5">Corporate</td></tr>
       <tr><td>Multi-empresa, API y acceso único (SSO)</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+
+      <tr class="grupo"><td colspan="5">En todos los planes</td></tr>
+      <tr><td><strong>Viajes internacionales</strong>: cargar en otra moneda, con cotización por día <span class="pista">Quien cruza la frontera necesita que las cuentas cierren, tenga el plan que tenga.</span></td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
     </tbody>
   </table>
   </div>
@@ -1727,6 +1730,15 @@ pre.flujo {
     chofer pasa a pedir el dato antes de guardar.
   </p>
 
+  <h3>Moneda y formato</h3>
+
+  <p>
+    <strong>Moneda base:</strong> en la que ves los indicadores y el neto de cada
+    rendición. <strong>Formato de números y fechas:</strong> cómo se escriben los
+    importes y las fechas en pantalla. Sólo cambia la presentación; los datos son
+    los mismos.
+  </p>
+
   <div class="nota">
     <span class="et">Cómo se guarda</span>
     Los cambios no se aplican solos: al modificar algo aparece abajo una barra con
@@ -1737,7 +1749,7 @@ pre.flujo {
   <h3>Tu propio checklist</h3>
 
   <p>
-    En la pestaña <span class="ui">Checklist</span> armás los puntos que revisa el
+    En la pestaña <span class="ui">Inspecciones</span> armás los puntos que revisa el
     chofer antes de salir. Mientras no crees ninguna plantilla, el sistema usa los
     siete de siempre (luces, frenos, cubiertas, aceite, matafuego, documentación y
     acoplado).
@@ -1764,6 +1776,16 @@ pre.flujo {
     </tbody>
   </table>
 
+  <h4>La planilla OEA</h4>
+
+  <p>
+    En la misma pestaña, más abajo, está la <strong>planilla OEA</strong>. Los
+    <strong>7 puntos AFIP y los precintos</strong> no se tocan: son lo que exige la
+    norma. Lo que sí podés hacer es <strong>agregar los tuyos</strong> —una faja
+    propia, el control de temperatura de un furgón refrigerado— y elegir en qué
+    bloque aparecen: inspección física o dispositivos de seguridad.
+  </p>
+
   <h4>Plantillas por tipo de unidad <span class="plan gestion">Desde Gestión</span></h4>
 
   <p>
@@ -1785,9 +1807,21 @@ pre.flujo {
 
   <p>
     En la pestaña <span class="ui">Catálogos</span> se editan las listas que el
-    sistema ofrece al cargar algo. Hoy son dos: los <strong>tipos de gasto</strong>
-    de la bitácora y los <strong>tipos de incidente</strong>.
+    sistema ofrece al cargar algo. Son siete:
   </p>
+
+  <table>
+    <thead><tr><th>Catálogo</th><th>Dónde aparece</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tipos de gasto</strong></td><td>La bitácora del viaje, en la app del chofer.</td></tr>
+      <tr><td><strong>Tipos de incidente</strong></td><td>Lo que el chofer puede reportar desde la ruta.</td></tr>
+      <tr><td><strong>Categorías de documento</strong></td><td>El Centro Documental.</td></tr>
+      <tr><td><strong>Permisos y habilitaciones</strong></td><td>El legajo de cada persona, en RRHH.</td></tr>
+      <tr><td><strong>Puestos</strong></td><td>El legajo. Cada puesto define con qué <strong>rol</strong> entra la persona al sistema.</td></tr>
+      <tr><td><strong>Motivos de licencia</strong></td><td>El historial laboral.</td></tr>
+      <tr><td><strong>Tipos de combustible</strong></td><td>La carga de combustible.</td></tr>
+    </tbody>
+  </table>
 
   <ol class="pasos">
     <li>Elegí el catálogo y tocá <span class="ui">Editar</span>.</li>
@@ -1798,11 +1832,12 @@ pre.flujo {
   </ol>
 
   <div class="clave">
-    <span class="et">Ojo con esto: los adelantos</span>
-    Al crear un tipo de gasto propio podés marcarlo como <strong>Adelanto</strong>.
-    Eso significa que <strong>resta</strong> en la rendición, igual que el adelanto
-    que trae el sistema. Si creás «Adelanto por transferencia» y no lo marcás, va a
-    sumar como un gasto más y la rendición te va a dar otra cosa.
+    <span class="et">Ojo con esto: los adelantos y los roles</span>
+    Hay dos listas donde el elemento no es sólo un nombre:
+    <ul>
+      <li><strong>Tipos de gasto:</strong> al crear uno propio elegís si <em>suma como gasto</em> o <em>resta como adelanto</em>. Si creás «Adelanto por transferencia» y lo dejás como gasto, la rendición te va a dar otra cosa.</li>
+      <li><strong>Puestos:</strong> al crear uno propio —«Playero», «Encargado de patio»— elegís el <strong>rol de acceso</strong>, es decir con qué permisos entra esa persona al sistema. Se puede cambiar después, persona por persona, al darle el acceso.</li>
+    </ul>
   </div>
 
   <div class="nota">
@@ -1810,6 +1845,96 @@ pre.flujo {
     Combustible, peaje, adelanto y los demás <strong>no se pueden eliminar</strong>:
     se renombran, se reordenan y, si no los usás, se desactivan. Es lo que permite
     que los viajes del año pasado se sigan leyendo bien.
+  </div>
+
+  <h3>El viático</h3>
+
+  <p>
+    En <span class="ui">Ajustes</span> → <strong>Cómo se paga el viático</strong> se
+    elige entre tres formas:
+  </p>
+
+  <table>
+    <thead><tr><th>Opción</th><th>Qué significa</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Lo carga el chofer</strong> (viene así)</td><td>El viático es un movimiento más de la bitácora, como hasta ahora.</td></tr>
+      <tr><td><strong>Monto fijo por viaje</strong></td><td>Al cargar el viaje se define el importe, y la rendición lo suma sola.</td></tr>
+      <tr><td><strong>Las dos cosas</strong></td><td>Suman el monto fijo del viaje y lo que además cargue el chofer.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="clave">
+    <span class="et">Por qué importa elegir bien</span>
+    Con <strong>monto fijo</strong>, si un chofer igual carga un viático en la
+    bitácora, ese importe <strong>no se suma</strong> —aparece en el detalle, pero
+    no computa—: si sumara, estarías pagando dos veces lo mismo. Con
+    <strong>las dos cosas</strong>, suma. Por eso la opción tiene tres valores y
+    no un sí/no.
+  </div>
+
+  <p>
+    En un viaje internacional, el viático puede tener <strong>su propia moneda</strong>:
+    un viaje a Asunción puede pagarse en dólares aunque factures en pesos.
+  </p>
+
+  <h3>Qué te avisa el sistema</h3>
+
+  <p>
+    En la pestaña <span class="ui">Alertas</span> está el motor de avisos: qué
+    situaciones generan una alerta y a partir de qué valor. Todas vienen activas
+    con los valores de siempre, así que si no tocás nada seguís recibiendo lo
+    mismo de antes.
+  </p>
+
+  <table>
+    <thead><tr><th>Regla</th><th>Qué se configura</th></tr></thead>
+    <tbody>
+      <tr><td>Gasto fuera de lo esperado</td><td>El monto a partir del cual avisar.</td></tr>
+      <tr><td>Camión detenido demasiado tiempo</td><td>Cuántas horas sin novedades.</td></tr>
+      <tr><td>Documento por vencer</td><td>Con cuántos días de anticipación. <strong>Es lo mismo que marca un documento como «Por vencer»</strong> en el Centro Documental.</td></tr>
+      <tr><td>Permiso o habilitación por vencer</td><td>Ídem para el legajo.</td></tr>
+      <tr><td>Mantenimiento próximo</td><td>Cuántos km y cuántos días antes del service.</td></tr>
+      <tr><td>Incidente reportado · Viaje asignado a alguien de licencia</td><td>Siempre activas. Silenciar el aviso de un accidente sería perder el motivo por el que el chofer tiene la app.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nota">
+    <span class="et">Según el plan</span>
+    <strong>Prender y apagar</strong> reglas entra con la configuración.
+    <strong>Cambiar los umbrales</strong> —los valores— viene con el plan
+    <strong>Gestión</strong>. Y cada plan tiene un tope de reglas configuradas:
+    3 en Control, 10 en Operación, sin límite desde Gestión.
+  </div>
+
+  <h3>Viajes internacionales: cargar en otra moneda</h3>
+
+  <p>
+    Si tu flota cruza la frontera, el chofer va a gastar en guaraníes, reales o
+    dólares. En la pestaña <span class="ui">Monedas</span> se habilita con cuáles
+    trabajás y se cargan las cotizaciones.
+  </p>
+
+  <ol class="pasos">
+    <li>En <span class="ui">Ajustes</span> confirmá tu <strong>moneda base</strong>: en la que ves los indicadores y el neto de cada rendición. Por defecto, pesos.</li>
+    <li>En <span class="ui">Monedas</span> elegí las monedas con las que operás y guardá.</li>
+    <li>Cada día que haya movimientos en otra moneda, cargá la <strong>cotización</strong>: cuántos pesos vale una unidad de esa moneda.</li>
+  </ol>
+
+  <div class="clave">
+    <span class="et">Lo que no se rompe nunca</span>
+    La cotización se guarda <strong>dentro de cada movimiento</strong> el día que se
+    carga. Una rendición cerrada en marzo <strong>no cambia de valor</strong> porque
+    en junio se movió el dólar: es un comprobante, no una estimación.
+  </div>
+
+  <div class="aviso">
+    <span class="et">Si el chofer carga y todavía no hay cotización</span>
+    <strong>No se pierde nada y no se lo bloquea</strong> —está en la aduana, no en
+    la oficina—. El gasto queda guardado, marcado como pendiente, y no suma al
+    total hasta que cargues la cotización de ese día. Al cargarla,
+    <strong>los pendientes se convierten solos</strong>. Por eso, si querés cerrar
+    una rendición que tiene movimientos pendientes, el sistema te frena: te estaría
+    faltando plata en la cuenta.
   </div>
 </section>
 
@@ -1977,7 +2102,7 @@ pre.flujo {
   <ol class="pasos">
     <li>Tocá <span class="ui">+</span>.</li>
     <li>Elegí el <strong>tipo</strong>: combustible, peaje, gasto, <strong>adelanto</strong>, reparación, multa, viático u otro.</li>
-    <li>Cargá el <strong>monto</strong>. Si es combustible, agregá litros y odómetro.</li>
+    <li>Cargá el <strong>monto</strong>. Si tu empresa trabaja con más de una moneda, elegí en cuál gastaste —el selector aparece al lado del monto—. Si es combustible, agregá litros y odómetro.</li>
     <li><strong>Sacale una foto al ticket</strong>. Es lo que después evita cualquier discusión.</li>
     <li>Si hace falta, dictá una observación y guardá.</li>
   </ol>

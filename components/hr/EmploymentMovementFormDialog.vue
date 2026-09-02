@@ -3,9 +3,9 @@ import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import {
   movementTypeOptions,
-  leaveTypeOptions,
   PERIOD_MOVEMENT_TYPES,
 } from "~/composables/useHrStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
 import { useHrStore } from "~/stores/hr";
 import { useGeneralStore } from "~/stores/general";
 import { useFormErrors } from "~/composables/useFormErrors";
@@ -27,6 +27,9 @@ const r = useValidations();
 const hrStore = useHrStore();
 const general = useGeneralStore();
 const formErrors = useFormErrors();
+
+// Los motivos dependen del convenio de cada empresa (docs/CONFIGURACION.md §5).
+const motivosLicencia = useCatalogOptions(CATALOG.LEAVE_TYPE);
 
 const formRef = ref();
 const valid = ref(true);
@@ -212,7 +215,7 @@ const submit = async () => {
           <v-select
             v-model="form.leaveType"
             :error-messages="formErrors.messages('leaveType')"
-            :items="leaveTypeOptions"
+            :items="motivosLicencia"
             item-title="label"
             item-value="value"
             label="Motivo de licencia"

@@ -5,11 +5,8 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { useHrStore } from "~/stores/hr";
-import {
-  positionOptions,
-  employmentStatusOptions,
-  useHrStatus,
-} from "~/composables/useHrStatus";
+import { employmentStatusOptions, useHrStatus } from "~/composables/useHrStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
 import type { EmploymentMovement } from "~/types/hr";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
@@ -24,6 +21,9 @@ definePageMeta({
 });
 
 useHead({ title: "RRHH" });
+
+// Los puestos los define cada empresa (docs/CONFIGURACION.md §5).
+const puestos = useCatalogOptions(CATALOG.EMPLOYEE_POSITION);
 
 const router = useRouter();
 const hrStore = useHrStore();
@@ -143,7 +143,7 @@ onMounted(() => {
       />
       <v-select
         v-model="hrStore.filterPosition"
-        :items="positionOptions"
+        :items="puestos"
         item-title="label"
         item-value="value"
         label="Puesto"

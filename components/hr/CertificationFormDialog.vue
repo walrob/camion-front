@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
-import { certificationTypeOptions } from "~/composables/useHrStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
+
+// Los tipos de permiso los define cada empresa (docs/CONFIGURACION.md §5).
+const tiposPermiso = useCatalogOptions(CATALOG.CERTIFICATION_TYPE);
 import { useHrStore } from "~/stores/hr";
 import { useGeneralStore } from "~/stores/general";
 import { useFormErrors } from "~/composables/useFormErrors";
@@ -106,7 +109,7 @@ const submit = async () => {
           <v-select
             v-model="form.type"
             :error-messages="formErrors.messages('type')"
-            :items="certificationTypeOptions"
+            :items="tiposPermiso"
             item-title="label"
             item-value="value"
             label="Tipo *"

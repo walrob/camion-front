@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from "vue";
 import { useValidations } from "~/composables/useValidations";
-import { fuelTypeOptions } from "~/composables/useFuelStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
+import { useCurrencyStore } from "~/stores/currency";
 import { useGeolocation } from "~/composables/useGeolocation";
 import { useFuelStore } from "~/stores/fuel";
 import { useSettingsStore } from "~/stores/settings";
@@ -29,12 +30,25 @@ const odometroObligatorio = computed(() =>
 );
 onMounted(() => settingsStore.load());
 
+// Los tipos de combustible los define cada empresa (CONFIGURACION §5).
+const tiposCombustible = useCatalogOptions(CATALOG.FUEL_TYPE);
+
+// Monedas: con una sola, el formulario es el de siempre. Cargar en Brasil y que
+// se guarde como pesos falsearía el costo por km (CONFIGURACION §7.4).
+const currencyStore = useCurrencyStore();
+const esMultimoneda = computed(() => currencyStore.esMultimoneda);
+const monedaElegida = computed(() =>
+  currencyStore.porCodigo(form.value.currency || currencyStore.base),
+);
+onMounted(() => currencyStore.load());
+
 const formRef = ref();
 const valid = ref(true);
 const file = ref<File | null>(null);
 
 const emptyForm = () => ({
   fuelType: "diesel",
+  currency: "",
   liters: null as number | null,
   pricePerLiter: null as number | null,
   odometerKm: null as number | null,
@@ -57,6 +71,7 @@ watch(
   (open) => {
     if (open) {
       form.value = emptyForm();
+      form.value.currency = currencyStore.base;
       file.value = null;
     }
   },
@@ -78,6 +93,7 @@ const submit = async () => {
     truckId: props.truckId,
     tripId: props.tripId || undefined,
     fuelType: form.value.fuelType,
+    currency: form.value.currency || undefined,
     liters: Number(form.value.liters),
     fullTank: form.value.fullTank,
     station: form.value.station || undefined,
@@ -107,7 +123,7 @@ const submit = async () => {
         <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
           <v-select
             v-model="form.fuelType"
-            :items="fuelTypeOptions"
+            :items="tiposCombustible"
             item-title="label"
             item-value="value"
             label="Tipo *"
@@ -137,7 +153,20 @@ const submit = async () => {
                 v-model="form.pricePerLiter"
                 label="Precio por litro"
                 type="number"
-                prefix="$"
+                :prefix="monedaElegida.symbol"
+                variant="outlined"
+                density="comfortable"
+              />
+            </v-col>
+            <!-- Sólo si la empresa opera con más de una moneda: cargar en Brasil
+                 y que se guarde como pesos falsearía el costo por km (§7). -->
+            <v-col v-if="esMultimoneda" cols="6">
+              <v-select
+                v-model="form.currency"
+                :items="currencyStore.currencies"
+                item-title="code"
+                item-value="code"
+                label="Moneda"
                 variant="outlined"
                 density="comfortable"
               />
@@ -151,7 +180,7 @@ const submit = async () => {
             density="compact"
             class="mb-3"
           >
-            Total estimado: {{ money(estimatedTotal) }}
+            Total estimado: {{ money(estimatedTotal, form.currency) }}
           </v-alert>
 
           <v-text-field

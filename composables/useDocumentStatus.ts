@@ -1,4 +1,5 @@
 import type { StatusOption } from "~/composables/useFleetStatus";
+import { useCatalogStore, CATALOG } from "~/stores/catalog";
 
 export const ownerTypeOptions: StatusOption[] = [
   { value: "truck", label: "Camión", color: "primary" },
@@ -32,7 +33,16 @@ export const useDocumentStatus = () => {
     documentCategoryOptions,
     documentStatusOptions,
     ownerType: (v?: string) => find(ownerTypeOptions, v),
-    documentCategory: (v?: string) => find(documentCategoryOptions, v),
+    // La categoría la define cada empresa (docs/CONFIGURACION.md §5); el tipo de
+    // dueño y el estado, no: son estructura del sistema (§8).
+    documentCategory: (v?: string) => {
+      const item = useCatalogStore()
+        .todos(CATALOG.DOCUMENT_CATEGORY)
+        .find((i) => i.key === v);
+      if (item)
+        return { value: item.key, label: item.label, color: item.color ?? "grey" };
+      return find(documentCategoryOptions, v);
+    },
     documentStatus: (v?: string) => find(documentStatusOptions, v),
   };
 };

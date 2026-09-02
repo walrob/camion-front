@@ -182,6 +182,32 @@ const GRUPOS = [
     ],
   },
   {
+    titulo: "El sistema se adapta a vos",
+    items: [
+      {
+        key: "settings",
+        titulo: "Configuración de la operación",
+        detalle:
+          "Qué se exige antes de que salga un camión y cómo se cierra una rendición",
+      },
+      {
+        key: "checklist_templates",
+        titulo: "Checklist y planilla OEA propios",
+        detalle: "Tus puntos, los críticos que frenan la salida y los que piden foto",
+      },
+      {
+        key: "catalogs",
+        titulo: "Catálogos con tu vocabulario",
+        detalle: "Tus tipos de gasto, de incidente, puestos y permisos",
+      },
+      {
+        key: "checklist_by_type",
+        titulo: "Checklist por tipo de unidad",
+        detalle: "Un tractor con cisterna no se revisa como un furgón",
+      },
+    ],
+  },
+  {
     titulo: "Plataforma",
     items: [
       {

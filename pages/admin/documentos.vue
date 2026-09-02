@@ -3,11 +3,8 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 import { ref, watch, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useDocumentStore } from "~/stores/document";
-import {
-  ownerTypeOptions,
-  documentCategoryOptions,
-  useDocumentStatus,
-} from "~/composables/useDocumentStatus";
+import { ownerTypeOptions, useDocumentStatus } from "~/composables/useDocumentStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import DocumentFormDialog from "~/components/document/DocumentFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
@@ -19,6 +16,9 @@ definePageMeta({
   roles: ["admin", "maintenance", "dispatcher", "manager"],
 });
 useHead({ title: "Documentos" });
+
+// Las categorías las define cada empresa (docs/CONFIGURACION.md §5).
+const categoriasDoc = useCatalogOptions(CATALOG.DOCUMENT_CATEGORY);
 
 const { fmtDate } = useFormatters();
 const store = useDocumentStore();
@@ -208,7 +208,7 @@ onMounted(async () => {
           />
           <v-select
             v-model="store.category"
-            :items="documentCategoryOptions"
+            :items="categoriasDoc"
             item-title="label"
             item-value="value"
             label="Categoría"

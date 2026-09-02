@@ -4,6 +4,8 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 import SettingsAjustes from "~/components/settings/SettingsAjustes.vue";
 import SettingsChecklist from "~/components/settings/SettingsChecklist.vue";
 import SettingsCatalogs from "~/components/settings/SettingsCatalogs.vue";
+import SettingsAlerts from "~/components/settings/SettingsAlerts.vue";
+import SettingsCurrencies from "~/components/settings/SettingsCurrencies.vue";
 import { Feature } from "~/types/plan";
 
 /**
@@ -30,8 +32,10 @@ const tab = ref("ajustes");
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="ajustes">Ajustes</v-tab>
-      <v-tab value="checklist">Checklist</v-tab>
+      <v-tab value="checklist">Inspecciones</v-tab>
       <v-tab value="catalogos">Catálogos</v-tab>
+      <v-tab value="alertas">Alertas</v-tab>
+      <v-tab value="monedas">Monedas</v-tab>
     </v-tabs>
 
     <v-window v-model="tab">
@@ -43,6 +47,12 @@ const tab = ref("ajustes");
       </v-window-item>
       <v-window-item value="catalogos">
         <SettingsCatalogs />
+      </v-window-item>
+      <v-window-item value="alertas">
+        <SettingsAlerts />
+      </v-window-item>
+      <v-window-item value="monedas">
+        <SettingsCurrencies />
       </v-window-item>
     </v-window>
   </div>

@@ -75,14 +75,14 @@ configuración que se escape de ahí es una fuga entre clientes.
 | Pieza | Estado |
 |---|---|
 | `CompanySetting` + `GET`/`PATCH /settings` + pantalla **Configuración** | ✅ **Fase A, construida.** Seis ajustes de viaje, rendición y combustible, aplicados en `trips`, `settlements` y `fuel`. |
-| `AlertRuleConfig` (clave/valor/`enabled` por empresa) + `GET`/`POST /alerts/thresholds` | ✅ Existe. **Es el germen de todo esto**, pero sólo para alertas y sin pantalla. Se absorbe en `CompanySetting` en la fase E. |
+| `AlertRuleConfig` + catálogo de reglas + `GET`/`PUT /alerts/rules` + pantalla **Alertas** | ✅ **Fase E, construida.** Ocho reglas con su umbral; el cupo del plan se cuenta sobre esta tabla (§6.3). |
 | `CompanySequence` (`trip`, `incident`) | ✅ Numeración correlativa por empresa. Falta que el prefijo sea configurable. |
 | `Company`: `cuit`, `phone`, `address`, `city`, `state`, `logoUrl`, `primaryColor` | ✅ Identidad fiscal y visual, ya por empresa. |
-| `currency` en `TripLogEntry`, `Settlement`, `FuelRecord` (default `'ARS'`) | ⚠️ La columna existe; **nadie la escribe** y no hay tasa de cambio ni conversión. |
-| `DEFAULT_THRESHOLDS`, `DEFAULT_CHECKLIST_ITEMS`, `DEFAULT_OEA_ITEMS` | ⚠️ Constantes globales sin override por empresa (salvo umbrales). |
-| 26 listas en `front-camion/composables/*.ts` | ❌ Hardcodeadas. Siete son catálogos de negocio (§5); el resto son **estados**, que no se configuran (§8). |
-| `days: 30` de vencimientos en `stores/document.ts` | ❌ Hardcodeado en el front, además duplicado del `expiryWarningDays` del back. |
-| `es-AR` / `ARS` en `composables/functions.ts` y `useFormatters.ts` | ❌ Formato fijo. |
+| Multi-moneda: `CompanyCurrency`, `ExchangeRate`, `exchangeRate` + `amountBase` congelados | ✅ **Fase D, construida.** Toda la aritmética de plata pasó a moneda base (§7). |
+| `DEFAULT_OEA_ITEMS` + `OeaTemplateItem` | ✅ Los 7 puntos AFIP son piso normativo; la empresa suma los suyos (§6.2). |
+| 26 listas en `front-camion/composables/*.ts` | ✅ Las siete de negocio salen del catálogo de la empresa, con la constante como respaldo offline (§5, §11). El resto son **estados**: no se configuran (§8). |
+| Ventana de «por vencer» de documentos y permisos | ✅ Sale de la regla de alerta de cada empresa; el `days: 30` del front se eliminó. |
+| Formato de importes y números en el front | ✅ `money()` acepta la moneda del importe (PYG/CLP sin decimales) y el `locale` sale del ajuste de la empresa. |
 
 ---
 
@@ -114,8 +114,8 @@ incorpora la configuración no le cambia el comportamiento a nadie.
 | Clave | Default | Qué cambia | |
 |---|---|---|---|
 | `settlement.allowReopen` | `true` | Si una rendición cerrada puede volver a borrador. Apagado, es definitiva incluso para el administrador. | ✅ |
-| `settlement.perDiemMode` | `log` | `log` = el chofer lo carga en la bitácora · `fixed` = monto fijo del viaje · `both`. Ver §6.4. | ⏳ |
-| `settlement.requireFxOnClose` | `true` | No deja cerrar con movimientos sin convertir a moneda base (§7). | ⏳ |
+| `settlement.perDiemMode` | `log` | `log` = el chofer lo carga en la bitácora · `fixed` = monto fijo del viaje · `both`. Ver §6.4. | ✅ |
+| `settlement.requireFxOnClose` | `true` | No deja cerrar con movimientos sin convertir a moneda base (§7). | ✅ |
 | `settlement.rounding` | `2` | Decimales del neto a rendir. | ⏳ |
 
 ### 4.3 Combustible
@@ -126,25 +126,29 @@ incorpora la configuración no le cambia el comportamiento a nadie.
 | `fuel.requireTicketPhoto` | `false` | Foto del ticket obligatoria. Necesita que la carga y el adjunto viajen juntos: hoy el adjunto va en una segunda llamada. | ⏳ |
 | `fuel.efficiencyTolerance` | `20` | % de desvío de km/l que dispara alerta de carga sospechosa. Va con el motor de alertas (fase E). | ⏳ |
 
-### 4.4 Vencimientos y avisos ⏳
+### 4.4 Vencimientos y avisos ✅ (fase E, como reglas)
 
-Van **con los umbrales de alerta (fase E)**, no antes: `expiryWarningDays`,
-`maintenanceKmThreshold`, `maintenanceDaysThreshold`, `idleHoursThreshold` y
-`expenseAmountThreshold` ya existen en `AlertRuleConfig`, y duplicarlos en
-`CompanySetting` sería crear una segunda fuente de verdad para lo mismo. En esa
-fase se migran las cinco claves a `CompanySetting`, se unifica el `days: 30`
-hardcodeado del front y `computeStatus` —el que decide si un documento está «por
-vencer»— pasa a leer la ventana de la empresa.
+No terminaron acá: **son umbrales de reglas de alerta**, no ajustes sueltos, y
+viven en la pantalla de Alertas (§6.3). Duplicarlos en `CompanySetting` habría
+creado una segunda fuente de verdad para lo mismo.
 
-### 4.5 Localización y presentación ⏳
+Lo que sí se cerró: `computeStatus` —el que decide si un documento o un permiso
+está «por vencer»— usa la ventana de la empresa, y el `days: 30` que estaba
+hardcodeado en `stores/document.ts` desapareció.
 
-`locale.baseCurrency` (`ARS`), `locale.locale` (`es-AR`) y `locale.timezone`.
-Llegan con multi-moneda (§7): sin conversión detrás, cambiar la moneda base sólo
-cambiaría el símbolo y mentiría sobre los importes.
+### 4.5 Localización y presentación
+
+`locale.baseCurrency` ✅ (fase D) y `locale.locale` ✅: el formato de números y
+fechas sale del ajuste de la empresa, con `es-AR` de default.
+
+`locale.timezone` **no se hizo, y se deja anotado**: para que sirviera habría que
+pasar por el huso de la empresa el corte del «gasto del día», los cortes de los
+crons y las fechas de los reportes. Un ajuste que sólo cambiara la etiqueta
+sería peor que no tenerlo: diría que el sistema respeta un huso que no respeta.
 
 ---
 
-## 5. Nivel 2 — Catálogos ✅ (fase C, parcial)
+## 5. Nivel 2 — Catálogos ✅ (fase C)
 
 Listas editables por empresa. Sólo hay filas de lo que la empresa **tocó**:
 hasta entonces se usan los elementos de sistema del código.
@@ -153,11 +157,11 @@ hasta entonces se usan los elementos de sistema del código.
 |---|---|---|
 | Tipos de gasto de la bitácora | ✅ | Estacionamiento, balanza, lavadero, guía: cada operación tiene los suyos |
 | Tipos de incidente | ✅ | Rubro y tipo de carga |
-| Categorías de documento | ⏳ | Carta de porte, MIC/DTA, senasa, ADR: depende de qué transporte |
-| Tipos de permiso / habilitación | ⏳ | LiNTI y psicofísico son argentinos |
-| Puestos y su mapeo a rol | ⏳ | Organigrama propio |
-| Motivos de licencia | ⏳ | Convenio aplicable |
-| Tipos de combustible | ⏳ | Flotas eléctricas o a GNC |
+| Categorías de documento | ✅ | Carta de porte, MIC/DTA, senasa, ADR: depende de qué transporte |
+| Tipos de permiso / habilitación | ✅ | LiNTI y psicofísico son argentinos |
+| Puestos y su rol de acceso | ✅ | Organigrama propio |
+| Motivos de licencia | ✅ | Convenio aplicable |
+| Tipos de combustible | ✅ | Flotas eléctricas o a GNC |
 
 Un elemento lleva `key`, `label`, `color`, `icon`, `order`, `isActive`,
 `behavior` e `isSystem`. **`isSystem` marca los que trae el producto**: se
@@ -166,34 +170,47 @@ los nombra y el código los espera por su clave—.
 
 ### 5.1 El comportamiento, o por qué un catálogo no es sólo texto
 
-En gastos, `cash_advance` no es una etiqueta: es lo que **resta** en la
-rendición. Si el cliente agrega «Adelanto por transferencia» y el sistema lo
-cuenta como gasto, la rendición da mal y nadie se entera hasta que alguien
-reclama.
+Hay catálogos donde el elemento no es una etiqueta sino una decisión del código:
 
-Por eso el catálogo de gastos tiene `behavior`, un conjunto **cerrado** que el
-código entiende:
+- En **gastos**, `cash_advance` es lo que **resta** en la rendición. Si el
+  cliente agrega «Adelanto por transferencia» y el sistema lo cuenta como gasto,
+  la rendición da mal y nadie se entera hasta que alguien reclama.
+- En **puestos**, el puesto define **con qué rol entra la persona a la app**. Un
+  cliente que crea el puesto «Playero» necesita poder decir con qué permisos
+  entra, o el sistema no tiene con qué crearle el usuario.
 
-| `behavior` | Qué hace |
-|---|---|
-| `expense` (default) | Suma en la rendición |
-| `advance` | Resta: plata que la empresa ya le dio al chofer |
+Por eso cada catálogo puede declarar un `comportamiento`: un conjunto
+**cerrado** de valores que el código entiende, con su etiqueta para la pantalla
+y su valor por defecto. El elemento propio del cliente elige uno.
 
-Liquidaciones y la bitácora resuelven qué resta consultando el catálogo, no
-comparando contra la constante. El comportamiento de un elemento de sistema no
-se puede cambiar: renombrar «Adelanto» a «Anticipo» le cambia el nombre, no la
-cuenta.
+| Catálogo | Comportamiento | Valores |
+|---|---|---|
+| Tipos de gasto | Cómo cuenta en la rendición | `expense` (default, suma) · `advance` (resta) |
+| Puestos | Rol de acceso | los siete roles del sistema; default `driver` |
+
+Dos reglas que lo sostienen:
+
+- **El comportamiento de un elemento de sistema no se toca.** Renombrar
+  «Adelanto» a «Anticipo» le cambia el nombre, no la cuenta — hay un test que lo
+  fija.
+- **Quien consume, pregunta al catálogo.** Liquidaciones y la bitácora resuelven
+  qué resta consultando los elementos de la empresa; RRHH resuelve el rol igual.
+  Nadie compara contra la constante.
+
+La pantalla de configuración no conoce ningún catálogo en particular: dibuja el
+selector con lo que declara el backend, así el próximo catálogo con
+comportamiento no toca el front.
 
 ### 5.2 Cómo se suma el próximo catálogo
 
-Los cinco pendientes siguen la misma receta, media hora cada uno:
+Media hora, cuatro pasos:
 
 1. Agregar la definición con sus elementos de sistema en `catalogs.catalog.ts`.
 2. Migración que libere la columna del `enum` de MySQL a `varchar(64)`.
-3. Cambiar el `@IsEnum` del DTO por la validación contra el catálogo en el
+3. Cambiar el `@IsEnum` del DTO por `catalogsService.assertVigente()` en el
    servicio.
-4. En el front, que el consumidor lea del store en vez de su constante — que
-   queda como fallback offline.
+4. En el front, que el consumidor use `useCatalogOptions()` en vez de su
+   constante — que queda como fallback offline.
 
 ---
 
@@ -228,20 +245,85 @@ Tres decisiones que valen para el resto de los niveles:
   checklist —y con `trip.requireChecklistToStart` activo, el viaje no arranca—, y
   una falla en un punto que **exige foto** no se puede firmar sin el adjunto.
 
-### 6.2 Plantilla OEA
+### 6.2 Plantilla OEA ✅
 
-Los 7 puntos AFIP son un piso normativo: se mantienen como base del sistema y la
-empresa **agrega** sus propios puntos. No se editan los de norma.
+Los 7 puntos AFIP y los precintos son un piso normativo: se mantienen como base
+del sistema y la empresa **agrega** los suyos —una faja propia, el control de
+temperatura de un furgón refrigerado—. Los de norma no se editan ni se
+desactivan: no son una preferencia.
 
-### 6.3 Reglas y umbrales de alerta
+`OeaTemplateItem` guarda sólo los puntos propios; la planilla se arma con
+«norma + propios activos». `oea_inspection_items.key` dejó de ser `enum`, el
+mismo desbloqueo del checklist y los catálogos. Editar la plantilla entra con
+`checklist_templates`, la feature que vende «plantillas de inspección propias»;
+leerla la puede cualquiera, porque el chofer ve la planilla que va a completar.
 
-Ya está vendido —*Umbrales de alerta personalizables* es feature de Gestión, y el
-add-on «Automatizaciones avanzadas» lo habilita en Operación— y hoy corre con los
-valores del código. **Es deuda comercial, no una idea nueva.** El backend ya tiene
-la mitad (`AlertRuleConfig`, `GET/POST /alerts/thresholds`); falta la pantalla y
-el `enabled` por regla.
+### 6.3 Reglas y umbrales de alerta ✅ (fase E)
 
-### 6.4 Viático por país o ruta
+Estaba vendido —*Umbrales de alerta personalizables* es feature de Gestión— y
+corría con los valores del código: era deuda comercial, no una idea nueva.
+
+**Corrección al plan original.** Este documento decía que las cinco claves de
+`AlertRuleConfig` se absorbían en `CompanySetting`. **No se hizo, a propósito**:
+el límite del plan —3 reglas en Control, 10 en Operación, ilimitadas en Gestión—
+se cuenta sobre las filas de esa tabla y ya estaba enforced en `LimitsService`.
+Fusionarlas en ajustes sueltos habría roto un límite vendido. Lo que faltaba no
+era mudarlas de tabla: era darles un **catálogo** (`alerts.catalog.ts`) y una
+pantalla.
+
+Las ocho reglas que el motor conoce:
+
+| Regla | Umbral | |
+|---|---|---|
+| Incidente reportado por un chofer | — | siempre activa |
+| Viaje asignado a alguien de licencia | — | siempre activa |
+| Gasto fuera de lo esperado | monto (en moneda base) | |
+| Camión detenido demasiado tiempo | horas | |
+| Documento por vencer | días | |
+| Permiso o habilitación por vencer | días | |
+| Mantenimiento próximo (por km) | km | |
+| Mantenimiento próximo (por fecha) | días | |
+
+Tres decisiones:
+
+- **Todas vienen activas con el valor de siempre.** Una empresa que no entra a
+  la pantalla recibe exactamente las mismas alertas que antes de la fase E.
+- **Dos reglas no se apagan.** Silenciar el aviso de un accidente no es una
+  preferencia: es perder el motivo por el que el chofer tiene la app. Tampoco
+  consumen cupo.
+- **Dos permisos distintos**: apagar o prender una regla entra con la
+  configuración (Operación); cambiar un umbral es la feature de Gestión. El cupo
+  del plan se consume al configurar una regla por primera vez —guardar los
+  valores de fábrica no crea fila ni gasta cupo—.
+
+Esto además cierra §4.4: la ventana de «por vencer» de documentos y permisos
+**es** el umbral de esas dos reglas. `computeStatus` la recibe por parámetro
+—una consulta por cron, no una por documento— y el `days: 30` que estaba
+hardcodeado en el front desapareció: el backend resuelve la ventana de cada
+empresa.
+
+### 6.4 Viático de monto fijo ✅
+
+`settlement.perDiemMode` decide cómo se paga:
+
+| Modo | Qué pasa |
+|---|---|
+| `log` (default) | Lo carga el chofer en la bitácora, como siempre |
+| `fixed` | El importe lo define la oficina al asignar el viaje |
+| `both` | Suman los dos |
+
+**El riesgo era la doble cuenta**, y es donde está el cuidado: en modo `fixed`,
+los viáticos que el chofer cargó en la bitácora **no suman** —`summary` los saca
+del total mirando el mismo ajuste y los reporta como `noComputado`—, porque ese
+importe lo pone la rendición desde el viaje. Siguen apareciendo en el detalle por
+tipo: no desaparecen, no computan. Hay tests que fijan los tres modos.
+
+El viaje lleva `perDiemAmount` + `perDiemCurrency`: un viaje a Asunción puede
+tener el viático en dólares aunque la empresa facture en pesos, y se convierte a
+moneda base con la misma regla congelada de §7.2. Sin cotización, el viático
+queda pendiente igual que cualquier otro movimiento.
+
+### 6.5 Viático por país o ruta
 
 Para quien paga viáticos por convenio: `PerDiemRate` (país o ruta → monto +
 moneda + vigencia). Al crear un viaje internacional, el monto se propone solo.
@@ -255,12 +337,12 @@ El disparador es concreto: un viaje a Paraguay se paga peaje en guaraníes,
 combustible en reales y el viático se acuerda en dólares. Si el sistema suma todo
 como si fueran pesos, la rendición es basura.
 
-### 7.1 Lo que ya está
+### 7.1 Lo que ya está ✅ (fase D)
 
-`TripLogEntry.currency`, `Settlement.currency` y `FuelRecord.currency` **ya
-existen** con default `'ARS'`. El modelo estaba previsto; nunca se completó.
-Falta: que el front escriba la moneda, la tasa de cambio, y que los totales sepan
-sumar peras con manzanas.
+`TripLogEntry.currency`, `Settlement.currency` y `FuelRecord.currency` ya
+existían con default `'ARS'`: el modelo estaba previsto y nunca se completó. La
+fase D agregó lo que faltaba —cotización, importe convertido y la aritmética que
+los usa— y lo dejó andando de punta a punta.
 
 ### 7.2 El modelo
 
@@ -312,6 +394,21 @@ En la app del chofer: la lista de monedas habilitadas y la última tasa conocida
   Un costo por km que ignora medio viaje es peor que no tenerlo.
 - **Formato**: `useFormatters` deja de asumir `ARS` y recibe la moneda; PYG y CLP
   no llevan decimales, y `Intl` ya lo sabe.
+
+### 7.4.1 Dónde quedó aplicado
+
+Todo lo que suma plata pasó a usar `amountBase`, no `amount`: la bitácora, el
+resumen del viaje, la rendición, el tablero de combustible —costo por km,
+precio del litro—, los indicadores y el panel. Sumar guaraníes con pesos daba un
+número que parecía correcto y no lo era.
+
+Dos consecuencias buscadas:
+
+- **Lo pendiente no se cuela en un total.** Un movimiento sin cotización no
+  suma; se cuenta aparte (`pendingFx`) y se avisa en la pantalla del chofer, en
+  el PDF de la rendición y al intentar cerrarla.
+- **El umbral de alerta de gasto compara en moneda base.** El umbral está en la
+  moneda de la empresa; comparar contra 200.000 guaraníes lo dispararía siempre.
 
 ### 7.5 El viático internacional
 
@@ -443,9 +540,9 @@ Tres cuidados:
 |---|---|---|
 | **A** ✅ | `CompanySetting` + pantalla **Configuración** (Cuenta → Configuración, sólo `admin`), con los seis ajustes marcados ✅ en §4 | Máximo dolor resuelto por línea de código; generaliza algo que ya existe |
 | **B** ✅ | Checklist configurable (§6.1) | Es el pedido que más aparece en una demo |
-| **C** ✅ | Catálogos (§5): gastos e incidentes construidos; los otros cinco con la receta de §5.2 | Habilita el vocabulario propio de cada operación |
-| **D** | Multi-moneda (§7) | **Se adelanta a la posición A/B si el primer cliente hace internacional**: es requisito, no mejora |
-| **E** | Umbrales y reglas de alerta con pantalla (§6.3) | Deuda: está vendido y no está entregado |
+| **C** ✅ | Catálogos (§5): los siete, con comportamiento donde el código decide algo | Habilita el vocabulario propio de cada operación |
+| **D** ✅ | Multi-moneda (§7) | **Se adelanta a la posición A/B si el primer cliente hace internacional**: es requisito, no mejora |
+| **E** ✅ | Reglas y umbrales de alerta con pantalla (§6.3), que además cierra §4.4 | Era deuda: estaba vendido y no estaba entregado |
 
 Cada fase cierra con su sección en el manual de usuario
 ([docs/manual-usuario/manual.html](manual-usuario/manual.html)): una funcionalidad

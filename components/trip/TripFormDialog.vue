@@ -10,6 +10,8 @@ import VoiceTextarea from "~/components/form/VoiceTextarea.vue";
 import FormDialog from "~/components/shared/FormDialog.vue";
 import FormSection from "~/components/shared/FormSection.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import { useSettingsStore } from "~/stores/settings";
+import { useCurrencyStore } from "~/stores/currency";
 import type { Trip } from "~/types/trip";
 
 const props = defineProps<{
@@ -45,9 +47,25 @@ const emptyForm = (): Partial<Trip> => ({
   plannedStartAt: "",
   plannedEndAt: "",
   notes: "",
+  perDiemAmount: null,
+  perDiemCurrency: null,
 });
 
 const form = ref<Partial<Trip>>(emptyForm());
+
+// Viático de monto fijo: sólo aparece si la empresa paga así (§6.4).
+const settingsStore = useSettingsStore();
+const currencyStore = useCurrencyStore();
+const viaticoFijo = computed(() =>
+  ["fixed", "both"].includes(settingsStore.str("settlement.perDiemMode")),
+);
+const monedaViatico = computed(() =>
+  currencyStore.porCodigo(form.value.perDiemCurrency || currencyStore.base),
+);
+onMounted(() => {
+  settingsStore.load();
+  currencyStore.load();
+});
 
 watch(
   () => props.modelValue,
@@ -75,6 +93,16 @@ const buildPayload = (closeLeave: boolean) => {
     if (!payload[k]) delete payload[k];
   });
   if (!payload.trailerId) delete payload.trailerId;
+
+  // El viático viaja como número o no viaja: un string vacío lo rechaza el DTO.
+  if (payload.perDiemAmount === "" || payload.perDiemAmount == null) {
+    delete payload.perDiemAmount;
+    delete payload.perDiemCurrency;
+  } else {
+    payload.perDiemAmount = Number(payload.perDiemAmount);
+    if (!payload.perDiemCurrency) delete payload.perDiemCurrency;
+  }
+
   if (closeLeave) payload.closeLeave = true;
   return payload;
 };
@@ -212,6 +240,29 @@ const onLeaveConfirm = async (payload: { resp: boolean }) => {
               type="datetime-local"
             />
           </v-col>
+          <!-- Sólo si la empresa paga el viático como monto fijo del viaje
+               (docs/CONFIGURACION.md §6.4). Con el modo por defecto —lo carga
+               el chofer en la bitácora— el formulario es el de siempre. -->
+          <v-col v-if="viaticoFijo" cols="12" sm="6">
+            <v-text-field
+              v-model="form.perDiemAmount"
+              label="Viático del viaje"
+              type="number"
+              :prefix="monedaViatico.symbol"
+              hint="Se suma solo a la rendición cuando el viaje se rinde."
+              persistent-hint
+            />
+          </v-col>
+          <v-col v-if="viaticoFijo && currencyStore.esMultimoneda" cols="12" sm="6">
+            <v-select
+              v-model="form.perDiemCurrency"
+              :items="currencyStore.currencies"
+              item-title="code"
+              item-value="code"
+              label="Moneda del viático"
+            />
+          </v-col>
+
           <v-col cols="12">
             <VoiceTextarea
               v-model="form.notes"

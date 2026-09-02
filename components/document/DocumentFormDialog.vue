@@ -4,7 +4,10 @@ import { useValidations } from "~/composables/useValidations";
 import { useDocumentStore } from "~/stores/document";
 import { useGeneralStore } from "~/stores/general";
 import { useFormErrors } from "~/composables/useFormErrors";
-import { documentCategoryOptions } from "~/composables/useDocumentStatus";
+import { useCatalogOptions, CATALOG } from "~/stores/catalog";
+
+// Las categorías las define cada empresa (docs/CONFIGURACION.md §5).
+const categoriasDoc = useCatalogOptions(CATALOG.DOCUMENT_CATEGORY);
 import FormDialog from "~/components/shared/FormDialog.vue";
 
 const props = defineProps<{
@@ -92,7 +95,7 @@ const submit = async () => {
           <v-select
             v-model="form.category"
             :error-messages="formErrors.messages('category')"
-            :items="documentCategoryOptions"
+            :items="categoriasDoc"
             item-title="label"
             item-value="value"
             label="Categoría *"

@@ -2,6 +2,7 @@
 import { ref, watch, computed, onMounted } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { useCatalogStore, CATALOG } from "~/stores/catalog";
+import { useCurrencyStore } from "~/stores/currency";
 import { useGeolocation } from "~/composables/useGeolocation";
 import { useTripLogStore } from "~/stores/tripLog";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -25,6 +26,7 @@ const file = ref<File | null>(null);
 const emptyForm = () => ({
   type: "fuel",
   amount: null as number | null,
+  currency: "",
   liters: null as number | null,
   odometerKm: null as number | null,
   notes: "",
@@ -37,7 +39,25 @@ const form = ref(emptyForm());
 // selector igual tiene con qué trabajar (docs/CONFIGURACION.md §11).
 const catalogStore = useCatalogStore();
 const tiposDeGasto = computed(() => catalogStore.activos(CATALOG.EXPENSE_TYPE));
-onMounted(() => catalogStore.load());
+
+// Monedas de la empresa: con una sola, el formulario es el de siempre.
+const currencyStore = useCurrencyStore();
+const esMultimoneda = computed(() => currencyStore.esMultimoneda);
+const monedaElegida = computed(() =>
+  currencyStore.porCodigo(form.value.currency || currencyStore.base),
+);
+/** En moneda base nunca falta cotización: la conversión es la identidad. */
+const sinCotizacion = computed(
+  () =>
+    esMultimoneda.value &&
+    !!form.value.currency &&
+    form.value.currency !== currencyStore.base,
+);
+
+onMounted(() => {
+  catalogStore.load();
+  currencyStore.load();
+});
 
 const isFuel = computed(() => form.value.type === "fuel");
 
@@ -51,6 +71,7 @@ watch(
       // backend rechaza.
       const primero = tiposDeGasto.value[0]?.key;
       if (primero) form.value.type = primero;
+      form.value.currency = currencyStore.base;
       file.value = null;
     }
   },
@@ -73,6 +94,7 @@ const submit = async () => {
     tripId: props.tripId,
     type: form.value.type,
     amount: Number(form.value.amount),
+    currency: form.value.currency || undefined,
     notes: form.value.notes || undefined,
     lat: pos?.lat,
     lng: pos?.lng,
@@ -110,15 +132,43 @@ const submit = async () => {
             </template>
           </v-select>
 
-          <v-text-field
-            v-model="form.amount"
-            label="Monto *"
-            type="number"
-            prefix="$"
-            variant="outlined"
-            density="comfortable"
-            :rules="[r.isRequired]"
-          />
+          <v-row dense>
+            <v-col :cols="esMultimoneda ? 7 : 12">
+              <v-text-field
+                v-model="form.amount"
+                label="Monto *"
+                type="number"
+                :prefix="monedaElegida.symbol"
+                variant="outlined"
+                density="comfortable"
+                :rules="[r.isRequired]"
+              />
+            </v-col>
+            <!-- Sólo si la empresa opera con más de una moneda: quien no cruza
+                 la frontera ve la pantalla de siempre (CONFIGURACION §7.4). -->
+            <v-col v-if="esMultimoneda" cols="5">
+              <v-select
+                v-model="form.currency"
+                :items="currencyStore.currencies"
+                item-title="code"
+                item-value="code"
+                label="Moneda"
+                variant="outlined"
+                density="comfortable"
+              />
+            </v-col>
+          </v-row>
+
+          <v-alert
+            v-if="sinCotizacion"
+            type="info"
+            variant="tonal"
+            density="compact"
+            class="mb-3"
+          >
+            Todavía no hay cotización de {{ form.currency }} para hoy. Cargalo
+            igual: la oficina la carga después y el gasto se convierte solo.
+          </v-alert>
 
           <v-text-field
             v-if="isFuel"

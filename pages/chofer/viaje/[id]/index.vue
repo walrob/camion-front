@@ -156,6 +156,20 @@ onMounted(reload);
       </v-card-text>
     </v-card>
 
+    <!-- Cargó en otra moneda y todavía no hay cotización: el gasto está, pero
+         no entra en el total hasta que la oficina la cargue (CONFIGURACION §7.3). -->
+    <v-alert
+      v-if="summary?.pendingFx"
+      type="info"
+      variant="tonal"
+      density="compact"
+      class="mb-3"
+    >
+      {{ summary.pendingFx }}
+      {{ summary.pendingFx === 1 ? "movimiento está" : "movimientos están" }}
+      esperando la cotización del día. Están guardados; todavía no suman al total.
+    </v-alert>
+
     <div class="d-flex align-center mb-2">
       <span class="text-subtitle-2 font-weight-bold">Bitácora</span>
       <v-spacer />
@@ -192,7 +206,7 @@ onMounted(reload);
               <span class="font-weight-bold">{{
                 expenseType(e.type).label
               }}</span>
-              <span class="font-weight-bold">{{ money(e.amount) }}</span>
+              <span class="font-weight-bold">{{ money(e.amount, e.currency) }}</span>
             </div>
             <div class="text-caption text-medium-emphasis">
               <span v-if="e.liters">{{ e.liters }} L · </span>

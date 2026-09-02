@@ -21,6 +21,9 @@ export interface Trip extends Audit {
   distanceKm?: number | null;
   status: string;
   notes?: string;
+  /** Viático de monto fijo del viaje, cuando la empresa paga así (§6.4). */
+  perDiemAmount?: number | null;
+  perDiemCurrency?: string | null;
 }
 
 export interface TripLogEntry extends Audit {
@@ -37,11 +40,18 @@ export interface TripLogEntry extends Audit {
 }
 
 export interface TripLogSummary {
+  /** Totales por tipo, **en moneda base** (docs/CONFIGURACION.md §7.2). */
   byType: Record<string, number>;
+  /** Subtotales en la moneda en que se gastó, para el viaje internacional. */
+  byCurrency?: Record<string, number>;
   totalExpenses: number;
   totalAdvances: number;
   netToSettle: number;
   count: number;
+  /** Movimientos en otra moneda todavía sin cotización: no suman al total. */
+  pendingFx?: number;
+  /** Moneda base de la empresa, en la que están los totales. */
+  currency?: string;
 }
 
 export interface Settlement extends Audit {

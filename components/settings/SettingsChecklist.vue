@@ -9,6 +9,7 @@ import {
 import { useFleetStore } from "~/stores/fleet";
 import EmptyState from "~/components/shared/EmptyState.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import { useGeneralStore } from "~/stores/general";
 import { Feature } from "~/types/plan";
 
 /**
@@ -129,9 +130,72 @@ const eliminar = async (payload: { resp: boolean }) => {
   await store.remove(confirmar.value.id);
 };
 
+// ── Planilla OEA ──────────────────────────────────────────────────────────
+// Los 7 puntos AFIP + precintos son piso normativo y no se editan; la empresa
+// suma los suyos (docs/CONFIGURACION.md §6.2).
+const SECCIONES_OEA = [
+  { value: "physical", label: "Inspección física" },
+  { value: "security_devices", label: "Dispositivos de seguridad" },
+];
+
+const oeaBase = ref<{ key: string; label: string }[]>([]);
+const oeaPropios = ref<
+  { key: string; label: string; section: string; isActive: boolean }[]
+>([]);
+const oeaGuardando = ref(false);
+
+const puedeGuardarOea = computed(() =>
+  oeaPropios.value.every((p) => p.label.trim()),
+);
+
+const cargarOea = async () => {
+  const { $api } = useNuxtApp();
+  try {
+    const { data } = await $api.get("oea/template/");
+    oeaBase.value = data.base;
+    oeaPropios.value = data.propios.map((p: any) => ({ ...p }));
+  } catch {
+    // La planilla es un extra de la pantalla: si falla, el resto sigue andando.
+  }
+};
+
+const agregarPuntoOea = () =>
+  oeaPropios.value.push({
+    key: "",
+    label: "",
+    section: "physical",
+    isActive: true,
+  });
+
+const guardarOea = async () => {
+  if (!puedeGuardarOea.value) return;
+  const { $api } = useNuxtApp();
+  const general = useGeneralStore();
+  oeaGuardando.value = true;
+  try {
+    const { data } = await $api.put("oea/template/", {
+      items: oeaPropios.value.map((p, i) => ({
+        key: p.key || clavear(p.label),
+        label: p.label.trim(),
+        section: p.section,
+        order: i,
+        isActive: p.isActive,
+      })),
+    });
+    oeaBase.value = data.base;
+    oeaPropios.value = data.propios.map((p: any) => ({ ...p }));
+    general.setSuccessSnackbar("Planilla OEA guardada.");
+  } catch (e) {
+    general.setErrorSnackbar(e);
+  } finally {
+    oeaGuardando.value = false;
+  }
+};
+
 onMounted(() => {
   store.getTemplates();
   if (!fleet.trucks?.length) fleet.getTrucks();
+  cargarOea();
 });
 </script>
 
@@ -377,6 +441,102 @@ onMounted(() => {
       </v-card>
     </v-dialog>
 
+    <!-- ── Planilla OEA ───────────────────────────────────────────────── -->
+    <v-divider class="my-6" />
+
+    <div class="text-subtitle-1 font-weight-bold mb-1">Planilla OEA</div>
+    <p class="text-body-2 text-medium-emphasis mb-4">
+      Los <strong>7 puntos AFIP y los precintos</strong> son un piso normativo: no
+      se editan ni se desactivan. Lo que sí podés hacer es <strong>agregar</strong>
+      los puntos propios de tu operación.
+    </p>
+
+    <v-card border flat rounded="lg" class="mb-4">
+      <v-card-text class="pa-5">
+        <div class="text-caption text-medium-emphasis mb-2">
+          Puntos de la norma ({{ oeaBase.length }})
+        </div>
+        <div class="d-flex flex-wrap ga-2 mb-4">
+          <v-chip v-for="p in oeaBase" :key="p.key" size="small" label variant="outlined">
+            <v-icon start size="14">mdi-lock-outline</v-icon>
+            {{ p.label }}
+          </v-chip>
+        </div>
+
+        <div class="d-flex align-center mb-2">
+          <span class="text-subtitle-2 font-weight-bold">Puntos propios</span>
+          <v-spacer />
+          <v-btn
+            v-if="puedeEditar"
+            size="small"
+            variant="tonal"
+            prepend-icon="mdi-plus"
+            @click="agregarPuntoOea"
+          >
+            Agregar
+          </v-btn>
+        </div>
+
+        <p v-if="!oeaPropios.length" class="text-body-2 text-medium-emphasis mb-0">
+          Todavía no agregaste ninguno: la planilla usa sólo los puntos de la norma.
+        </p>
+
+        <div
+          v-for="(punto, i) in oeaPropios"
+          :key="i"
+          class="punto d-flex align-center ga-2 py-2"
+        >
+          <v-text-field
+            v-model="punto.label"
+            label="Punto a revisar"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="flex-grow-1"
+          />
+          <v-select
+            v-model="punto.section"
+            :items="SECCIONES_OEA"
+            item-title="label"
+            item-value="value"
+            label="Bloque"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="punto__seccion"
+          />
+          <v-switch
+            v-model="punto.isActive"
+            color="success"
+            density="compact"
+            hide-details
+            inset
+            label="Activo"
+          />
+          <IconBtn
+            tooltip="Quitar punto"
+            icon="mdi-close"
+            size="small"
+            variant="text"
+            color="error"
+            @click="oeaPropios.splice(i, 1)"
+          />
+        </div>
+
+        <div v-if="puedeEditar" class="d-flex mt-3">
+          <v-spacer />
+          <v-btn
+            color="primary"
+            :loading="oeaGuardando"
+            :disabled="!puedeGuardarOea"
+            @click="guardarOea"
+          >
+            Guardar planilla
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
+
     <ModalConfirm
       v-model="confirmar.abierto"
       title="Eliminar plantilla"
@@ -396,6 +556,10 @@ onMounted(() => {
 
   &__flag {
     flex: 0 0 auto;
+  }
+
+  &__seccion {
+    flex: 0 0 220px;
   }
 }
 </style>
