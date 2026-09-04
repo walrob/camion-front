@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "frontNatu",
+      name: "frontCamionex",
       script: ".output/server/index.mjs",
       // __dirname = directorio donde vive este archivo en el servidor.
       // Sin esto, PM2 resuelve rutas relativas desde donde fue ejecutado,
@@ -17,9 +17,9 @@ module.exports = {
 
       env_production: {
         NODE_ENV: "production",
-        PORT: 3002,
+        PORT: 3006,
         NITRO_HOST: "0.0.0.0",
-        NITRO_PORT: 3002,
+        NITRO_PORT: 3006,
         // Limitar heap de Node a 200MB. Deja margen para el SO y otras apps.
         NODE_OPTIONS: "--max-old-space-size=200",
       },

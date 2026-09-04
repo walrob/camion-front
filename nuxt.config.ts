@@ -177,7 +177,7 @@ export default defineNuxtConfig({
         // (DNS + TLS) en paralelo con el HTML adelanta ese primer dato.
         {
           rel: "preconnect",
-          href: "https://www.supernatu.com.ar",
+          href: "https://www.camionex.com.ar",
           crossorigin: "anonymous",
         },
       ],
