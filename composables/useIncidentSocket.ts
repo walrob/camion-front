@@ -1,26 +1,20 @@
-import { io, type Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
+import { crearSocket } from "~/composables/useSocketConexion";
 import type { Incident } from "~/types/incident";
 
 /**
  * Suscripción en vivo al tablero de incidentes (namespace /incidents del back).
- * Reusa NUXT_BASE_URL quitando el sufijo /api/v1 para apuntar al host del socket.
+ * El host y la ruta del handshake los resuelve `crearSocket`.
  */
 export const useIncidentSocket = (onChange: (incident: Incident) => void) => {
   let socket: Socket | null = null;
 
   const connect = () => {
-    const config = useRuntimeConfig();
-    const base = (config.public.apiBaseUrl as string) || "";
-    const host = base.replace(/\/api\/v1\/?$/, "");
-
     // El back exige el JWT en el handshake: sin él rechaza la conexión. Es lo
     // que mete al cliente en la sala de su empresa y evita que reciba los
     // incidentes de las demás.
     const auth = useAuthStore();
-    socket = io(`${host}/incidents`, {
-      transports: ["websocket"],
-      auth: { token: auth.token },
-    });
+    socket = crearSocket("/incidents", auth.token);
     socket.on("incident:new", (incident: Incident) => onChange(incident));
     socket.on("incident:update", (incident: Incident) => onChange(incident));
   };

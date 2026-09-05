@@ -1,0 +1,96 @@
+# Despliegue del frontend de CamioNex al EC2 compartido.
+#
+# El EC2 hospeda además Aturna, Aturna Vet y Supernatu. Todo lo que hay acá está
+# escrito para tocar únicamente lo de CamioNex: el proceso de PM2 se nombra
+# siempre de forma explícita y el rsync se limita a la carpeta del proyecto.
+name: Deploy frontend
+
+on:
+  # Sólo `main`. La rama de trabajo es `dev`, así que un push ahí no despliega:
+  # a producción se llega por merge, que es donde se decide qué entra.
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # La URL de la API se resuelve **en el build**, no al arrancar.
+      # `nuxt.config.ts` la mete en `runtimeConfig.public`, y las páginas
+      # públicas se pre-renderizan: el valor queda escrito dentro del HTML y del
+      # bundle. Definir NUXT_BASE_URL en el servidor no cambiaría nada.
+      #
+      # Van como variables del workflow y no como secretos porque son URLs
+      # públicas —aparecen en el HTML que recibe cualquier visitante—. Se pueden
+      # sobrescribir desde las Variables del repositorio sin tocar este archivo.
+      #
+      # dotenv no pisa lo que ya está en el entorno, así que esto gana sobre
+      # cualquier .env.production que llegue a existir en el runner.
+      - name: Compilar
+        env:
+          NODE_ENV: production
+          NUXT_BASE_URL: ${{ vars.NUXT_BASE_URL || 'https://www.camionex.com.ar/api/v1/' }}
+          NUXT_BASE_URL_FILES: ${{ vars.NUXT_BASE_URL_FILES }}
+          GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
+          GA_ENABLED: ${{ vars.GA_ENABLED }}
+        run: npm run build
+
+      - name: Preparar clave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      # `.output` es autocontenido: el preset node-server de Nitro empaqueta
+      # adentro las dependencias que necesita para correr, así que en el
+      # servidor no hace falta ningún `npm install`.
+      #
+      # `--delete` sólo dentro de `.output`, que se regenera entero en cada
+      # build: sin eso quedan archivos de versiones viejas conviviendo con los
+      # nuevos. Fuera de `.output` no se borra nada, para no llevarse puesto el
+      # .env ni nada que viva en la carpeta del proyecto.
+      - name: Copiar build al EC2
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_deploy" \
+            .output/ \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ec2-user/camionex-front/.output/"
+          rsync -az \
+            -e "ssh -i ~/.ssh/id_deploy" \
+            package.json ecosystem.config.cjs \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ec2-user/camionex-front/"
+
+      # `pm2 reload camionex-front` nombra el proceso de forma explícita. Nunca
+      # `restart all` ni `delete all`: eso reiniciaría también Aturna, Aturna Vet
+      # y Supernatu.
+      - name: Recargar PM2
+        run: |
+          ssh -i ~/.ssh/id_deploy \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            'set -e
+             cd /home/ec2-user/camionex-front
+             pm2 reload camionex-front --update-env || pm2 start ecosystem.config.cjs
+             pm2 save'
+
+      - name: Comprobar que responde
+        run: |
+          ssh -i ~/.ssh/id_deploy \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            'sleep 8 && curl -fsS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3006/'
