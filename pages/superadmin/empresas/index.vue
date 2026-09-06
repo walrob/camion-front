@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 
 /**
  * Listado de empresas con sus métricas de uso.
@@ -74,10 +75,11 @@ onMounted(cargar);
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-1">Empresas</h1>
-    <p class="text-body-2 text-medium-emphasis mb-4">
-      {{ meta?.totalItems ?? 0 }} empresas.
-    </p>
+    <PageHeader
+      title="Empresas"
+      :subtitle="`${meta?.totalItems ?? 0} empresas.`"
+      :breadcrumbs="[{ title: 'Plataforma', to: '/superadmin' }, { title: 'Empresas', disabled: true }]"
+    />
 
     <div class="d-flex flex-wrap ga-3 mb-4">
       <v-text-field

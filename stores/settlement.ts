@@ -119,12 +119,19 @@ export const useSettlementStore = defineStore("settlement", {
       }
     },
 
+    // Abre el comprobante (PDF) en una pestaña nueva para ver/imprimir. El back
+    // manda el archivo, igual que la hoja de ruta y la orden de trabajo.
     async openPdf(id: string) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
       try {
-        const resp = await $api.get(`settlements/${id}/pdf/`);
-        if (resp.data?.url) window.open(resp.data.url, "_blank");
+        const resp = await $api.get(`settlements/${id}/pdf/`, {
+          responseType: "blob",
+        });
+        const url = window.URL.createObjectURL(
+          new Blob([resp.data], { type: "application/pdf" }),
+        );
+        window.open(url, "_blank");
       } catch (e) {
         general.setErrorSnackbar(e);
       }

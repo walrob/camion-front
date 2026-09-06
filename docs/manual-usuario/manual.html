@@ -505,7 +505,7 @@ pre.flujo {
 
   <div>
     <h1>Manual de Usuario</h1>
-    <span class="version">Versión 1.9.2026</span>
+    <span class="version">Versión 5.9.2026</span>
     <p class="bajada">
       CamioNex reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp:
       viajes, gastos, vencimientos y mantenimiento en un solo lugar. Este manual
@@ -653,7 +653,7 @@ pre.flujo {
       <tr><td>Tablero de incidentes (kanban)</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>RRHH: legajo y habilitaciones</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>Exportación a Excel</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
-      <tr><td><strong>Configuración</strong>: ajustes, checklist y planilla OEA propios, catálogos, viático fijo</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td><strong>Configuración</strong>: ajustes, checklist y planilla OEA propios, catálogos, viático fijo <span class="pista">Ver cómo está configurada tu empresa no depende del plan; cambiarla, sí.</span></td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
 
       <tr class="grupo"><td colspan="5">Gestión</td></tr>
       <tr><td><strong>Indicadores</strong> gerenciales (costo por km)</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td></tr>
@@ -1693,9 +1693,10 @@ pre.flujo {
 
   <div class="nota">
     <span class="et">Si tenés plan Control</span>
-    Vas a ver esta sección con candado. El sistema funciona igual, con los valores
-    de fábrica —que son los que se describen acá como «viene»—: lo que suma
-    Operación es poder cambiarlos.
+    <strong>Podés entrar y ver</strong> cómo está configurada tu empresa: saber qué
+    te exige el sistema no depende del plan. Lo que vas a encontrar es los controles
+    apagados, porque el sistema funciona con los valores de fábrica —los que se
+    describen acá como «viene»—. Lo que suma Operación es poder cambiarlos.
   </div>
 
   <h3>Viajes</h3>
@@ -1722,6 +1723,11 @@ pre.flujo {
         <td><strong>Prefijo del número de viaje</strong></td>
         <td>Con qué empieza el código visible: <code>V-</code> genera V-00001. Sólo afecta a los viajes nuevos.</td>
         <td class="val"><code>V-</code></td>
+      </tr>
+      <tr>
+        <td><strong>Viajes internacionales</strong></td>
+        <td>Suma al formulario del viaje el <strong>país de destino</strong> y la <strong>moneda del viaje</strong>. Si tu flota no cruza la frontera, dejalo apagado y el formulario queda igual que siempre.</td>
+        <td class="val">Desactivado</td>
       </tr>
     </tbody>
   </table>
@@ -1929,8 +1935,24 @@ pre.flujo {
   <ol class="pasos">
     <li>En <span class="ui">Ajustes</span> confirmá tu <strong>moneda base</strong>: en la que ves los indicadores y el neto de cada rendición. Por defecto, pesos.</li>
     <li>En <span class="ui">Monedas</span> elegí las monedas con las que operás y guardá.</li>
+    <li>En <span class="ui">Ajustes</span> activá <strong>Viajes internacionales</strong>: es lo que agrega el país y la moneda al formulario del viaje.</li>
     <li>Cada día que haya movimientos en otra moneda, cargá la <strong>cotización</strong>: cuántos pesos vale una unidad de esa moneda.</li>
   </ol>
+
+  <p>
+    Con eso, al cargar un viaje aparecen dos campos nuevos: <strong>país de destino</strong>
+    y <strong>moneda del viaje</strong> (la moneda se muestra cuando tenés más de una
+    habilitada). La moneda del viaje no es un dato decorativo: es la que la app del
+    chofer <strong>propone sola</strong> en cada gasto de la bitácora. El que cruza a
+    Paraguay carga en guaraníes toda la semana sin volver a elegir la moneda en cada
+    peaje, que es justo donde aparecen los errores de carga.
+  </p>
+
+  <div class="nota">
+    <span class="et">Si no cruzás la frontera</span>
+    Dejá <strong>Viajes internacionales</strong> apagado, como viene, y el formulario
+    del viaje queda exactamente como lo conocés: ni un campo de más.
+  </div>
 
   <div class="clave">
     <span class="et">Lo que no se rompe nunca</span>
@@ -2114,7 +2136,7 @@ pre.flujo {
   <ol class="pasos">
     <li>Tocá <span class="ui">+</span>.</li>
     <li>Elegí el <strong>tipo</strong>: combustible, peaje, gasto, <strong>adelanto</strong>, reparación, multa, viático u otro.</li>
-    <li>Cargá el <strong>monto</strong>. Si tu empresa trabaja con más de una moneda, elegí en cuál gastaste —el selector aparece al lado del monto—. Si es combustible, agregá litros y odómetro.</li>
+    <li>Cargá el <strong>monto</strong>. Si tu empresa trabaja con más de una moneda, el selector aparece al lado del monto y <strong>ya viene con la del viaje</strong>: sólo lo tocás si ese gasto puntual fue en otra. Si es combustible, agregá litros y odómetro.</li>
     <li><strong>Sacale una foto al ticket</strong>. Es lo que después evita cualquier discusión.</li>
     <li>Si hace falta, dictá una observación y guardá.</li>
   </ol>
@@ -2343,7 +2365,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
       <tr><td>Rendiciones <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
       <tr><td>Planillas OEA <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
       <tr><td>Mi plan</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-      <tr><td>Configuración <span class="plan operacion">Operación</span></td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td>Configuración</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
     </tbody>
   </table>
   </div>
@@ -2434,7 +2456,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
   </p>
 
   <div class="cierre">
-    <strong>Manual de Usuario · CamioNex</strong> — Versión 1.9.2026<br>
+    <strong>Manual de Usuario · CamioNex</strong> — Versión 5.9.2026<br>
     NorthAr Consulting · info@northar.com.ar · www.northar.com.ar
   </div>
 </section>

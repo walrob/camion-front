@@ -12,6 +12,7 @@ import FormSection from "~/components/shared/FormSection.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import { useSettingsStore } from "~/stores/settings";
 import { useCurrencyStore } from "~/stores/currency";
+import { usePaises } from "~/composables/usePaises";
 import type { Trip } from "~/types/trip";
 
 const props = defineProps<{
@@ -49,6 +50,8 @@ const emptyForm = (): Partial<Trip> => ({
   notes: "",
   perDiemAmount: null,
   perDiemCurrency: null,
+  destinationCountry: null,
+  currency: null,
 });
 
 const form = ref<Partial<Trip>>(emptyForm());
@@ -62,6 +65,11 @@ const viaticoFijo = computed(() =>
 const monedaViatico = computed(() =>
   currencyStore.porCodigo(form.value.perDiemCurrency || currencyStore.base),
 );
+
+// Viaje internacional: país de destino y moneda del viaje (§7.6). Apagado —que
+// es el default— el formulario queda exactamente como era.
+const { paises } = usePaises();
+const internacional = computed(() => settingsStore.bool("trip.international"));
 onMounted(() => {
   settingsStore.load();
   currencyStore.load();
@@ -101,6 +109,16 @@ const buildPayload = (closeLeave: boolean) => {
   } else {
     payload.perDiemAmount = Number(payload.perDiemAmount);
     if (!payload.perDiemCurrency) delete payload.perDiemCurrency;
+  }
+
+  // Los campos del viaje internacional no viajan si la empresa no lo usa: un
+  // país suelto en un viaje nacional sólo confunde al que después lo lee.
+  if (!internacional.value) {
+    delete payload.destinationCountry;
+    delete payload.currency;
+  } else {
+    if (!payload.destinationCountry) delete payload.destinationCountry;
+    if (!payload.currency) delete payload.currency;
   }
 
   if (closeLeave) payload.closeLeave = true;
@@ -222,6 +240,37 @@ const onLeaveConfirm = async (payload: { resp: boolean }) => {
               :error-messages="formErrors.messages('destination')"
               label="Destino *"
               :rules="[r.isRequired]"
+            />
+          </v-col>
+          <!-- Viaje internacional (docs/CONFIGURACION.md §7.6): aparece sólo si
+               la empresa lo activó. La moneda del viaje es la que la bitácora
+               le propone después al chofer en cada gasto. -->
+          <v-col v-if="internacional" cols="12" sm="6">
+            <v-autocomplete
+              v-model="form.destinationCountry"
+              :error-messages="formErrors.messages('destinationCountry')"
+              :items="paises"
+              item-title="label"
+              item-value="code"
+              label="País de destino"
+              clearable
+            />
+          </v-col>
+          <v-col
+            v-if="internacional && currencyStore.esMultimoneda"
+            cols="12"
+            sm="6"
+          >
+            <v-select
+              v-model="form.currency"
+              :error-messages="formErrors.messages('currency')"
+              :items="currencyStore.currencies"
+              item-title="code"
+              item-value="code"
+              label="Moneda del viaje"
+              hint="Es la que se propone al cargar cada gasto."
+              persistent-hint
+              clearable
             />
           </v-col>
           <v-col cols="12" sm="6">

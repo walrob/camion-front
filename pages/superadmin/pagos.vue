@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 
 /**
  * Pagos de todas las empresas y avisos de Mercado Pago.
@@ -163,11 +164,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-1">Pagos</h1>
-    <p class="text-body-2 text-medium-emphasis mb-4">
-      Todo lo cobrado, por Mercado Pago o conciliado a mano, y los avisos que
-      quedaron sin procesar.
-    </p>
+    <PageHeader
+      title="Pagos"
+      subtitle="Todo lo cobrado, por Mercado Pago o conciliado a mano, y los avisos que quedaron sin procesar."
+      :breadcrumbs="[{ title: 'Plataforma', to: '/superadmin' }, { title: 'Pagos', disabled: true }]"
+    />
 
     <v-tabs v-model="solapa" color="primary" class="mb-4">
       <v-tab value="pagos">Pagos</v-tab>

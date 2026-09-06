@@ -10,6 +10,12 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 const props = defineProps<{
   modelValue: boolean;
   tripId: string;
+  /**
+   * Moneda del viaje, cuando es internacional (§7.6). Es la que se propone
+   * acá: el que cruza a Paraguay carga en guaraníes toda la semana, y elegirla
+   * de nuevo en cada peaje es donde aparecen los errores de carga.
+   */
+  tripCurrency?: string | null;
 }>();
 
 const emit = defineEmits(["update:modelValue", "saved"]);
@@ -71,7 +77,8 @@ watch(
       // backend rechaza.
       const primero = tiposDeGasto.value[0]?.key;
       if (primero) form.value.type = primero;
-      form.value.currency = currencyStore.base;
+      // La del viaje si la hay; si no, la base de la empresa, como siempre.
+      form.value.currency = props.tripCurrency || currencyStore.base;
       file.value = null;
     }
   },

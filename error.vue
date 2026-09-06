@@ -10,6 +10,21 @@
  * Los enlaces de salida no son decoración: una 404 sin salida hace que el
  * visitante vuelva al buscador, que es exactamente la señal que no se quiere dar.
  */
+/**
+ * Las imágenes de `public/` se referencian por variable y con `:src`, no con
+ * `src="/..."` literal.
+ *
+ * Con la ruta literal, el compilador de plantillas la convierte en un import y
+ * Nuxt la reescribe al id virtual `virtual:public?/images/...`. Ese id lleva un
+ * `?`, y al resolverlo en SSR el dev server lo pide por HTTP contra
+ * `/__nuxt_vite_node__/resolve/…%3F…`, que devuelve 400. Como este archivo entra
+ * en el bundle SSR de toda la app, el fallo se llevaba puesta cualquier página.
+ *
+ * Con `:src` la ruta queda como string en runtime: el navegador la pide a
+ * `public/` y no hay resolución de módulo que pueda fallar.
+ */
+const imagenError = "/images/background/errorimg.svg";
+
 const props = defineProps<{ error?: { statusCode?: number } }>();
 
 const esNoEncontrada = computed(() => props.error?.statusCode === 404);
@@ -26,7 +41,7 @@ useHead({
   <div class="d-flex justify-center align-center text-center h-100vh pa-4">
     <div>
       <img
-        src="/images/background/errorimg.svg"
+        :src="imagenError"
         width="500"
         class="mx-auto"
         style="max-width: 100%; height: auto"

@@ -31,6 +31,7 @@ const destino = computed(() =>
     rounded
     class="mb-1"
     color="primary"
+    :exact="item.exact"
     :disabled="item.disabled"
     :class="{ 'nav-item--bloqueado': bloqueado }"
     :target="item.external === true && !bloqueado ? '_blank' : undefined"

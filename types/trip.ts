@@ -24,6 +24,13 @@ export interface Trip extends Audit {
   /** Viático de monto fijo del viaje, cuando la empresa paga así (§6.4). */
   perDiemAmount?: number | null;
   perDiemCurrency?: string | null;
+  /**
+   * Viaje internacional (§7.6). Sólo se completan con `trip.international`
+   * activo: el país de destino en ISO 3166-1 alfa-2, y la moneda en la que
+   * se espera gastar, que es la que la bitácora propone en cada movimiento.
+   */
+  destinationCountry?: string | null;
+  currency?: string | null;
 }
 
 export interface TripLogEntry extends Audit {

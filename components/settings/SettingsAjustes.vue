@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useSettingsStore, type SettingDef } from "~/stores/settings";
+import { useFeatures } from "~/composables/useFeatures";
+import { Feature } from "~/types/plan";
 
 /**
  * Los ajustes sueltos de la empresa.
@@ -12,6 +14,10 @@ import { useSettingsStore, type SettingDef } from "~/stores/settings";
  */
 const store = useSettingsStore();
 const { groups, settings, loading, saving } = storeToRefs(store);
+
+// Ver la configuración propia no se gatea; cambiarla, sí (§10).
+const { has } = useFeatures();
+const puedeEditar = computed(() => has(Feature.SETTINGS));
 
 /** Copia editable: lo que se ve hasta que se aprieta Guardar. */
 const borrador = ref<Record<string, string>>({});
@@ -33,7 +39,7 @@ const cambios = computed(() => {
 const hayCambios = computed(() => Object.keys(cambios.value).length > 0);
 
 const guardar = async () => {
-  if (!hayCambios.value) return;
+  if (!hayCambios.value || !puedeEditar.value) return;
   await store.save(cambios.value);
 };
 
@@ -60,6 +66,24 @@ onMounted(() => store.load(true));
       cambies aplica a toda la empresa —incluida la app de los choferes— y queda
       registrado con tu nombre y la fecha.
     </v-alert>
+
+    <v-card v-if="!puedeEditar" border flat rounded="lg" class="mb-4">
+      <v-card-text class="pa-5 d-flex align-center ga-4 flex-wrap">
+        <v-icon color="medium-emphasis" size="24">mdi-lock-outline</v-icon>
+        <div class="min-w-0 flex-grow-1">
+          <div class="text-subtitle-2 font-weight-bold">
+            Cambiar los ajustes viene con el plan Operación
+          </div>
+          <p class="text-body-2 text-medium-emphasis mb-0">
+            Podés ver cómo está configurada tu empresa; para modificarlo hace
+            falta el plan que lo incluye.
+          </p>
+        </div>
+        <v-btn color="primary" variant="tonal" to="/upgrade/settings">
+          Ver qué incluye
+        </v-btn>
+      </v-card-text>
+    </v-card>
 
     <div v-if="loading && !settings.length" class="d-flex justify-center my-10">
       <v-progress-circular indeterminate color="primary" />
@@ -88,6 +112,7 @@ onMounted(() => store.load(true));
             <v-switch
               v-if="def.type === 'boolean'"
               :model-value="leerBool(def)"
+              :disabled="!puedeEditar"
               color="primary"
               density="comfortable"
               hide-details
@@ -103,6 +128,7 @@ onMounted(() => store.load(true));
               v-else-if="def.type === 'enum'"
               v-model="borrador[def.key]"
               :items="def.options"
+              :disabled="!puedeEditar"
               item-title="label"
               item-value="value"
               :label="def.label"
@@ -116,6 +142,7 @@ onMounted(() => store.load(true));
               v-else-if="def.type === 'number'"
               v-model="borrador[def.key]"
               type="number"
+              :disabled="!puedeEditar"
               :label="def.label"
               :min="def.min"
               :max="def.max"
@@ -128,6 +155,7 @@ onMounted(() => store.load(true));
             <v-text-field
               v-else
               v-model="borrador[def.key]"
+              :disabled="!puedeEditar"
               :label="def.label"
               :maxlength="def.maxLength"
               density="comfortable"
@@ -146,7 +174,7 @@ onMounted(() => store.load(true));
       <!-- Aparece sólo cuando hay algo que guardar: nadie se queda con un
            cambio sin aplicar creyendo que se guardó solo. -->
       <v-slide-y-reverse-transition>
-        <div v-if="hayCambios" class="barra-guardado">
+        <div v-if="hayCambios && puedeEditar" class="barra-guardado">
           <v-card border flat rounded="lg" class="pa-3 d-flex align-center ga-3">
             <v-icon color="warning" size="20">mdi-content-save-alert-outline</v-icon>
             <span class="text-body-2">

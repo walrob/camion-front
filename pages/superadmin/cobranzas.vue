@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 
 /**
  * Cobranza: todo lo emitido y sin pagar, de todas las empresas.
@@ -50,10 +51,11 @@ onMounted(cargar);
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-1">Cobranzas</h1>
-    <p class="text-body-2 text-medium-emphasis mb-4">
-      Períodos emitidos y sin cobrar, del que vence antes al que vence después.
-    </p>
+    <PageHeader
+      title="Cobranzas"
+      subtitle="Períodos emitidos y sin cobrar, del que vence antes al que vence después."
+      :breadcrumbs="[{ title: 'Plataforma', to: '/superadmin' }, { title: 'Cobranzas', disabled: true }]"
+    />
 
     <v-row dense class="mb-2">
       <v-col cols="6" md="3">

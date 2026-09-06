@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 
 /**
  * Registro de acciones de la plataforma.
@@ -108,11 +109,11 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-1">Auditoría</h1>
-    <p class="text-body-2 text-medium-emphasis mb-4">
-      Registro inmutable de las acciones sobre la plataforma, de la más reciente
-      hacia atrás.
-    </p>
+    <PageHeader
+      title="Auditoría"
+      subtitle="Registro inmutable de las acciones sobre la plataforma, de la más reciente hacia atrás."
+      :breadcrumbs="[{ title: 'Plataforma', to: '/superadmin' }, { title: 'Auditoría', disabled: true }]"
+    />
 
     <div class="d-flex flex-wrap ga-3 mb-4">
       <v-text-field

@@ -11,6 +11,9 @@ const authStore = useAuthStore();
 
 const isAuthenticated = computed(() => !!authStore.token);
 
+/** Por variable y con `:src`, por lo mismo que en `error.vue`. */
+const avatarPorDefecto = "/images/avatar-1.png";
+
 // Solo mostramos el nombre en ≥md; en mobile queda solo el avatar.
 const showUserName = computed(() => mdAndUp.value && !!user?.name);
 
@@ -28,7 +31,7 @@ const logout = async () => {
         <template v-if="user">
           <v-avatar size="35">
             <v-img v-if="user?.avatar" :src="returnUrlImg(user.avatar)" />
-            <img v-else src="/images/avatar-1.png" height="35" />
+            <img v-else :src="avatarPorDefecto" height="35" />
           </v-avatar>
 
           <span v-if="showUserName" class="ml-2 text-body-1">

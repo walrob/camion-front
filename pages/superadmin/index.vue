@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 
 /** Tablero de plataforma: MRR, altas, mora y trials por vencer. */
 definePageMeta({ layout: "superadmin", roles: ["superadmin"] });
@@ -33,10 +34,11 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-1">Tablero</h1>
-    <p class="text-body-2 text-medium-emphasis mb-5">
-      Estado comercial de toda la plataforma.
-    </p>
+    <PageHeader
+      title="Tablero"
+      subtitle="Estado comercial de toda la plataforma."
+      :breadcrumbs="[{ title: 'Plataforma', disabled: true }]"
+    />
 
     <div v-if="cargando" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />

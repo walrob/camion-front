@@ -6,14 +6,15 @@ import SettingsChecklist from "~/components/settings/SettingsChecklist.vue";
 import SettingsCatalogs from "~/components/settings/SettingsCatalogs.vue";
 import SettingsAlerts from "~/components/settings/SettingsAlerts.vue";
 import SettingsCurrencies from "~/components/settings/SettingsCurrencies.vue";
-import { Feature } from "~/types/plan";
 
 /**
  * Configuración de la empresa: dónde el sistema se adapta a cómo trabaja cada
  * cliente en vez de imponerle una forma (docs/CONFIGURACION.md).
  */
+// Sin `feature`: cualquier admin ve la configuración de su empresa, pague el
+// plan que pague. Lo que el plan decide es quién puede *cambiarla*, y eso lo
+// resuelve cada pestaña por dentro (docs/CONFIGURACION.md §10).
 definePageMeta({
-  feature: Feature.SETTINGS,
   layout: "admin",
   roles: ["admin"],
 });

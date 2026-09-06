@@ -37,6 +37,12 @@ export interface menu {
   external?: boolean;
   roles?: string[];
   /**
+   * Marca el ítem activo sólo en su ruta exacta. Vuetify, por defecto, lo
+   * considera activo por prefijo: sin esto, el ítem raíz de una sección queda
+   * encendido también en todas sus pantallas hijas.
+   */
+  exact?: boolean;
+  /**
    * Feature del plan que habilita el ítem. Si el plan no la incluye, el ítem
    * NO se oculta: se muestra en gris con candado y linkea a la pantalla de
    * upgrade. Es una decisión comercial explícita (MODELO-COMERCIAL §6.2): el
@@ -55,6 +61,8 @@ const sidebarItem: menu[] = [
     icon: LayoutDashboardIcon,
     to: "/admin",
     external: false,
+    // Si no, queda activo en /admin/viajes, /admin/flota y todas las demás.
+    exact: true,
   },
   {
     title: "Indicadores",
@@ -181,10 +189,14 @@ const sidebarItem: menu[] = [
     // Ajustes de operación: qué exige el sistema antes de que salga un camión,
     // si una rendición cerrada se puede reabrir, etc. Sólo `admin` porque
     // cambian el comportamiento para toda la empresa, choferes incluidos.
+    //
+    // Sin `feature` a propósito: con el candado, el ítem llevaba a la pantalla
+    // de upgrade y el admin no podía ni ver cómo estaba configurada su propia
+    // empresa. Leer no se gatea (docs/CONFIGURACION.md §10); el upsell de la
+    // escritura lo hace la pestaña de Ajustes, ya adentro.
     title: "Configuración",
     icon: SettingsIcon,
     to: "/configuracion",
-    feature: Feature.SETTINGS,
     roles: [Role.ADMIN],
   },
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 
 /**
  * ABM de planes.
@@ -70,11 +71,11 @@ onMounted(cargar);
 
 <template>
   <div>
-    <h1 class="text-h5 font-weight-bold mb-1">Planes</h1>
-    <p class="text-body-2 text-medium-emphasis mb-4">
-      Los precios viven en la base: cambiarlos acá actualiza la landing y la
-      facturación sin necesidad de un despliegue.
-    </p>
+    <PageHeader
+      title="Planes"
+      subtitle="Los precios viven en la base: cambiarlos acá actualiza la landing y la facturación sin necesidad de un despliegue."
+      :breadcrumbs="[{ title: 'Plataforma', to: '/superadmin' }, { title: 'Planes', disabled: true }]"
+    />
 
     <v-alert
       v-if="aviso"

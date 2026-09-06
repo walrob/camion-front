@@ -76,7 +76,7 @@ configuración que se escape de ahí es una fuga entre clientes.
 |---|---|
 | `CompanySetting` + `GET`/`PATCH /settings` + pantalla **Configuración** | ✅ **Fase A, construida.** Seis ajustes de viaje, rendición y combustible, aplicados en `trips`, `settlements` y `fuel`. |
 | `AlertRuleConfig` + catálogo de reglas + `GET`/`PUT /alerts/rules` + pantalla **Alertas** | ✅ **Fase E, construida.** Ocho reglas con su umbral; el cupo del plan se cuenta sobre esta tabla (§6.3). |
-| `CompanySequence` (`trip`, `incident`) | ✅ Numeración correlativa por empresa. Falta que el prefijo sea configurable. |
+| `CompanySequence` (`trip`, `incident`) | ✅ Numeración correlativa por empresa, con el prefijo configurable (`trip.codePrefix`, §4.1). |
 | `Company`: `cuit`, `phone`, `address`, `city`, `state`, `logoUrl`, `primaryColor` | ✅ Identidad fiscal y visual, ya por empresa. |
 | Multi-moneda: `CompanyCurrency`, `ExchangeRate`, `exchangeRate` + `amountBase` congelados | ✅ **Fase D, construida.** Toda la aritmética de plata pasó a moneda base (§7). |
 | `DEFAULT_OEA_ITEMS` + `OeaTemplateItem` | ✅ Los 7 puntos AFIP son piso normativo; la empresa suma los suyos (§6.2). |
@@ -107,7 +107,7 @@ incorpora la configuración no le cambia el comportamiento a nadie.
 | `trip.requireOeaToStart` | `false` | Ídem con la planilla OEA en estado conforme. | ✅ |
 | `trip.blockOnExpiredDocs` | `false` | Bloquea la asignación si el camión, el acoplado o el chofer tienen documentación vencida, y dice cuál. Apagado, el sistema igual avisa por alerta. | ✅ |
 | `trip.codePrefix` | `V-` | Prefijo de la numeración (`CompanySequence`). | ✅ |
-| `trip.international` | `false` | Habilita país de destino y moneda del viaje (§7). | ⏳ |
+| `trip.international` | `false` | Habilita país de destino y moneda del viaje (§7.6). | ✅ |
 
 ### 4.2 Rendición
 
@@ -124,7 +124,7 @@ incorpora la configuración no le cambia el comportamiento a nadie.
 |---|---|---|---|
 | `fuel.requireOdometer` | `false` | Sin odómetro hay gasto pero no rendimiento. Recomendado activarlo. | ✅ |
 | `fuel.requireTicketPhoto` | `false` | Foto del ticket obligatoria. Necesita que la carga y el adjunto viajen juntos: hoy el adjunto va en una segunda llamada. | ⏳ |
-| `fuel.efficiencyTolerance` | `20` | % de desvío de km/l que dispara alerta de carga sospechosa. Va con el motor de alertas (fase E). | ⏳ |
+| `fuel.efficiencyTolerance` | `20` | % de desvío de km/l que dispara alerta de carga sospechosa. Iba con el motor de alertas, pero la fase E cerró sin él: hay que decidir si entra o se descarta (§14). | ⏳ |
 
 ### 4.4 Vencimientos y avisos ✅ (fase E, como reglas)
 
@@ -417,13 +417,30 @@ Con `settlement.perDiemMode = 'fixed'`, el viaje lleva `perDiemAmount` +
 empresa facture en pesos. Entra en la rendición como un movimiento más, con su
 conversión, y el neto a rendir sale por moneda y en base.
 
-### 7.6 El viaje internacional en sí
+### 7.6 El viaje internacional en sí ✅
 
-Con `trip.international = true`, el formulario de viaje suma **país de destino** y
-**moneda del viaje** (que preselecciona la moneda de los gastos). Habilita además
-exigir la documentación del cruce mediante las categorías de documento del
-catálogo (MIC/DTA, carta de porte internacional, seguro con cobertura regional) y
-la regla `trip.blockOnExpiredDocs`.
+Con `trip.international = true`, el formulario de viaje suma **país de destino**
+y **moneda del viaje**. Apagado —que es el default— el formulario es exactamente
+el de siempre: ni un campo de más.
+
+La moneda del viaje no es decorativa: es la que la bitácora **propone** en cada
+gasto. `ExpenseFormDialog` la recibe del viaje y cae a la moneda base cuando no
+hay. El que cruza a Paraguay carga en guaraníes toda la semana, y tener que
+elegirla de nuevo en cada peaje es justo donde aparecen los errores de carga.
+
+El país viaja como ISO 3166-1 alfa-2 y sale de una constante del código
+(`composables/usePaises.ts`), no de un catálogo de empresa: un país no es
+vocabulario propio de nadie. Es además la clave con la que `PerDiemRate` propone
+después el viático por país (§6.5). Si alguna operación necesita destinos fuera
+de la región, deja de ser una constante y pasa a ser un catálogo más (§5).
+
+Habilita además exigir la documentación del cruce mediante las categorías de
+documento del catálogo (MIC/DTA, carta de porte internacional, seguro con
+cobertura regional) y la regla `trip.blockOnExpiredDocs`.
+
+> El formulario, la propagación de la moneda y el armado del payload están
+> construidos en el front. Para que la función quede completa el backend tiene
+> que aportar su mitad: ver §14.
 
 ---
 
@@ -465,6 +482,7 @@ PerDiemRate           (TenantEntity)  country?, route?, amount, currency, validF
 | `GET/POST /checklist-templates` | Plantillas y sus ítems. |
 | `GET/POST /currencies`, `GET/POST /exchange-rates` | Monedas habilitadas y cotizaciones. |
 | `GET/POST /alerts/thresholds` | Ya existe. Se le suma `enabled` por regla. |
+| `GET /superadmin/companies/:id/settings` | Configuración efectiva de una empresa, para soporte (§13). Sólo `superadmin` y sólo lectura; misma forma que `GET /settings`. |
 
 ---
 
@@ -489,12 +507,20 @@ Features que lo implementan:
 | `checklist_templates` | Operación | Armar la plantilla propia del checklist (§6.1) | ✅ |
 | `checklist_by_type` | Gestión | Tener una plantilla distinta por tipo de unidad | ✅ |
 | `catalogs` | Operación | Editar los catálogos (§5) | ✅ |
-| `alert_thresholds` | Gestión | Umbrales y reglas de alerta (§6.3) | existe, sin pantalla |
+| `alert_thresholds` | Gestión | Umbrales y reglas de alerta (§6.3) | ✅ |
 
 **Se gatea escribir, nunca leer.** `GET /settings` y `GET /checklist-templates`
 quedan abiertos a cualquier plan: la app del chofer necesita saber qué se le va a
 exigir, y saberlo no puede depender de lo que pague la empresa. Lo que el plan
 decide es quién puede *cambiarlo*.
+
+Eso vale también para la **pantalla**. `/configuracion` no lleva `feature` en su
+`definePageMeta` y el ítem del menú tampoco: cualquier `admin` entra y ve cómo
+está configurada su empresa, con el plan que sea. Antes el candado estaba en los
+dos lugares y el efecto era el contrario al buscado —el admin de un plan Control
+terminaba en la pantalla de upgrade sin poder ver siquiera su propia
+configuración—. El upsell lo hace ahora cada pestaña, ya adentro, con los
+controles deshabilitados y el cartel del plan que los incluye.
 
 Dónde se aplica cada verificación:
 
@@ -543,6 +569,7 @@ Tres cuidados:
 | **C** ✅ | Catálogos (§5): los siete, con comportamiento donde el código decide algo | Habilita el vocabulario propio de cada operación |
 | **D** ✅ | Multi-moneda (§7) | **Se adelanta a la posición A/B si el primer cliente hace internacional**: es requisito, no mejora |
 | **E** ✅ | Reglas y umbrales de alerta con pantalla (§6.3), que además cierra §4.4 | Era deuda: estaba vendido y no estaba entregado |
+| **F** ✅ | El viaje internacional (§7.6) y la configuración efectiva en el panel de plataforma (§13) | Cierra la última milla de D —la maquinaria estaba y no se podía activar— y saca al soporte de trabajar a ciegas |
 
 Cada fase cierra con su sección en el manual de usuario
 ([docs/manual-usuario/manual.html](manual-usuario/manual.html)): una funcionalidad
@@ -556,9 +583,30 @@ configurable que nadie sabe configurar no se usa.
   módulo, cada opción explica en una línea qué cambia, y todo tiene su default
   visible. Si una opción no se puede explicar en una línea, probablemente no
   debería ser configurable.
-- **Soporte a ciegas.** Ante «esto no anda», lo primero es saber cómo está
-  configurada esa empresa: la configuración efectiva tiene que verse desde el
-  panel de plataforma, y cada cambio queda en la auditoría con autor y fecha.
+- **Soporte a ciegas.** ✅ Resuelto: la ficha de empresa del panel de plataforma
+  (`/superadmin/empresas/[id]`) muestra la **configuración efectiva**, agrupada
+  igual que la ve el cliente y marcando cuáles están fuera del default, que son
+  las que explican un comportamiento raro. Es de **sólo lectura**: quien cambia la
+  configuración de una empresa sigue siendo su propio admin, desde su pantalla de
+  Configuración. Cada cambio queda en la auditoría con autor y fecha.
 - **Configuración que contradice al plan.** El backend valida contra la feature,
   no contra lo que quedó guardado: una empresa que baja de plan conserva sus filas
   pero deja de aplicarlas, y las recupera intactas si vuelve a subir.
+
+---
+
+## 14. Lo que falta del lado del backend
+
+Las dos piezas de la fase F se construyeron en el front. Ninguna funciona de
+punta a punta hasta que el backend aporte su mitad, y conviene que esté escrito
+para que no se descubra en una demo.
+
+| Para | Qué falta |
+|---|---|
+| **Viaje internacional** (§7.6) | Registrar `trip.international` en el catálogo de ajustes —hoy el front lo lee y, si no existe, se comporta como `false`, que es el default seguro—; sumar `destinationCountry` (char(2), nullable) y `currency` a la entidad `Trip` y a su DTO de alta y edición. Sin eso el formulario nunca muestra los campos. |
+| **Configuración efectiva** (§13) | `GET /superadmin/companies/:id/settings`, sólo `superadmin`, devolviendo lo mismo que `GET /settings` para la empresa indicada: `{ groups, settings }` con `value` e `isDefault` por ajuste. La ficha ya lo consume y, si el endpoint no está, muestra el aviso y sigue funcionando. |
+
+Siguen abiertos, sin fecha, los `⏳` de §4: `settlement.rounding`,
+`fuel.requireTicketPhoto` —que antes que un ajuste necesita que la carga y su
+adjunto viajen en una sola llamada— y `fuel.efficiencyTolerance`, que quedó
+huérfano al cerrar la fase E y hay que decidir si entra o se descarta.

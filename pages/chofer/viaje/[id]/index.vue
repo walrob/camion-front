@@ -240,7 +240,12 @@ onMounted(reload);
       @click="expenseDialog = true"
     />
 
-    <ExpenseFormDialog v-model="expenseDialog" :trip-id="id" @saved="reload" />
+    <ExpenseFormDialog
+      v-model="expenseDialog"
+      :trip-id="id"
+      :trip-currency="trip?.currency"
+      @saved="reload"
+    />
     <OdometerDialog
       v-model="odoDialog"
       :trip-id="id"
