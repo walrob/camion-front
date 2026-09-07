@@ -505,7 +505,7 @@ pre.flujo {
 
   <div>
     <h1>Manual de Usuario</h1>
-    <span class="version">Versión 5.9.2026</span>
+    <span class="version">Versión 7.9.2026</span>
     <p class="bajada">
       CamioNex reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp:
       viajes, gastos, vencimientos y mantenimiento en un solo lugar. Este manual
@@ -1083,6 +1083,7 @@ pre.flujo {
     <li>Elegí el <strong>camión</strong> y el <strong>chofer</strong> (obligatorios). Los dos selectores <strong>buscan mientras escribís</strong>: patente, nombre o DNI.</li>
     <li>Si corresponde, sumá el <strong>acoplado</strong>.</li>
     <li>Cargá <strong>origen</strong> y <strong>destino</strong> (obligatorios).</li>
+    <li>Si tu empresa las usa, elegí la <strong>clasificación de ruta</strong>: «Ida Brasil», «Vuelta Brasil», «Nacional»… Es la categoría con la que después agrupás y reportás. Las armás vos en <span class="ruta">Configuración → Catálogos</span>.</li>
     <li>Opcional pero muy recomendable: la <strong>carga</strong>, la <strong>salida planificada</strong> y la <strong>llegada planificada</strong>. Son los datos con los que después el sistema detecta las demoras.</li>
     <li>Guardá. El viaje queda <strong>Asignado</strong> y <strong>aparece en el celular del chofer al instante</strong>.</li>
   </ol>
@@ -1119,6 +1120,50 @@ pre.flujo {
       <tr><td><span class="punto rojo"></span> <strong>Cancelado</strong></td><td>No se hizo.</td><td>La oficina.</td></tr>
     </tbody>
   </table>
+
+  <h3>Liberar la unidad: validaciones de Tráfico</h3>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span></p>
+
+  <p>
+    Hay planillas que el chofer firma y que <strong>no liberan el camión</strong>: declaró
+    una falla, o viaja con acompañante. En vez de resolverse solas, quedan
+    <strong>esperando que alguien de tráfico las mire</strong> en
+    <span class="ruta">Operación → Validaciones</span>.
+  </p>
+
+  <p>
+    Cada tarjeta dice <strong>por qué</strong> quedó esperando —qué puntos declaró el
+    chofer, con su observación, y los acompañantes con o sin seguro— y tenés dos botones:
+  </p>
+
+  <ul>
+    <li><span class="ui">Liberar unidad</span> — el chofer ya puede iniciar el viaje.</li>
+    <li><span class="ui">No liberar</span> — la planilla queda rechazada. <strong>El motivo es obligatorio</strong> y el chofer lo ve en su pantalla.</li>
+  </ul>
+
+  <div class="clave">
+    <span class="et">Mientras esté ahí, ese camión no sale</span>
+    Una planilla pendiente de validación <strong>no habilita el viaje</strong>: con la
+    opción «Exigir checklist para iniciar» activada, el botón <span class="ui">Iniciar</span>
+    del chofer sigue bloqueado hasta que alguien la resuelva. Es una bandeja para
+    <strong>vaciar</strong>, no para mirar.
+  </div>
+
+  <div class="nota">
+    <span class="et">Quién decide qué requiere validación</span>
+    Lo elegís vos en <span class="ruta">Configuración → Ajustes → Checklist pre-viaje</span>
+    y, punto por punto, en tu plantilla. <strong>De fábrica no hay ninguna validación</strong>:
+    la planilla se resuelve al firmarse, como siempre. Quien la activa es quien la necesita.
+  </div>
+
+  <div class="aviso">
+    <span class="et">Queda registrado quién liberó</span>
+    La validación guarda <strong>tu nombre, la hora y tu observación</strong>. Es
+    exactamente lo que una auditoría pide y lo que un «me dijo que sí por teléfono»
+    no puede probar.
+  </div>
 </section>
 
 <section class="seccion">
@@ -1732,6 +1777,55 @@ pre.flujo {
     </tbody>
   </table>
 
+  <h3>Checklist pre-viaje</h3>
+
+  <p>
+    Qué le exige la planilla al chofer, y quién libera la unidad después de que la
+    firma. <strong>Todo viene desactivado</strong>: sin tocar nada, el checklist se
+    comporta como siempre —se firma y queda aprobado o rechazado ahí mismo—.
+  </p>
+
+  <table>
+    <thead><tr><th>Opción</th><th>Qué cambia</th><th>Viene</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Exigir validación de Tráfico ante una falla</strong></td>
+        <td>La planilla firmada con alguna falla queda <strong>pendiente</strong> y la unidad no se libera sola: alguien de tráfico tiene que resolverla en <span class="ruta">Operación → Validaciones</span>. Recomendado para operaciones bajo OEA.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Permitir declarar acompañantes</strong></td>
+        <td>Muestra en la planilla la pregunta por acompañantes y sus datos. Desactivado, el chofer no puede declarar ninguno.</td>
+        <td class="val">Activado</td>
+      </tr>
+      <tr>
+        <td><strong>Exigir el seguro del acompañante</strong></td>
+        <td>El chofer no puede firmar si declaró un acompañante sin marcar que le pidió el seguro a su operador de tráfico.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Exigir el documento del acompañante</strong></td>
+        <td>Obliga a cargar el número de documento de cada acompañante antes de firmar.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Exigir validación si viaja con acompañante</strong></td>
+        <td>Aunque la planilla esté toda conforme, declarar un acompañante la deja pendiente: la unidad no se dirige al cliente hasta que Tráfico la libere.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Exigir la ubicación al firmar</strong></td>
+        <td>No deja firmar sin GPS. Sirve para probar que la planilla se completó en el lugar y no desde otro lado.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+      <tr>
+        <td><strong>Avisar cuando una planilla no queda conforme</strong></td>
+        <td>Genera una <strong>alerta</strong> apenas el chofer firma una planilla rechazada o pendiente. Recomendado: sin esto, enterarse depende de que el chofer llame.</td>
+        <td class="val">Desactivado</td>
+      </tr>
+    </tbody>
+  </table>
+
   <h3>Rendiciones</h3>
 
   <p>
@@ -1775,21 +1869,67 @@ pre.flujo {
 
   <ol class="pasos">
     <li>Botón <span class="ui">Nueva plantilla</span>. Viene <strong>precargada con los siete puntos por defecto</strong>: se ajusta lo que haga falta en vez de escribir todo de cero.</li>
+    <li>Si tu empresa tiene un sistema de calidad, cargá el <strong>código</strong> del formulario, su <strong>revisión</strong> y la fecha —«RIP 06 09 01», «REV.04»—. Es opcional.</li>
     <li>Agregá, renombrá o quitá puntos, y ordenálos con las flechitas.</li>
-    <li>Marcá cada punto que lo merezca como <strong>Crítico</strong> o con <strong>Foto</strong> (ver abajo).</li>
+    <li>Poné el <strong>bloque</strong> al que pertenece cada punto: «Estado del tractor», «Estado del equipo de frío», «Estado del furgón». El chofer los ve agrupados así.</li>
+    <li>Con el botón <span class="ui">Opciones</span> de cada punto abrís sus opciones: el tipo, cuál es la respuesta correcta, el texto de ayuda, las fotos y qué pasa si falla (ver abajo).</li>
     <li>Guardá.</li>
   </ol>
+
+  <div class="clave">
+    <span class="et">El código y la revisión no son decorativos</span>
+    Cada planilla que se emite <strong>se lleva una copia</strong> del código y la
+    revisión. Es lo que permite responder, meses después, con qué versión del
+    formulario firmó el chofer ese día. Una auditoría no pregunta por «el checklist»:
+    pregunta por el RIP 06 09 01 REV.04.
+  </div>
+
+  <h4>Los tipos de punto</h4>
+
+  <p>No todo lo que hay en una planilla es una inspección:</p>
+
+  <table>
+    <thead><tr><th>Tipo</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pregunta</strong></td><td>Lo habitual: el chofer contesta y el sistema evalúa si está conforme.</td></tr>
+      <tr><td><strong>Declaración</strong></td><td>Un texto que el chofer tiene que <strong>aceptar</strong> para poder firmar: «leído y soy consciente de la situación». No evalúa el estado de nada.</td></tr>
+      <tr><td><strong>Fotos</strong></td><td>Sólo adjuntos, sin pregunta: «fotos del interior del furgón».</td></tr>
+      <tr><td><strong>Texto libre</strong></td><td>Un campo para que escriba lo que considere importante.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="aviso">
+    <span class="et">Cuidado con las preguntas en negativo</span>
+    En cada pregunta elegís <strong>cuál es la respuesta que indica que está todo
+    bien</strong>. «¿Los zunchos están OK?» espera <strong>Sí</strong>, pero «¿tiene
+    pérdidas de aceite?» espera <strong>No</strong>: ahí el sí es la respuesta mala.
+    Si no lo marcás, el sistema va a entender al revés lo que conteste el chofer.
+  </div>
+
+  <h4>Qué pasa si el punto falla</h4>
 
   <table>
     <thead><tr><th>Marca</th><th>Qué hace</th></tr></thead>
     <tbody>
       <tr>
         <td><strong>Crítico</strong></td>
-        <td>Si el chofer marca <span class="ui">Falla</span> en ese punto, el checklist queda <strong>rechazado</strong>. Con la opción «Exigir checklist para iniciar» activada, ese camión no sale hasta que se resuelva.</td>
+        <td>Si el chofer contesta mal ese punto, el checklist queda <strong>rechazado</strong>. Con la opción «Exigir checklist para iniciar» activada, ese camión no sale hasta que se resuelva.</td>
+      </tr>
+      <tr>
+        <td><strong>Requiere validación de Tráfico</strong></td>
+        <td>No es lo mismo que crítico: crítico es «este camión no sale», esto es «este camión no sale <strong>solo</strong>, que lo mire alguien». La planilla queda pendiente en <span class="ruta">Operación → Validaciones</span>.</td>
       </tr>
       <tr>
         <td><strong>Foto si falla</strong></td>
         <td>Si ese punto falla, el chofer <strong>no puede firmar</strong> hasta adjuntar la foto. Es lo que evita la falla anotada que después nadie puede reconstruir.</td>
+      </tr>
+      <tr>
+        <td><strong>Foto siempre</strong></td>
+        <td>La foto se pide salga como salga el punto: el interior del furgón en cada salida, por ejemplo. Podés fijar un <strong>mínimo</strong> y un <strong>máximo</strong> de fotos.</td>
+      </tr>
+      <tr>
+        <td><strong>Texto de ayuda</strong></td>
+        <td>La advertencia o instrucción que se le muestra al chofer junto al punto: «en caso de presentar alguna alarma, avisar de inmediato a su operador de tráfico».</td>
       </tr>
     </tbody>
   </table>
@@ -1825,7 +1965,7 @@ pre.flujo {
 
   <p>
     En la pestaña <span class="ui">Catálogos</span> se editan las listas que el
-    sistema ofrece al cargar algo. Son siete:
+    sistema ofrece al cargar algo. Son ocho:
   </p>
 
   <table>
@@ -1838,6 +1978,7 @@ pre.flujo {
       <tr><td><strong>Puestos</strong></td><td>El legajo. Cada puesto define con qué <strong>rol</strong> entra la persona al sistema.</td></tr>
       <tr><td><strong>Motivos de licencia</strong></td><td>El historial laboral.</td></tr>
       <tr><td><strong>Tipos de combustible</strong></td><td>La carga de combustible.</td></tr>
+      <tr><td><strong>Clasificación de viaje</strong></td><td>Cómo agrupás tus viajes por ruta: «Ida Brasil», «Nacional». El sistema trae dos genéricas para renombrar; las tuyas las armás vos.</td></tr>
     </tbody>
   </table>
 
@@ -2102,19 +2243,68 @@ pre.flujo {
 
   <ol class="pasos">
     <li>Abrí el viaje y tocá <span class="ui">Checklist</span>.</li>
-    <li>Recorré los puntos (luces, frenos, cubiertas, aceite, matafuego, documentación, acoplado… o los que haya definido tu empresa). Todos empiezan en <strong>N/A</strong>: marcá <span class="ui">OK</span> o <span class="ui">Falla</span> en los que revises.</li>
-    <li>Si algo está mal, marcá <span class="ui">Falla</span> y describí el problema —podés dictarlo—. En los puntos que lo pidan, <strong>sacá la foto</strong>: sin ella no vas a poder firmar, y la pantalla te avisa.</li>
-    <li>Firmá con el dedo en el recuadro y tocá <span class="ui">Aprobar y firmar</span>.</li>
+    <li>Si tu empresa lo pide, decí si <strong>viajás con acompañante</strong> y cargá sus datos (ver abajo).</li>
+    <li>Recorré los puntos (luces, frenos, cubiertas, aceite, matafuego, documentación, acoplado… o los que haya definido tu empresa, agrupados por bloque). Todos empiezan en <strong>N/A</strong>: contestá los que revises.</li>
+    <li>Si algo está mal, contestalo y describí el problema —podés dictarlo—. En los puntos que lo pidan, <strong>sacá la foto</strong>: sin ella no vas a poder firmar, y la pantalla te avisa cuántas faltan.</li>
+    <li>Si hay <strong>declaraciones</strong> para aceptar, marcalas: sin eso no se puede firmar.</li>
+    <li>Usá <strong>Otras observaciones</strong> para cualquier otro punto que consideres importante.</li>
+    <li>Firmá con el dedo en el recuadro y tocá <span class="ui">Firmar planilla</span>.</li>
   </ol>
 
-  <p>El checklist queda con tu firma y la hora, como <strong>aprobado</strong> o <strong>rechazado</strong>.</p>
+  <div class="clave">
+    <span class="et">Ojo: no siempre el botón dice OK y Falla</span>
+    Depende de cómo esté escrita la pregunta. «¿Tiene pérdidas de aceite?» se contesta
+    <span class="ui">Sí</span> o <span class="ui">No</span>, y ahí el <strong>Sí es la
+    respuesta mala</strong>. Fijate en el color: <strong>verde</strong> es que está
+    todo bien, <strong>rojo</strong> es que hay algo para avisar. El color nunca miente,
+    la palabra depende de la pregunta.
+  </div>
+
+  <p>La planilla queda con tu firma y la hora, y puede terminar de tres maneras:</p>
+
+  <table>
+    <thead><tr><th>Cómo queda</th><th>Qué significa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="punto verde"></span> <strong>Aprobada</strong></td><td>Todo en orden. Ya podés iniciar el viaje.</td></tr>
+      <tr><td><span class="punto naranja"></span> <strong>Esperando validación</strong></td><td>Firmaste, pero <strong>la unidad no está liberada</strong>. No te dirijas al cliente hasta que tu operador de tráfico la valide.</td></tr>
+      <tr><td><span class="punto rojo"></span> <strong>Rechazada</strong></td><td>Falló un punto crítico. El viaje no se puede iniciar: avisale al despacho.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="aviso">
+    <span class="et">«Esperando validación» no es «listo»</span>
+    Es la confusión más cara de esta planilla: firmaste, la pantalla dice que quedó
+    firmada, y parece que ya está. <strong>No está.</strong> Mientras diga
+    <em>esperando validación</em>, el botón <span class="ui">Iniciar</span> sigue
+    bloqueado y la unidad no puede ir a cargar. Llamá a tráfico.
+  </div>
 
   <div class="aviso">
     <span class="et">Los puntos marcados «Crítico»</span>
-    Algunos puntos vienen con la etiqueta <strong>Crítico</strong> en rojo. Si marcás
-    <span class="ui">Falla</span> en uno de ellos, el checklist queda
-    <strong>rechazado</strong> y el viaje no se puede iniciar: avisale al despacho.
-    No es un error tuyo —es exactamente para lo que sirve el checklist—.
+    Algunos puntos vienen con la etiqueta <strong>Crítico</strong> en rojo. Si contestás
+    mal uno de ellos, el checklist queda <strong>rechazado</strong> y el viaje no se
+    puede iniciar: avisale al despacho. No es un error tuyo —es exactamente para lo
+    que sirve el checklist—.
+  </div>
+
+  <h4>Si viajás con acompañante</h4>
+
+  <p>
+    Cuando tu empresa lo permite, la planilla te pregunta si viajás acompañado. Marcá
+    que sí y cargá a cada persona con <span class="ui">Agregar acompañante</span>.
+  </p>
+
+  <ul>
+    <li>Si la persona <strong>ya está en el sistema</strong> —otro chofer, alguien de la empresa— buscala por su nombre: el documento y la foto del DNI salen de su legajo y <strong>no hace falta que cargues nada más</strong>.</li>
+    <li>Si no está —un familiar—, cargá nombre y documento a mano y adjuntá la foto del DNI con el botón de la tarjeta.</li>
+    <li>Marcá <strong>«ya le pedí el seguro a mi operador de tráfico»</strong> cuando lo hayas hecho. Según cómo esté configurada tu empresa, sin eso no vas a poder firmar.</li>
+  </ul>
+
+  <div class="nota">
+    <span class="et">Declarar un acompañante puede frenar la salida</span>
+    En algunas empresas, declarar un acompañante deja la planilla
+    <strong>esperando validación de Tráfico</strong> aunque esté todo lo demás en
+    orden. La pantalla te lo avisa <strong>antes</strong> de firmar, no después.
   </div>
 
   <h3>Salir: <span class="ui">Iniciar</span></h3>
@@ -2352,6 +2542,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
       <tr><td>Panel</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>Indicadores <span class="plan gestion">Gestión</span></td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
       <tr><td>Viajes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="si">✓</td></tr>
+      <tr><td>Validaciones</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
       <tr><td>Incidentes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td></tr>
       <tr><td>Alertas</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="si">✓</td><td class="no">—</td></tr>
       <tr><td>Mensajes</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
@@ -2456,7 +2647,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
   </p>
 
   <div class="cierre">
-    <strong>Manual de Usuario · CamioNex</strong> — Versión 5.9.2026<br>
+    <strong>Manual de Usuario · CamioNex</strong> — Versión 7.9.2026<br>
     NorthAr Consulting · info@northar.com.ar · www.northar.com.ar
   </div>
 </section>
