@@ -1,0 +1,150 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Páginas temáticas públicas (components/landing/PaginaTema.vue).
+//
+// Reutilizan `.legal` para el cuerpo del artículo —la medida de lectura, el
+// interlineado y las anclas de los títulos son exactamente los mismos
+// problemas— y agregan acá sólo lo que un texto legal no necesita: migas de
+// pan, tablas de datos y bloques de ejemplo.
+//
+// El contenido llega por slot desde las páginas, así que estos estilos NO
+// pueden ir en un <style scoped> del componente: van globales, acotados a
+// `.tema`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Migas de pan ────────────────────────────────────────────────────────────
+// Van sobre la banda oscura del encabezado, de ahí los blancos con opacidad y
+// no los tokens del tema.
+.tema-migas {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+
+  a {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+
+    &:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+  }
+}
+
+.tema {
+  // ── Tablas ────────────────────────────────────────────────────────────────
+  // El desglose del costo por kilómetro es una tabla de verdad y tiene que
+  // seguir siéndolo: es la forma en que Google la puede levantar como
+  // fragmento destacado, cosa que una grilla de <div> no permite.
+  //
+  // El envoltorio con scroll propio es obligatorio: sin él, en un teléfono la
+  // tabla desborda y hace scrollear horizontalmente la página entera, que es
+  // exactamente lo que penaliza la evaluación móvil.
+  .tema-tabla {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border: 1px solid rgb(var(--v-theme-borderColor));
+    border-radius: 12px;
+  }
+
+  table {
+    width: 100%;
+    min-width: 30rem;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  th,
+  td {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgb(var(--v-theme-borderColor));
+  }
+
+  th {
+    font-weight: 600;
+    background: rgba(var(--v-theme-primary), 0.05);
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  // Los importes se leen comparándolos entre sí: alineados a la derecha y con
+  // cifras de ancho fijo, para que las unidades queden en la misma columna.
+  .tema-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  tfoot td {
+    font-weight: 700;
+    background: rgba(var(--v-theme-primary), 0.05);
+    border-top: 2px solid rgb(var(--v-theme-borderColor));
+  }
+
+  // ── Resultado destacado ───────────────────────────────────────────────────
+  // El número que la persona vino a buscar. Se separa del texto porque es la
+  // respuesta, no un paso más del razonamiento.
+  .tema-resultado {
+    margin: 1.75rem 0;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    background: rgba(var(--v-theme-primary), 0.08);
+    border: 1px solid rgba(var(--v-theme-primary), 0.22);
+  }
+
+  .tema-resultado__valor {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: rgb(var(--v-theme-primary));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tema-resultado__pie {
+    margin: 0.35rem 0 0;
+    font-size: 0.9375rem;
+    color: rgb(var(--v-theme-textSecondary));
+  }
+
+  // ── Fórmula ───────────────────────────────────────────────────────────────
+  .tema-formula {
+    margin: 1.5rem 0;
+    padding: 1.1rem 1.25rem;
+    border-radius: 12px;
+    border: 1px dashed rgb(var(--v-theme-borderColor));
+    background: rgb(var(--v-theme-surface));
+    text-align: center;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  // ── Lista de comprobación ─────────────────────────────────────────────────
+  // Los inventarios de documentación (qué vence en una flota) se leen salteados,
+  // buscando el ítem propio. La viñeta con ícono los hace barrer más rápido que
+  // un <ul> corrido.
+  .tema-items {
+    margin: 1.25rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tema-items li {
+    display: flex;
+    gap: 0.7rem;
+    margin-bottom: 0.7rem;
+
+    &::before {
+      content: "";
+      flex: 0 0 0.45rem;
+      height: 0.45rem;
+      margin-top: 0.62rem;
+      border-radius: 50%;
+      background: rgb(var(--v-theme-primary));
+    }
+  }
+}

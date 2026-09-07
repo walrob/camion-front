@@ -346,6 +346,39 @@ const MODULOS = [
   },
 ];
 
+/**
+ * Páginas temáticas, enlazadas desde la portada.
+ *
+ * No es un menú: es la salida hacia las tres páginas que explican en serio los
+ * problemas que las tarjetas de arriba resuelven en una línea. Sirve para dos
+ * cosas a la vez —el visitante que quiere entender antes de probar, y el
+ * buscador, que reparte autoridad de la portada hacia adentro del sitio— y por
+ * eso el texto del enlace dice de qué trata la página en vez de "ver más".
+ */
+const GUIAS = [
+  {
+    icono: "mdi-calendar-alert",
+    titulo: "Control de vencimientos: CNRT, LiNTI, RTO y seguros",
+    texto:
+      "Todo lo que vence en una flota argentina, por unidad y por chofer, y por qué el Excel no alcanza.",
+    ruta: "/control-vencimientos-cnrt",
+  },
+  {
+    icono: "mdi-receipt-text-outline",
+    titulo: "Rendición de gastos de viaje del chofer",
+    texto:
+      "Qué tiene que llevar una rendición, qué se pierde con el cuaderno y cómo se arma sola.",
+    ruta: "/rendicion-de-viajes",
+  },
+  {
+    icono: "mdi-calculator-variant-outline",
+    titulo: "Costo por kilómetro de un camión",
+    texto:
+      "La fórmula, el desglose de fijos y variables, un ejemplo con números y los cinco errores típicos.",
+    ruta: "/costo-por-kilometro",
+  },
+];
+
 const DIFERENCIAL = [
   "Rendición de gastos y adelantos del chofer — ningún competidor internacional la resuelve",
   "Legajo con habilitaciones argentinas: LiNTI, CNRT, psicofísico, carga peligrosa",
@@ -933,6 +966,12 @@ useDatosEstructurados(datosEstructurados);
                 por un ticket que no aparece: el número sale del sistema y se
                 firma.
               </p>
+              <p class="text-body-1 lp-medida mb-5">
+                <NuxtLink to="/rendicion-de-viajes" class="lp-enlace">
+                  Cómo se hace la rendición de gastos de un viaje
+                  <v-icon size="16">mdi-arrow-right</v-icon>
+                </NuxtLink>
+              </p>
               <div class="d-flex flex-column ga-2">
                 <div class="d-flex align-start ga-3">
                   <v-icon color="success" size="20" class="mt-1"
@@ -976,6 +1015,12 @@ useDatosEstructurados(datosEstructurados);
                 contra el viaje y contra los kilómetros. El costo por kilómetro
                 sale solo, por flota, por camión y por chofer — que es como se
                 cotiza una tarifa que no te deje afuera.
+              </p>
+              <p class="text-body-1 lp-medida mb-5">
+                <NuxtLink to="/costo-por-kilometro" class="lp-enlace">
+                  Cómo se calcula el costo por kilómetro de un camión
+                  <v-icon size="16">mdi-arrow-right</v-icon>
+                </NuxtLink>
               </p>
               <div class="d-flex flex-column ga-2">
                 <div class="d-flex align-start ga-3">
@@ -1089,6 +1134,53 @@ useDatosEstructurados(datosEstructurados);
               </div>
               <p class="text-body-2 text-medium-emphasis mb-0">{{ m.texto }}</p>
             </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </section>
+
+    <!-- ── Guías ─────────────────────────────────────────────────────────── -->
+    <!--
+      La salida hacia las páginas temáticas. Va acá, después de los módulos y
+      antes del diferencial, porque es el punto donde alguien ya entendió qué
+      hace el producto y todavía no está listo para mirar precios.
+    -->
+    <section class="py-16 bg-surface border-y">
+      <v-container>
+        <div class="text-center mb-12">
+          <h2 v-reveal class="lp-h2 mb-3">Guías del oficio</h2>
+          <p
+            v-reveal="80"
+            class="lp-lead text-medium-emphasis lp-medida-centro mb-0"
+          >
+            Cómo se resuelven, con o sin nosotros, los tres problemas que más
+            plata cuestan en una flota.
+          </p>
+        </div>
+
+        <v-row>
+          <v-col v-for="(g, i) in GUIAS" :key="g.ruta" cols="12" md="4">
+            <NuxtLink :to="g.ruta" class="text-decoration-none">
+              <v-card
+                v-reveal="i * 110"
+                border
+                flat
+                rounded="lg"
+                class="lp-card pa-7 h-100"
+              >
+                <v-icon size="30" color="primary" class="mb-4">
+                  {{ g.icono }}
+                </v-icon>
+                <div class="lp-h3 mb-3">{{ g.titulo }}</div>
+                <p class="text-body-1 text-medium-emphasis mb-4">
+                  {{ g.texto }}
+                </p>
+                <span class="lp-enlace">
+                  Leer la guía
+                  <v-icon size="16">mdi-arrow-right</v-icon>
+                </span>
+              </v-card>
+            </NuxtLink>
           </v-col>
         </v-row>
       </v-container>

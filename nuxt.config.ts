@@ -2,6 +2,8 @@
 import { config as loadEnv } from "dotenv";
 import { resolve } from "path";
 
+import { RUTAS_A_PRERRENDERIZAR } from "./seo/paginas";
+
 // Detectar archivo .env según NODE_ENV
 const envFile = `.env.${process.env.NODE_ENV || "development"}`;
 loadEnv({ path: resolve(process.cwd(), envFile) });
@@ -60,9 +62,13 @@ export default defineNuxtConfig({
    *   el buscador encontró enlazada desde otro lado.
    */
   routeRules: {
-    "/": { prerender: true },
-    "/politica-de-privacidad": { prerender: true },
-    "/terminos-y-condiciones": { prerender: true },
+    // Qué se pre-renderiza sale de `seo/paginas.ts`, la misma lista que arma el
+    // sitemap y los enlaces del pie. Antes estaba escrita a mano acá y repetida
+    // más abajo en `nitro.prerender.routes`: agregar una página exigía
+    // acordarse de los dos lugares, y olvidarse de uno no da ningún error.
+    ...Object.fromEntries(
+      RUTAS_A_PRERRENDERIZAR.map((r) => [r, { prerender: true }]),
+    ),
 
     ...Object.fromEntries(
       RUTAS_PRIVADAS.flatMap((r) => {
@@ -157,8 +163,13 @@ export default defineNuxtConfig({
         // descartan las rutas relativas y la tarjeta sale sin imagen. Este era
         // el motivo real de que las previsualizaciones salieran en blanco.
         { property: "og:image", content: `${ORIGEN}/og-camionex.png` },
-        { property: "og:image:width", content: "1200" },
-        { property: "og:image:height", content: "630" },
+        // Las medidas reales del archivo. Estaban declaradas como 1200×630 —el
+        // tamaño canónico de una tarjeta— pero la imagen es de 1730×909, y las
+        // plataformas usan estos valores para reservar el espacio antes de
+        // descargarla: si no coinciden, la vista previa salta o se recorta.
+        { property: "og:image:width", content: "1730" },
+        { property: "og:image:height", content: "909" },
+        { property: "og:image:type", content: "image/png" },
         {
           property: "og:image:alt",
           content:
@@ -256,7 +267,10 @@ export default defineNuxtConfig({
      */
     prerender: {
       crawlLinks: false,
-      routes: ["/", "/politica-de-privacidad", "/terminos-y-condiciones"],
+      // `/sitemap.xml` es una ruta de servidor (`server/routes/sitemap.xml.ts`)
+      // y no un archivo estático: pre-renderizarla la deja congelada en el
+      // build, así que en producción se sirve sin ejecutar nada.
+      routes: [...RUTAS_A_PRERRENDERIZAR, "/sitemap.xml"],
       // La landing consulta `/plans/public` desde el cliente; si la API no está
       // disponible durante el build, eso no debe frenar el despliegue (R7.3).
       failOnError: false,

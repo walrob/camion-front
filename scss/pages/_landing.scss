@@ -372,3 +372,31 @@ section[id] {
     opacity: 1;
   }
 }
+
+// ── Enlace de continuación ──────────────────────────────────────────────────
+// Los enlaces hacia las páginas temáticas (`/costo-por-kilometro` y compañía).
+// Se ven como enlace y no como botón a propósito: un botón promete una acción,
+// y esto lleva a leer. La flecha lo separa del resto del párrafo.
+.lp-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgb(var(--v-theme-primary));
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  // Dentro de una tarjeta enlazada entera, el hover lo dispara la tarjeta.
+  .lp-card:hover & {
+    text-decoration: underline;
+  }
+}
+
+// Las tarjetas de guía son un enlace completo: el título tiene que seguir
+// leyéndose como texto y no heredar el color del <a> que las envuelve.
+a .lp-card {
+  color: rgb(var(--v-theme-textPrimary));
+}

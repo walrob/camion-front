@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 import { CONTACTO } from "~/composables/useContacto";
+import { PAGINAS_PUBLICAS } from "~~/seo/paginas";
 
 /**
  * Layout de las páginas públicas: landing, planes, contacto y legales.
@@ -50,6 +51,17 @@ const SECCIONES = [
   { texto: "Preguntas", ancla: "#faq" },
   { texto: "Contacto", ancla: "#contacto" },
 ];
+
+/**
+ * Páginas temáticas, para la columna "Recursos" del pie.
+ *
+ * Salen del registro y no de una lista escrita acá: una página que está en el
+ * sitemap pero a la que no apunta ningún enlace interno es una página huérfana
+ * —se rastrea tarde y se posiciona peor—, y el pie es lo único que aparece en
+ * todas las páginas del sitio. Al agregar una entrada con `enlacePie` en
+ * `seo/paginas.ts`, el enlace aparece solo.
+ */
+const RECURSOS = PAGINAS_PUBLICAS.filter((p) => p.enlacePie);
 
 useHead({
   titleTemplate: (t?: string) => (t ? `${t} | CamioNex` : "CamioNex"),
@@ -177,7 +189,27 @@ useHead({
             </div>
           </v-col>
 
-          <v-col cols="6" md="3">
+          <!--
+            Recursos: las páginas temáticas. Es el enlace interno que las saca
+            de ser huérfanas, y con un texto de ancla que dice de qué tratan
+            —"Control de vencimientos", no "leer más"—, porque el texto del
+            enlace es una de las señales de qué trata la página que apunta.
+          -->
+          <v-col cols="6" md="2">
+            <div class="text-subtitle-2 font-weight-medium mb-2">Recursos</div>
+            <div class="d-flex flex-column ga-1">
+              <NuxtLink
+                v-for="r in RECURSOS"
+                :key="r.ruta"
+                :to="r.ruta"
+                class="text-body-2 text-medium-emphasis"
+              >
+                {{ r.enlacePie }}
+              </NuxtLink>
+            </div>
+          </v-col>
+
+          <v-col cols="6" md="2">
             <div class="text-subtitle-2 font-weight-medium mb-2">Legales</div>
             <div class="d-flex flex-column ga-1">
               <NuxtLink
@@ -195,7 +227,7 @@ useHead({
             </div>
           </v-col>
 
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="2">
             <div class="text-subtitle-2 font-weight-medium mb-2">Contacto</div>
             <div class="d-flex flex-column ga-1">
               <a

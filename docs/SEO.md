@@ -1,6 +1,6 @@
 # CamioNex — SEO
 
-> Estado al 02/09/2026. Qué se hizo en el código, qué falta hacer **fuera** del
+> Estado al 07/09/2026. Qué se hizo en el código, qué falta hacer **fuera** del
 > código y qué queda pendiente por decisión.
 
 Este documento existe porque buena parte del posicionamiento no se resuelve
@@ -90,6 +90,53 @@ descartan.
   título, descripción y canónica propias, enlazada desde el pie. Es el texto más
   extenso del sitio y el que puede responder consultas de cola larga.
 
+### Segunda tanda (07/09/2026): contenido y registro único
+
+- **`seo/paginas.ts`** — el registro de páginas públicas. La misma lista estaba
+  escrita a mano en cuatro lugares que no se hablaban (`routeRules`,
+  `nitro.prerender.routes`, `sitemap.xml` y el pie), y agregar una página exigía
+  acordarse de los cuatro. Ahora sale de acá. Es un módulo plano, sin imports,
+  porque `nuxt.config.ts` se evalúa antes de que existan los alias de Nuxt.
+- **`server/routes/sitemap.xml.ts`** — el sitemap se genera desde ese registro y
+  se pre-renderiza en el build, así que en producción se sirve estático igual
+  que antes. `public/sitemap.xml` se eliminó: un sitemap incompleto no da error,
+  simplemente deja páginas sin descubrir, y esa es la falla que se venía.
+- **Tres páginas temáticas**, con `PaginaTema.vue` como molde (encabezado con
+  migas visibles, índice con anclas y cierre con llamada a la acción):
+
+  | Ruta | Consulta que ataca | Palabras |
+  |---|---|---|
+  | `/control-vencimientos-cnrt` | "control de vencimientos CNRT", "cuándo vence la LiNTI" | ~1.400 |
+  | `/rendicion-de-viajes` | "rendición de gastos de viaje camión", "planilla de gastos del chofer" | ~1.500 |
+  | `/costo-por-kilometro` | "cómo calcular el costo por kilómetro de un camión" | ~1.570 |
+
+  Cada una con `title` y `description` propios, canónica, `BreadcrumbList` y
+  `FAQPage`; `/costo-por-kilometro` suma `HowTo`, que es el tipo que describe
+  una fórmula con pasos.
+- **El ejemplo numérico del costo por kilómetro se calcula, no se escribe.** Los
+  totales salen de `computed` sobre los renglones. Si fueran literales, tocar un
+  renglón dejaría la tabla sin cerrar, y una página que enseña a hacer una
+  cuenta y se equivoca en la suya pierde lo único que vino a construir.
+- **Enlaces internos.** Las páginas nuevas se enlazan desde la sección "Guías
+  del oficio" de la portada, desde el cuerpo de las secciones que les
+  corresponden y desde la columna "Recursos" del pie —que se dibuja sola desde
+  el registro—, con texto de ancla que dice de qué trata la página. Y las tres
+  se enlazan entre sí. Una página que está en el sitemap pero a la que no apunta
+  ningún enlace interno se rastrea tarde y se posiciona peor.
+- **`og:image:width` / `height`** declaraban 1200×630 y el archivo mide
+  1730×909. Las plataformas usan esos valores para reservar el espacio antes de
+  descargar la imagen: si no coinciden, la vista previa salta o recorta.
+
+#### Lo que se decidió NO hacer
+
+La versión anterior de este documento proponía una página
+`/software-gestion-flotas` para la consulta de cabeza. **No se creó, a
+propósito**: la portada ya se titula "Software de gestión de flotas de
+camiones" y apunta exactamente a esa consulta. Dos páginas del mismo sitio
+compitiendo por el mismo término se reparten las señales y las dos bajan.
+La consulta de cabeza la defiende `/`; las páginas temáticas atacan lo que la
+portada no puede decir sin desenfocarse.
+
 ### Correcciones de fondo que salieron al paso
 
 - `composables/functions.ts` llamaba a `useRuntimeConfig()` **a nivel de módulo**,
@@ -124,7 +171,12 @@ Sin esto, nada de lo anterior posiciona. En orden de urgencia:
    intención local que hoy se está perdiendo entera.
 6. **Rehacer las piezas gráficas**, que siguen con la marca vieja:
    - `public/og-camionex.png` — el archivo se renombró, **la imagen sigue
-     diciendo FleetLog**. Es lo que se ve al compartir por WhatsApp. 1200×630.
+     diciendo FleetLog**. Es lo que se ve al compartir por WhatsApp. Al
+     rehacerla, exportarla en **1200×630** y bajo **300 kB**: hoy mide 1730×909
+     y pesa 1,14 MB, y varios clientes de WhatsApp descartan la vista previa de
+     una imagen tan grande antes de terminar de bajarla. Si se cambia el tamaño,
+     actualizar `og:image:width` / `og:image:height` en `nuxt.config.ts`, que
+     ahora declaran las medidas reales del archivo.
    - `public/images/logos/FletLog*.png` — los cinco archivos.
    - Los favicons y los íconos de `android-chrome-*`.
 
@@ -158,23 +210,25 @@ componente de Vuetify en las ~50 pantallas de la aplicación: exige QA visual
 completo, no una verificación de build. Es la decisión de mayor impacto que queda
 pendiente y conviene tomarla aparte, con tiempo de prueba.
 
-### Una sola página no alcanza para competir
+### Más contenido — el trabajo que sigue
 
-Hoy hay tres URL públicas. Una página sola no puede rankear para todo el abanico
-de consultas del rubro, porque cada consulta quiere una página que la responda
-específicamente. Las que faltan, en orden de valor:
+Las tres páginas temáticas están (§2). Lo que sigue es cola larga, y ya no es
+trabajo de arquitectura sino de escribir:
 
 | Página sugerida | Consulta que ataca |
 |---|---|
-| `/software-gestion-flotas` | "software de gestión de flotas" (cabeza) |
-| `/control-vencimientos-cnrt` | "control de vencimientos CNRT / LiNTI" |
-| `/rendicion-de-viajes` | "rendición de gastos de viaje camión" |
-| `/costo-por-kilometro` | "cómo calcular el costo por kilómetro de un camión" |
-| `/blog/...` | cola larga: normativa, costos, gestión de choferes |
+| `/planilla-oea-afip` | "planilla OEA 7 puntos", "OEA AFIP transporte" |
+| `/app-para-choferes` | "app para choferes de camión", "checklist digital camión" |
+| `/mantenimiento-preventivo-flota` | "plan de mantenimiento preventivo de camiones" |
+| `/blog/...` | normativa, costos, gestión de choferes |
 
-`useCanonical()`, `organizacionJsonLd()` y `migasJsonLd()` ya están listos para
-que cada una las use. Al agregarlas hay que sumarlas a `nitro.prerender.routes`,
-a `sitemap.xml` y a `RUTAS_PUBLICAS_POR_PREFIJO`.
+**Para agregar una página nueva**: crearla usando `LandingPaginaTema`, sumarla a
+`PAGINAS_PUBLICAS` en `seo/paginas.ts` —eso ya la pre-renderiza, la publica en
+el sitemap y la enlaza en el pie— y agregar su prefijo a
+`RUTAS_PUBLICAS_POR_PREFIJO` en `composables/useRutasPublicas.ts`, o el
+middleware global manda a login justo al visitante que llegó desde una búsqueda.
+Esos dos lugares siguen separados a propósito: el segundo es la pieza donde un
+error no rompe una pantalla sino que deja el sistema abierto, y se testea aparte.
 
 ### Enlaces entrantes
 
@@ -187,11 +241,16 @@ por la empresa.
 
 ## 5. Al cambiar el dominio, tocar estos cuatro lugares
 
-No hay una sola fuente de verdad porque dos de los archivos son estáticos:
+No hay una sola fuente de verdad porque los tres primeros se evalúan en
+contextos distintos —el build, la aplicación y Nitro— y ninguno puede importar
+el composable de los otros:
 
 - `nuxt.config.ts` → `ORIGEN`
 - `composables/useSeoSitio.ts` → `SITIO.origen`
+- `server/routes/sitemap.xml.ts` → `ORIGEN`
 - `public/robots.txt` → la línea `Sitemap:`
-- `public/sitemap.xml` → los `<loc>`
 
 Y en `docs/manual-usuario/manual.html`, la etiqueta `<link rel="canonical">`.
+
+(Los `<loc>` del sitemap ya no están en la lista: se arman con ese `ORIGEN` y
+las rutas de `seo/paginas.ts`.)

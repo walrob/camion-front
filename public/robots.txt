@@ -2,7 +2,7 @@
 # https://www.camionex.com.ar
 #
 # Si cambia el dominio, cambia también en `nuxt.config.ts` (ORIGEN),
-# `composables/useSeoSitio.ts` (SITIO.origen) y `public/sitemap.xml`.
+# `composables/useSeoSitio.ts` (SITIO.origen) y `server/routes/sitemap.xml.ts`.
 
 User-agent: *
 
@@ -39,4 +39,7 @@ Disallow: /*?utm_
 # en el informe de cobertura y hunde la evaluación de "apta para móviles".
 Allow: /_nuxt/
 
+# El sitemap ya no es un archivo estatico: lo genera `server/routes/sitemap.xml.ts`
+# a partir de `seo/paginas.ts`, la misma lista que decide que se pre-renderiza y
+# que se enlaza en el pie. Se sirve en la URL de siempre.
 Sitemap: https://www.camionex.com.ar/sitemap.xml

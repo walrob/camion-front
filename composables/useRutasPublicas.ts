@@ -19,6 +19,14 @@ export const RUTAS_PUBLICAS_POR_PREFIJO = [
   '/planes',
   '/contacto',
   '/para-transportistas',
+  // Páginas temáticas públicas. Tienen que estar acá o el middleware global
+  // manda a login a quien llega desde una búsqueda — que es exactamente el
+  // visitante para el que se escribieron. Van declaradas también en
+  // `seo/paginas.ts`, que es lo que las pre-renderiza y las publica en el
+  // sitemap.
+  '/control-vencimientos-cnrt',
+  '/rendicion-de-viajes',
+  '/costo-por-kilometro',
   '/politica-de-privacidad',
   '/terminos-y-condiciones',
   '/auth/login',
