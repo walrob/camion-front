@@ -94,14 +94,25 @@ export default defineNuxtConfig({
         "width=device-width, initial-scale=1, interactive-widget=resizes-content",
 
       /**
+       * El título se compone: cada página aporta el suyo y la marca se agrega
+       * al final.
+       *
        * Antes esto era la cadena literal `"CamioNex"`, y eso hacía dos daños a
        * la vez: pisaba el título propio de cada página y, cuando la página no
        * declaraba ninguno, el HTML salía **sin `<title>`**. El título es la
        * señal más fuerte del `<head>` y lo que se lee en el resultado de
-       * búsqueda: ahora cada página aporta el suyo y la marca se agrega al final.
+       * búsqueda.
+       *
+       * `title` es el que se usa cuando la página no declara ninguno, y va
+       * **sin** la marca porque la agrega `titleTemplate`: con la marca acá,
+       * esas páginas salían como "CamioNex — … | CamioNex".
+       *
+       * El template va como cadena con `%s` y no como función: `app.head` se
+       * serializa al build, así que no admite funciones —TypeScript lo marca— y
+       * una función acá se pierde en el HTML que ve el buscador.
        */
-      title: "CamioNex — Software de gestión de flotas de camiones",
-      titleTemplate: (t?: string) => (t ? `${t} | CamioNex` : "CamioNex"),
+      title: "Software de gestión de flotas de camiones",
+      titleTemplate: "%s | CamioNex",
 
       meta: [
         {
