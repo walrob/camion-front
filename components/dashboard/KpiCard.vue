@@ -14,6 +14,19 @@ const props = withDefaults(
     delta?: number;
     /** Si subir es "bueno" (verde) o "malo" (rojo). Default: true. */
     deltaGoodWhenUp?: boolean;
+    /** Contra qué compara el delta, ej. "vs. 7 días previos". */
+    deltaHint?: string;
+    /**
+     * Serie del período para el sparkline de fondo. Un KPI sin forma no dice si
+     * el número viene subiendo o si es un pico aislado: son dos decisiones
+     * distintas con el mismo valor.
+     */
+    series?: number[];
+    /**
+     * El plan no incluye la métrica. Se muestra un candado en vez del valor: un
+     * cero sería un dato falso, no un dato acotado.
+     */
+    locked?: boolean;
   }>(),
   { tone: "primary", deltaGoodWhenUp: true },
 );
@@ -22,6 +35,28 @@ const deltaClass = computed(() => {
   if (props.delta === undefined) return "";
   const up = props.delta >= 0;
   return up === props.deltaGoodWhenUp ? "text-success" : "text-error";
+});
+
+/**
+ * Sparkline en SVG y no con la librería de gráficos: son hasta ocho por
+ * pantalla y ninguno necesita ejes, tooltip ni interacción. Montar ocho
+ * instancias de ApexCharts para dibujar ocho polilíneas cuesta más que todo el
+ * resto del panel junto.
+ */
+const spark = computed(() => {
+  const s = props.series;
+  if (!s || s.length < 2 || props.locked) return null;
+  const max = Math.max(...s);
+  const min = Math.min(...s);
+  // Serie plana: la línea va al medio en vez de dividir por cero.
+  const rango = max - min || 1;
+  const paso = 100 / (s.length - 1);
+  const puntos = s.map((v, i) => {
+    const x = (i * paso).toFixed(2);
+    const y = (22 - ((v - min) / rango) * 18).toFixed(2);
+    return `${x},${y}`;
+  });
+  return { linea: puntos.join(" "), area: `0,24 ${puntos.join(" ")} 100,24` };
 });
 
 // El tono se propaga como variable CSS para teñir el velo, la barra superior y
@@ -39,14 +74,43 @@ const toneVar = computed(() => ({ "--tone": `var(--v-theme-${props.tone})` }));
     class="pa-4 h-100 kpi-card"
     :style="toneVar"
   >
-    <div class="d-flex align-center justify-space-between">
+    <!--
+      Sparkline al fondo de la tarjeta: la forma del período detrás del número,
+      sin robarle lugar al valor ni al delta.
+    -->
+    <svg
+      v-if="spark"
+      class="kpi-card__spark"
+      viewBox="0 0 100 24"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <polygon :points="spark.area" :fill="`rgba(var(--tone), 0.12)`" />
+      <polyline
+        :points="spark.linea"
+        fill="none"
+        :stroke="`rgb(var(--tone))`"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        vector-effect="non-scaling-stroke"
+      />
+    </svg>
+
+    <div class="d-flex align-center justify-space-between kpi-card__body">
       <div style="min-width: 0">
         <div class="text-caption text-medium-emphasis text-truncate">
           {{ label }}
         </div>
-        <div class="text-h5 font-weight-bold mt-1">{{ value }}</div>
+        <div v-if="locked" class="d-flex align-center mt-1">
+          <v-icon size="20" color="medium-emphasis" class="mr-1">
+            mdi-lock-outline
+          </v-icon>
+          <span class="text-body-2 text-medium-emphasis">No incluido</span>
+        </div>
+        <div v-else class="text-h5 font-weight-bold mt-1">{{ value }}</div>
         <div
-          v-if="delta !== undefined"
+          v-if="delta !== undefined && !locked"
           class="text-caption mt-1 d-flex align-center"
           :class="deltaClass"
         >
@@ -54,6 +118,9 @@ const toneVar = computed(() => ({ "--tone": `var(--v-theme-${props.tone})` }));
             {{ delta >= 0 ? "mdi-trending-up" : "mdi-trending-down" }}
           </v-icon>
           {{ Math.abs(delta) }}%
+          <span v-if="deltaHint" class="text-medium-emphasis ml-1">
+            {{ deltaHint }}
+          </span>
         </div>
       </div>
       <v-avatar rounded="lg" size="44" class="kpi-card__icon">
@@ -93,6 +160,21 @@ const toneVar = computed(() => ({ "--tone": `var(--v-theme-${props.tone})` }));
       rgb(var(--tone)) 0%,
       rgba(var(--tone), 0.25) 100%
     );
+  }
+
+  // El sparkline vive detrás del contenido, pegado al borde inferior.
+  &__spark {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 38px;
+    width: 100%;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  &__body {
+    position: relative;
+    z-index: 1;
   }
 
   &__icon {

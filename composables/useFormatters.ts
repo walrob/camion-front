@@ -76,5 +76,5 @@ export const useFormatters = () => {
     return d.includes("T") ? `${date} ${formatHourLocal(d)}` : date;
   };
 
-  return { money, moneyFixed, moneyK, num, fmtDate, fmtDateTime };
+  return { money, moneyFixed, moneyK, num, fmtDate, fmtDateTime, locale };
 };

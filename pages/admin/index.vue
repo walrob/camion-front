@@ -4,10 +4,17 @@ import { storeToRefs } from "pinia";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
 import ChartCard from "~/components/dashboard/ChartCard.vue";
+import StackedStrip from "~/components/dashboard/StackedStrip.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
-import { useDashboardStore } from "~/stores/dashboard";
+import {
+  useDashboardStore,
+  dashboardRangeOptions,
+  type DashboardRange,
+  type TrendMetric,
+} from "~/stores/dashboard";
 import { truckStatusOptions } from "~/composables/useFleetStatus";
 import { incidentSeverityOptions } from "~/composables/useIncidentStatus";
+import { alertLevelOptions } from "~/composables/useAlertStatus";
 import { useAlertSocket } from "~/composables/useAlertSocket";
 import { useIncidentSocket } from "~/composables/useIncidentSocket";
 
@@ -15,18 +22,10 @@ definePageMeta({ layout: "admin" });
 useHead({ title: "Dashboard" });
 
 const dashboardStore = useDashboardStore();
-const { overview, loading } = storeToRefs(dashboardStore);
+const { overview, loading, range } = storeToRefs(dashboardStore);
 
-// Colores de gráficos: paleta suave y armónica derivada del tema (tintes más
-// claros que la UI, para que los donuts no se vean saturados ni "arcoíris").
-const { chartHex: hex } = useChartColors();
-
-const donutBase = {
-  legend: { position: "bottom" as const },
-  chart: { type: "donut" as const, fontFamily: "inherit" },
-  stroke: { width: 0 },
-  dataLabels: { enabled: false },
-};
+const { money, num } = useFormatters();
+const { lineOptions } = useTrendChart();
 
 const totalTrucks = computed(() =>
   Object.values(overview.value?.trucksByStatus ?? {}).reduce(
@@ -35,97 +34,172 @@ const totalTrucks = computed(() =>
   ),
 );
 
-const truckChart = computed(() => {
-  const data = overview.value?.trucksByStatus ?? {};
-  const present = truckStatusOptions.filter((o) => (data[o.value] ?? 0) > 0);
-  return {
-    series: present.map((o) => data[o.value]),
-    options: {
-      ...donutBase,
-      labels: present.map((o) => o.label),
-      colors: present.map((o) => hex(o.color)),
-    },
-  };
+// ───────────────────────── KPIs del período ─────────────────────────
+//
+// La fila de KPIs mide el **período**: cuánto se gastó, cuántos viajes se
+// cerraron, cuántos incidentes entraron. Los contadores accionables (alertas,
+// incidentes abiertos, demorados, mantenimientos) no están acá a propósito:
+// viven en "Requiere atención", con su drill-down. Antes estaban en los dos
+// lados y la primera pantalla mostraba los mismos cinco números dos veces.
+
+const dias = computed(() =>
+  range.value === "today" ? 1 : range.value === "30d" ? 30 : 7,
+);
+
+const deltaHint = computed(() =>
+  range.value === "today" ? "vs. ayer" : `vs. ${dias.value} días previos`,
+);
+
+/**
+ * Variación porcentual contra el período anterior.
+ *
+ * Con un período anterior en cero no se devuelve nada: la variación contra cero
+ * es infinita y "+100 %" sería inventarla. En ese caso la tarjeta muestra sólo
+ * el valor, que es lo honesto.
+ */
+const variacion = (m?: TrendMetric | null) => {
+  if (!m || !m.previousValue) return undefined;
+  return Number((((m.value - m.previousValue) / m.previousValue) * 100).toFixed(1));
+};
+
+const trends = computed(() => overview.value?.trends);
+
+const disponibilidad = computed(() => {
+  const total = totalTrucks.value;
+  if (!total) return 0;
+  const libres = overview.value?.trucksByStatus?.available ?? 0;
+  return Math.round((libres / total) * 100);
 });
 
-const ALERT_LEVELS = [
-  { key: "red", label: "Crítica", color: "error" },
-  { key: "orange", label: "Alta", color: "warning" },
-  { key: "yellow", label: "Media", color: "amber" },
-  { key: "green", label: "Aviso", color: "success" },
-];
-
-const alertChart = computed(() => {
-  const data = overview.value?.alerts?.byLevel ?? {};
-  const present = ALERT_LEVELS.filter((l) => (data[l.key] ?? 0) > 0);
-  return {
-    series: present.map((l) => data[l.key]),
-    options: {
-      ...donutBase,
-      labels: present.map((l) => l.label),
-      colors: present.map((l) => hex(l.color)),
-    },
-  };
-});
-
-const { money } = useFormatters();
-const sevCount = (v: string) => overview.value?.incidents?.bySeverity?.[v] ?? 0;
-
-// KPIs con drill-down a la sección correspondiente.
 const kpis = computed(() => {
-  const o = overview.value;
-  if (!o) return [];
+  const t = trends.value;
+  if (!overview.value || !t) return [];
   return [
     {
-      label: "Camiones",
-      value: totalTrucks.value,
-      icon: "mdi-truck-outline",
-      tone: "primary",
-      to: "/admin/flota",
+      label: "Gasto del período",
+      // `null` = la bitácora no entra en el plan: candado, no un cero.
+      locked: t.expenses === null,
+      value: money(t.expenses?.value ?? 0),
+      delta: variacion(t.expenses),
+      // Gastar más no es una buena noticia: el verde va cuando baja.
+      deltaGoodWhenUp: false,
+      series: t.expenses?.series,
+      icon: "mdi-cash-multiple",
+      tone: "success",
+      to: t.expenses === null ? "/upgrade/trip_log" : "/admin/liquidaciones",
     },
     {
-      label: "Incidentes abiertos",
-      value: o.incidents.open,
+      label: "Viajes finalizados",
+      value: num(t.tripsFinished.value),
+      delta: variacion(t.tripsFinished),
+      series: t.tripsFinished.series,
+      icon: "mdi-check-decagram-outline",
+      tone: "primary",
+      to: "/admin/viajes",
+    },
+    {
+      label: "Incidentes reportados",
+      value: num(t.incidentsReported.value),
+      delta: variacion(t.incidentsReported),
+      deltaGoodWhenUp: false,
+      series: t.incidentsReported.series,
       icon: "mdi-alert-circle-outline",
       tone: "error",
       to: "/admin/incidentes",
     },
     {
-      label: "Alertas activas",
-      value: o.alerts.active,
-      icon: "mdi-bell-ring-outline",
-      tone: "warning",
-      to: "/admin/alertas",
-    },
-    {
-      label: "Viajes demorados",
-      value: o.delayedTrips,
-      icon: "mdi-clock-alert-outline",
+      label: "Disponibilidad de flota",
+      value: `${disponibilidad.value}%`,
+      // Es la foto de hoy, no un acumulado: no lleva delta ni serie mientras no
+      // exista historial de estados de la flota.
+      icon: "mdi-truck-check-outline",
       tone: "info",
-      to: "/admin/viajes",
-    },
-    {
-      label: "Gasto del día",
-      value: money(o.todayExpenses),
-      icon: "mdi-cash-multiple",
-      tone: "success",
-      to: "/admin/liquidaciones",
-    },
-    {
-      label: "Mant. próximos",
-      value: o.upcomingMaintenance,
-      icon: "mdi-wrench-clock",
-      tone: "secondary",
-      to: "/admin/mantenimiento",
-    },
-    {
-      label: "Choferes con novedades",
-      value: o.driversWithNews,
-      icon: "mdi-account-alert-outline",
-      tone: "accent",
-      to: "/admin/choferes",
+      to: "/admin/flota",
     },
   ];
+});
+
+// ───────────────────── Cortes de estado del panel ─────────────────────
+//
+// Los cuatro responden la misma pregunta —cómo se reparte un total chico entre
+// pocas categorías— así que se dibujan igual. La flota estaba en dona: con una
+// decena de unidades el ángulo no agregaba nada sobre el largo del tramo, y la
+// leyenda de la dona no muestra las cifras, que es lo que se termina leyendo.
+// Unificar acá no es cosmética: tres formas distintas para la misma pregunta
+// obligan a re-aprender a leer cada tarjeta.
+
+const truckItems = computed(() => {
+  const data = overview.value?.trucksByStatus ?? {};
+  return truckStatusOptions.map((o) => ({
+    label: o.label,
+    value: data[o.value] ?? 0,
+    color: o.color,
+    to: "/admin/flota",
+  }));
+});
+
+const alertItems = computed(() => {
+  const data = overview.value?.alerts?.byLevel ?? {};
+  return alertLevelOptions.map((l) => ({
+    label: l.label,
+    value: data[l.value] ?? 0,
+    color: l.color,
+    to: "/admin/alertas",
+  }));
+});
+
+const incidentItems = computed(() => {
+  const data = overview.value?.incidents?.bySeverity ?? {};
+  // De crítica a baja: la barra se lee en el mismo orden en que se prioriza.
+  return [...incidentSeverityOptions].reverse().map((s) => ({
+    label: s.label,
+    value: data[s.value] ?? 0,
+    color: s.color,
+    to: "/admin/incidentes",
+  }));
+});
+
+const expirationItems = computed(() => {
+  const e = overview.value?.expirations;
+  return [
+    { label: "Vencidos", value: e?.expired ?? 0, color: "error" },
+    { label: "≤ 7 días", value: e?.in7 ?? 0, color: "warning" },
+    { label: "8 a 30 días", value: e?.in30 ?? 0, color: "amber" },
+    { label: "31 a 90 días", value: e?.in90 ?? 0, color: "info" },
+  ].map((i) => ({ ...i, to: "/admin/documentos" }));
+});
+
+// ───────────────────── Evolución del gasto ─────────────────────
+//
+// La serie llega como números sin fecha —un valor por día, terminando hoy—, así
+// que las etiquetas se reconstruyen acá desde el largo del rango.
+
+const expenseChart = computed(() => {
+  const serie = trends.value?.expenses?.series ?? [];
+  // Con un solo punto no hay evolución que mostrar; la card queda en vacío.
+  if (serie.length < 2) return { series: [], options: lineOptions([]) };
+
+  const hoy = new Date();
+  const etiquetas = serie.map((_, i) => {
+    const d = new Date(hoy);
+    d.setDate(d.getDate() - (serie.length - 1 - i));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate(),
+    ).padStart(2, "0")}`;
+  });
+
+  return {
+    series: [{ name: "Gasto", data: serie }],
+    options: lineOptions(etiquetas, { color: "success", asMoney: true }),
+  };
+});
+
+const expenseEmptyText = computed(() => {
+  if (trends.value?.expenses === null)
+    return "La bitácora de gastos no está incluida en tu plan.";
+  if (range.value === "today")
+    return "Elegí 7 o 30 días para ver la evolución del gasto.";
+  return "Sin gastos registrados en el período.";
 });
 
 // Feed accionable "Requiere atención": solo lo que tiene pendientes.
@@ -149,7 +223,7 @@ const attention = computed(() => {
     },
     {
       label: "mantenimientos próximos",
-      count: o.upcomingMaintenance,
+      count: o.upcomingMaintenance ?? 0,
       icon: "mdi-wrench",
       tone: "info",
       to: "/admin/mantenimiento",
@@ -171,6 +245,8 @@ const attention = computed(() => {
   ].filter((i) => i.count > 0);
 });
 
+const cambiarRango = (r: DashboardRange) => dashboardStore.getOverview(r);
+
 // Refresco en vivo del panel ante nuevas alertas/incidentes.
 const alertSocket = useAlertSocket(() => dashboardStore.getOverview());
 const incidentSocket = useIncidentSocket(() => dashboardStore.getOverview());
@@ -191,14 +267,39 @@ onBeforeUnmount(() => {
     <PageHeader
       title="Panel gerencial"
       subtitle="Estado operativo de la flota en tiempo real"
-    />
+    >
+      <template #actions>
+        <!--
+          El rango manda sobre los KPIs del período (valor, variación y
+          sparkline). Los contadores de estado —alertas, incidentes abiertos—
+          son siempre "ahora": no dependen de esta elección.
+        -->
+        <v-btn-toggle
+          :model-value="range"
+          density="compact"
+          variant="outlined"
+          divided
+          mandatory
+          @update:model-value="cambiarRango"
+        >
+          <v-btn
+            v-for="r in dashboardRangeOptions"
+            :key="r.value"
+            :value="r.value"
+            size="small"
+          >
+            {{ r.label }}
+          </v-btn>
+        </v-btn-toggle>
+      </template>
+    </PageHeader>
 
     <div v-if="loading && !overview" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
     <template v-else-if="overview">
-      <!-- KPIs -->
+      <!-- KPIs del período, con variación y forma -->
       <v-row dense class="mb-2">
         <v-col v-for="k in kpis" :key="k.label" cols="6" md="3">
           <KpiCard
@@ -207,6 +308,11 @@ onBeforeUnmount(() => {
             :icon="k.icon"
             :tone="k.tone"
             :to="k.to"
+            :delta="k.delta"
+            :delta-good-when-up="k.deltaGoodWhenUp ?? true"
+            :delta-hint="deltaHint"
+            :series="k.series"
+            :locked="k.locked"
           />
         </v-col>
       </v-row>
@@ -255,53 +361,75 @@ onBeforeUnmount(() => {
           </v-card>
         </v-col>
 
-        <!-- Flota por estado -->
-        <v-col cols="12" md="4">
+        <!-- Evolución del gasto del período -->
+        <v-col cols="12" md="8">
           <ChartCard
-            title="Flota por estado"
-            type="donut"
-            :height="260"
-            :series="truckChart.series"
-            :options="truckChart.options"
-            empty-text="Sin datos."
-            empty-icon="mdi-truck-outline"
-          />
-        </v-col>
-
-        <!-- Alertas por nivel -->
-        <v-col cols="12" md="4">
-          <ChartCard
-            title="Alertas por nivel"
-            type="donut"
-            :height="260"
-            :series="alertChart.series"
-            :options="alertChart.options"
-            expand-color="warning"
-            empty-text="Sin alertas activas."
-            empty-icon="mdi-check-circle-outline"
+            title="Gasto diario"
+            :caption="`(${dias === 1 ? 'hoy' : `últimos ${dias} días`})`"
+            type="line"
+            :height="280"
+            :series="expenseChart.series"
+            :options="expenseChart.options"
+            expand-color="success"
+            :empty-text="expenseEmptyText"
+            empty-icon="mdi-chart-line"
           />
         </v-col>
       </v-row>
 
-      <!-- Incidentes por severidad -->
+      <!--
+        Banda de composición: cuatro repartos de un total sobre pocas
+        categorías, los cuatro con la misma forma y una tarjeta cada uno. La
+        fila se lee de un saque porque no hay que aprender a leer cada tarjeta
+        por separado.
+
+        `sm="6"` no es un detalle de responsive: en pantallas angostas la banda
+        se acomoda sola en 2×2 y sigue siendo una banda, en vez de convertirse
+        en cuatro tarjetas apiladas que ya no se comparan entre sí.
+      -->
       <v-row dense>
-        <v-col cols="12" md="4">
-          <v-card border flat rounded="lg" class="pa-4">
-            <div class="text-subtitle-2 font-weight-bold mb-2">
-              Incidentes por severidad
-            </div>
-            <div class="d-flex flex-column ga-2 mt-2">
-              <div
-                v-for="s in incidentSeverityOptions"
-                :key="s.value"
-                class="d-flex align-center justify-space-between"
-              >
-                <v-chip :color="s.color" size="small" label>{{
-                  s.label
-                }}</v-chip>
-                <span class="font-weight-bold">{{ sevCount(s.value) }}</span>
-              </div>
-            </div>
+        <v-col cols="12" sm="6" md="3">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
+            <StackedStrip
+              title="Flota por estado"
+              :items="truckItems"
+              empty-text="Sin unidades cargadas."
+              empty-icon="mdi-truck-outline"
+            />
+          </v-card>
+        </v-col>
+
+        <!-- Vencimientos documentales: cuándo, no sólo cuántos -->
+        <v-col cols="12" sm="6" md="3">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
+            <StackedStrip
+              title="Vencimientos a 90 días"
+              :items="expirationItems"
+              empty-text="Nada por vencer en los próximos 90 días."
+              empty-icon="mdi-file-check-outline"
+            />
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" sm="6" md="3">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
+            <StackedStrip
+              title="Alertas activas"
+              :items="alertItems"
+              empty-text="Sin alertas activas."
+              empty-icon="mdi-bell-check-outline"
+            />
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" sm="6" md="3">
+          <v-card border flat rounded="lg" class="pa-4 h-100">
+            <StackedStrip
+              title="Incidentes abiertos"
+              :items="incidentItems"
+              empty-text="Sin incidentes abiertos."
+              empty-icon="mdi-shield-check-outline"
+            />
           </v-card>
         </v-col>
       </v-row>

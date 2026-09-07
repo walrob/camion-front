@@ -80,6 +80,8 @@ const expand = () => {
         </span>
       </div>
       <v-spacer />
+      <!-- Controles propios del gráfico (paso de la serie, unidad…). -->
+      <slot name="actions" />
       <!--
         El ícono se muestra siempre que haya algo que ampliar. Que el gráfico
         esté recortado o no lo aclara el `caption` ("Top 10"), no este botón:
