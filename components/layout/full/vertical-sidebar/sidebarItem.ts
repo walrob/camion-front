@@ -80,6 +80,16 @@ const sidebarItem: menu[] = [
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.AUDITOR],
   },
   {
+    // La bandeja de Tráfico: planillas firmadas cuya unidad sigue sin liberar.
+    // Va en Operación y pegada a Viajes porque es lo que los destraba: mientras
+    // una planilla esté ahí, ese camión no sale.
+    title: "Validaciones",
+    icon: ClipboardCheckIcon,
+    to: "/admin/validaciones",
+    feature: Feature.CHECKLISTS,
+    roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER],
+  },
+  {
     title: "Incidentes",
     icon: AlertTriangleIcon,
     to: "/admin/incidentes",

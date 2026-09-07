@@ -50,6 +50,19 @@ export const useSettingsStore = defineStore("settings", {
     /** Valor efectivo de un ajuste, ya tipado. */
     bool: (state) => (key: string) =>
       state.settings.find((s) => s.key === key)?.value === "true",
+    /**
+     * Igual que `bool`, pero con un default explícito para cuando el ajuste
+     * todavía no cargó.
+     *
+     * `bool()` supone `false` ante la ausencia, que es el default de casi
+     * todos. Los que valen `true` por defecto tienen que decirlo acá: si no,
+     * en la app del chofer —que arranca sin señal— se apagan solos, y una
+     * función que la empresa habilitó desaparece de la pantalla.
+     */
+    boolCon: (state) => (key: string, porDefecto: boolean) => {
+      const def = state.settings.find((s) => s.key === key);
+      return def ? def.value === "true" : porDefecto;
+    },
     num: (state) => (key: string) =>
       Number(state.settings.find((s) => s.key === key)?.value ?? 0),
     str: (state) => (key: string) =>

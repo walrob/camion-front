@@ -1,24 +1,79 @@
 import { defineStore } from "pinia";
 import { useGeneralStore } from "@/stores/general";
+import type { ChecklistAnswer, ChecklistItemType } from "@/stores/checklist";
 
 export interface ChecklistTemplateItem {
   id?: string;
   key: string;
   label: string;
+  /** Bloque de la planilla. `null` = lista corrida, como venían todas. */
+  section?: string | null;
+  /** Advertencia o instrucción que se muestra junto al punto. */
+  helpText?: string | null;
+  type?: ChecklistItemType;
+  /** La respuesta que indica que está todo bien: «¿tiene pérdidas?» espera NO. */
+  expectedAnswer?: ChecklistAnswer;
   order: number;
   isCritical: boolean;
   requiresPhotoOnFail: boolean;
+  /** Foto obligatoria siempre, salga como salga el punto. */
+  requiresPhoto?: boolean;
+  minPhotos?: number;
+  maxPhotos?: number | null;
+  /** En falla, la planilla queda esperando a Tráfico en vez de resolverse sola. */
+  requiresValidationOnFail?: boolean;
   isActive: boolean;
 }
 
 export interface ChecklistTemplate {
   id: string;
   name: string;
+  /**
+   * Identidad del formulario en el sistema documental de la empresa:
+   * «RIP 06 09 01», «REV.04» y su fecha. Quien opera bajo OEA no pide «el
+   * checklist», pide el formulario por su código y revisión.
+   */
+  code?: string | null;
+  revision?: string | null;
+  revisionDate?: string | null;
   /** `null` = plantilla general, aplica a toda unidad sin plantilla propia. */
   vehicleType: string | null;
   isActive: boolean;
   items: ChecklistTemplateItem[];
 }
+
+/** Los tipos de punto, para dibujar el selector del editor. */
+export const TIPOS_DE_PUNTO: {
+  value: ChecklistItemType;
+  label: string;
+  help: string;
+  icon: string;
+}[] = [
+  {
+    value: "condition",
+    label: "Pregunta",
+    help: "Se contesta sí/no y se evalúa contra la respuesta esperada.",
+    icon: "mdi-help-circle-outline",
+  },
+  {
+    value: "ack",
+    label: "Declaración",
+    help: "El chofer la acepta. Sin aceptarla no puede firmar.",
+    icon: "mdi-gavel",
+  },
+  {
+    value: "photo",
+    label: "Fotos",
+    help: "Sólo adjuntos: por ejemplo, el interior del furgón.",
+    icon: "mdi-camera",
+  },
+  {
+    value: "text",
+    label: "Texto libre",
+    help: "Un campo para que escriba lo que considere importante.",
+    icon: "mdi-text-box-outline",
+  },
+];
 
 /**
  * Plantillas del checklist pre-viaje (docs/CONFIGURACION.md §6.1).
