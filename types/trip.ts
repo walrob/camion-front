@@ -11,6 +11,13 @@ export interface Trip extends Audit {
   clientId?: string | null;
   origin: string;
   destination: string;
+  /**
+   * Cómo agrupa la empresa este viaje por su ruta: «Ida Brasil», «Nacional».
+   * Es una clave del catálogo `trip_classification`, no un enum: las rutas de
+   * una empresa no son las de otra. `origin`/`destination` siguen siendo el
+   * detalle del recorrido; esto es la categoría con la que se reporta.
+   */
+  classification?: string | null;
   cargoDescription?: string;
   plannedStartAt?: string | null;
   plannedEndAt?: string | null;

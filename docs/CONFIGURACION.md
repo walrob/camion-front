@@ -595,16 +595,35 @@ configurable que nadie sabe configurar no se usa.
 
 ---
 
-## 14. Lo que falta del lado del backend
+## 14. La mitad del backend de la fase F
 
-Las dos piezas de la fase F se construyeron en el front. Ninguna funciona de
-punta a punta hasta que el backend aporte su mitad, y conviene que esté escrito
-para que no se descubra en una demo.
+Las dos piezas de la fase F se construyeron primero en el front y quedaron un
+tiempo sin su mitad del backend. Las dos están cerradas; queda escrito qué era
+cada una, porque el modo de falla —un formulario que manda campos que el
+servidor descarta sin decir nada— es fácil de repetir.
 
-| Para | Qué falta |
-|---|---|
-| **Viaje internacional** (§7.6) | Registrar `trip.international` en el catálogo de ajustes —hoy el front lo lee y, si no existe, se comporta como `false`, que es el default seguro—; sumar `destinationCountry` (char(2), nullable) y `currency` a la entidad `Trip` y a su DTO de alta y edición. Sin eso el formulario nunca muestra los campos. |
-| **Configuración efectiva** (§13) | `GET /superadmin/companies/:id/settings`, sólo `superadmin`, devolviendo lo mismo que `GET /settings` para la empresa indicada: `{ groups, settings }` con `value` e `isDefault` por ajuste. La ficha ya lo consume y, si el endpoint no está, muestra el aviso y sigue funcionando. |
+**Cerrado — viaje internacional (§7.6).** El backend ya aporta su mitad:
+`trip.international` está en el catálogo de ajustes, y `Trip` tiene
+`destinationCountry` (char(2)) y `currency`, en la entidad y en los DTO de alta
+y edición (migración `1788200000000-ViajeInternacional`). El síntoma era mudo:
+el `ValidationPipe` corre con `whitelist: true`, así que los dos campos que el
+formulario venía mandando se descartaban sin error y el alta respondía 201 como
+si los hubiera guardado. El servidor ahora rechaza país o moneda con el ajuste
+apagado —en vez de ignorarlos en silencio— y valida que la moneda esté entre las
+que la empresa habilitó, porque una moneda sin cotización se propondría en cada
+gasto para después no poder convertir ninguno.
+
+**Cerrado — configuración efectiva (§13).** `GET /superadmin/companies/:id/settings`
+existe, sólo `superadmin` y sólo lectura, y devuelve `{ groups, settings }` con
+`value` e `isDefault` por ajuste: la misma forma que `GET /settings`. Se resuelve
+con el **mismo** `describe()` que consume la pantalla del cliente, corrido dentro
+del contexto de esa empresa (`runAsCompany`); una consulta paralela armada aparte
+podría devolver algo distinto de lo que el cliente ve, que es justo el
+malentendido que el endpoint viene a evitar. La lectura queda auditada como la
+ficha: mirar la configuración de un cliente es el mismo privilegio que mirar sus
+datos.
+
+Con esto **la fase F queda completa de punta a punta**.
 
 Siguen abiertos, sin fecha, los `⏳` de §4: `settlement.rounding`,
 `fuel.requireTicketPhoto` —que antes que un ajuste necesita que la carga y su

@@ -42,6 +42,7 @@ export const CATALOG = {
   EMPLOYEE_POSITION: "employee_position",
   LEAVE_TYPE: "leave_type",
   FUEL_TYPE: "fuel_type",
+  TRIP_CLASSIFICATION: "trip_classification",
 } as const;
 
 /** Un tipo de gasto con este comportamiento **resta** en la rendición. */
@@ -147,6 +148,18 @@ export const FUEL_TYPE_FALLBACK = [
   { key: "adblue", label: "AdBlue", color: "secondary", icon: "mdi-water" },
 ];
 
+/**
+ * Cómo agrupa la empresa sus viajes por ruta.
+ *
+ * Lo que trae el sistema es apenas un punto de partida para renombrar: las
+ * rutas de una empresa no son las de otra. «Ida Brasil», «Vuelta Brasil» o
+ * «Nacional/UY/PY» las arma cada una en Configuración.
+ */
+export const TRIP_CLASSIFICATION_FALLBACK = [
+  { key: "national", label: "Nacional", color: "primary", icon: "mdi-map-marker" },
+  { key: "international", label: "Internacional", color: "info", icon: "mdi-earth" },
+];
+
 const comoItems = (
   base: { key: string; label: string; color?: string; icon?: string; behavior?: string }[],
 ): CatalogItem[] =>
@@ -160,6 +173,7 @@ const porDefecto = (): Record<string, CatalogItem[]> => ({
   [CATALOG.EMPLOYEE_POSITION]: comoItems(EMPLOYEE_POSITION_FALLBACK),
   [CATALOG.LEAVE_TYPE]: comoItems(LEAVE_TYPE_FALLBACK),
   [CATALOG.FUEL_TYPE]: comoItems(FUEL_TYPE_FALLBACK),
+  [CATALOG.TRIP_CLASSIFICATION]: comoItems(TRIP_CLASSIFICATION_FALLBACK),
 });
 
 const leerCache = (): Record<string, CatalogItem[]> | null => {

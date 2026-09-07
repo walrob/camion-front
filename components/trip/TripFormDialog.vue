@@ -12,6 +12,7 @@ import FormSection from "~/components/shared/FormSection.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import { useSettingsStore } from "~/stores/settings";
 import { useCurrencyStore } from "~/stores/currency";
+import { useCatalogStore, CATALOG } from "~/stores/catalog";
 import { usePaises } from "~/composables/usePaises";
 import type { Trip } from "~/types/trip";
 
@@ -44,6 +45,7 @@ const emptyForm = (): Partial<Trip> => ({
   trailerId: null,
   origin: "",
   destination: "",
+  classification: null,
   cargoDescription: "",
   plannedStartAt: "",
   plannedEndAt: "",
@@ -66,6 +68,14 @@ const monedaViatico = computed(() =>
   currencyStore.porCodigo(form.value.perDiemCurrency || currencyStore.base),
 );
 
+// Cómo clasifica la empresa este viaje por su ruta: «Ida Brasil», «Vuelta
+// Brasil», «Nacional». Es un catálogo porque las rutas de una empresa no son
+// las de otra, y agregar la suya no puede pedir un deploy.
+const catalogStore = useCatalogStore();
+const clasificaciones = computed(() =>
+  catalogStore.activos(CATALOG.TRIP_CLASSIFICATION),
+);
+
 // Viaje internacional: país de destino y moneda del viaje (§7.6). Apagado —que
 // es el default— el formulario queda exactamente como era.
 const { paises } = usePaises();
@@ -73,6 +83,7 @@ const internacional = computed(() => settingsStore.bool("trip.international"));
 onMounted(() => {
   settingsStore.load();
   currencyStore.load();
+  catalogStore.load();
 });
 
 watch(
@@ -113,12 +124,17 @@ const buildPayload = (closeLeave: boolean) => {
 
   // Los campos del viaje internacional no viajan si la empresa no lo usa: un
   // país suelto en un viaje nacional sólo confunde al que después lo lee.
+  //
+  // Con la función activa, un campo vacío viaja como `null` y NO se borra la
+  // clave: es la diferencia entre «no lo toques» y «sacale el país». Borrando
+  // la clave, el backend hacía `Object.assign` sin ella y un país cargado por
+  // error no había forma de quitarlo desde el formulario.
   if (!internacional.value) {
     delete payload.destinationCountry;
     delete payload.currency;
   } else {
-    if (!payload.destinationCountry) delete payload.destinationCountry;
-    if (!payload.currency) delete payload.currency;
+    payload.destinationCountry = payload.destinationCountry || null;
+    payload.currency = payload.currency || null;
   }
 
   if (closeLeave) payload.closeLeave = true;
@@ -240,6 +256,20 @@ const onLeaveConfirm = async (payload: { resp: boolean }) => {
               :error-messages="formErrors.messages('destination')"
               label="Destino *"
               :rules="[r.isRequired]"
+            />
+          </v-col>
+          <!-- La categoría con la que la empresa agrupa y reporta sus viajes.
+               `origin`/`destination` siguen siendo el detalle del recorrido;
+               esto es la ruta como la nombra la operación. -->
+          <v-col cols="12" sm="6">
+            <v-select
+              v-model="form.classification"
+              :error-messages="formErrors.messages('classification')"
+              :items="clasificaciones"
+              item-title="label"
+              item-value="key"
+              label="Clasificación de ruta"
+              clearable
             />
           </v-col>
           <!-- Viaje internacional (docs/CONFIGURACION.md §7.6): aparece sólo si
