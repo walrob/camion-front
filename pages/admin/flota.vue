@@ -12,28 +12,28 @@ definePageMeta({
 
 useHead({ title: "Flota" });
 
-const tab = ref("trucks");
+const tab = ref("fleets");
 </script>
 
 <template>
   <div>
-    <PageHeader title="Flota" subtitle="Camiones, acoplados y flotas" />
+    <PageHeader title="Flota" subtitle="Flotas, camiones y acoplados" />
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
+      <v-tab value="fleets">Flotas</v-tab>
       <v-tab value="trucks">Camiones</v-tab>
       <v-tab value="trailers">Acoplados</v-tab>
-      <v-tab value="fleets">Flotas</v-tab>
     </v-tabs>
 
     <v-window v-model="tab">
+      <v-window-item value="fleets" eager>
+        <FleetFleetsTab />
+      </v-window-item>
       <v-window-item value="trucks" eager>
         <FleetTrucksTab />
       </v-window-item>
       <v-window-item value="trailers" eager>
         <FleetTrailersTab />
-      </v-window-item>
-      <v-window-item value="fleets" eager>
-        <FleetFleetsTab />
       </v-window-item>
     </v-window>
   </div>
