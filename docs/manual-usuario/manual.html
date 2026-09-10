@@ -652,7 +652,7 @@ pre.flujo {
       <tr><td>Combustible, Mantenimiento y Planillas OEA</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>Tablero de incidentes (kanban)</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td>RRHH: legajo y habilitaciones</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
-      <tr><td>Exportación a Excel</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
+      <tr><td>Exportación a Excel (todas las tablas)</td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
       <tr><td><strong>Configuración</strong>: ajustes, checklist y planilla OEA propios, catálogos, viático fijo <span class="pista">Ver cómo está configurada tu empresa no depende del plan; cambiarla, sí.</span></td><td class="no">—</td><td class="si">✓</td><td class="si">✓</td><td class="si">✓</td></tr>
 
       <tr class="grupo"><td colspan="5">Gestión</td></tr>
@@ -966,7 +966,17 @@ pre.flujo {
     <li>El campo de búsqueda espera un momento mientras escribís y después filtra. No hay que apretar Enter.</li>
     <li>Las columnas con flechita <strong>ordenan</strong> al hacer clic.</li>
     <li>La paginación está abajo de cada tabla.</li>
-    <li>Donde hay un botón <span class="ui">Excel</span>, lo que se descarga es <strong>lo que estás viendo</strong>, ya filtrado. <span class="plan operacion">Desde Operación</span></li>
+    <li>
+      <strong>Todas</strong> las tablas tienen un botón <span class="ui">Excel</span>.
+      Lo que se descarga es <strong>lo que estás viendo</strong>, ya filtrado.
+      <span class="plan operacion">Desde Operación</span>
+    </li>
+    <li>
+      En los listados de datos propios —flotas, camiones, acoplados, choferes,
+      legajos, permisos, asignaciones, documentos y planes de mantenimiento— el
+      mismo botón permite <strong>cargar desde Excel</strong>: bajás la
+      plantilla, la completás y la subís.
+    </li>
   </ul>
 
   <h3>Los colores de los estados</h3>
@@ -2129,9 +2139,44 @@ pre.flujo {
     <li><strong>Plan actual</strong> y estado de la cuenta.</li>
     <li><strong>Consumo</strong>: camiones y acoplados activos del mes.</li>
     <li><strong>Períodos</strong>: los meses facturados, pagos y pendientes.</li>
+    <li><strong>Datos de facturación</strong>: con qué razón social, CUIT y condición de IVA se te emite la factura.</li>
+    <li><strong>Comprobantes</strong>: las facturas de cada período, para ver o imprimir.</li>
     <li><span class="ui">Pagar</span> — abre el pago por <strong>Mercado Pago</strong> del período.</li>
     <li><span class="ui">Activar débito automático</span> — para no tener que acordarse todos los meses. Se puede cancelar cuando quieras.</li>
   </ul>
+
+  <h3>Tus datos de facturación</h3>
+
+  <p>
+    En la tarjeta <span class="ui">Datos de facturación</span> cargás
+    <strong>con qué datos querés que se te facture</strong>: razón social, CUIT,
+    condición frente al IVA, domicilio fiscal y el email al que llegan los avisos
+    de cobranza. Pueden ser distintos de los operativos —se opera desde un
+    depósito y se factura a la razón social— y por eso se piden aparte.
+  </p>
+
+  <div class="clave">
+    <span class="et">Completalo antes de la primera factura</span>
+    La <strong>condición frente al IVA</strong> es la que define si te corresponde
+    una factura <strong>A</strong> o una <strong>B</strong>. Si no está cargada, la
+    factura sale a nombre del nombre de la cuenta y puede no servirte para
+    descargar el IVA. La tarjeta te avisa qué falta.
+  </div>
+
+  <h3>Tus facturas</h3>
+
+  <p>
+    Una vez emitida la factura de un período, aparece en la tarjeta
+    <span class="ui">Comprobantes</span> con el botón <span class="ui">Ver</span>,
+    que la abre en PDF en una pestaña nueva para mirarla o imprimirla. No hace
+    falta pedirla por mail.
+  </p>
+
+  <p>
+    Si un período ya está pago y no ves el comprobante, es que todavía no se
+    emitió: la factura la emite la administración y se sube al período, así que
+    puede aparecer unos días después del pago.
+  </p>
 
   <div class="clave">
     <span class="et">El menú te avisa</span>
@@ -2628,9 +2673,57 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
 
   <h3>«¿Cómo saco la información a Excel?»</h3>
   <p>
-    Donde haya botón <span class="ui">Excel</span> (viajes, documentos por vencer, combustible,
-    indicadores) se descarga <strong>lo que estás viendo</strong>, con los filtros aplicados.
-    Está disponible desde el plan Operación.
+    Todas las tablas del sistema tienen el botón <span class="ui">Excel</span>, arriba
+    a la derecha. Se descarga <strong>lo que estás viendo</strong>, con los filtros
+    aplicados y sin el corte de la paginación. Está disponible desde el plan Operación.
+  </p>
+  <p>
+    Si el listado es muy grande el sistema no recorta el archivo en silencio: avisa
+    que <strong>acotes el período</strong>. Poné un rango de fechas en los filtros y
+    bajalo por partes, así sabés exactamente qué contiene cada archivo.
+  </p>
+
+  <h3>«¿Puedo cargar datos desde un Excel que ya tengo?»</h3>
+  <p>
+    Sí, en los listados de datos propios: <strong>flotas, camiones, acoplados,
+    choferes, legajos, permisos, asignaciones, documentos y planes de
+    mantenimiento</strong>. En el botón <span class="ui">Excel</span> elegí
+    <span class="ui">Descargar plantilla</span>, completala y subila con
+    <span class="ui">Cargar desde Excel</span>.
+  </p>
+  <ul>
+    <li>
+      Antes de guardar nada el sistema <strong>valida el archivo</strong> y te
+      muestra qué va a pasar: cuántas filas se crean, cuántas se actualizan y
+      qué filas tienen un problema, con el número de fila y el motivo.
+    </li>
+    <li>
+      Si en esa revisión alguna fila falla, <strong>no se carga ninguna</strong>.
+      Corregís el archivo y lo volvés a subir; no queda una carga a medias.
+    </li>
+    <li>
+      Si el problema aparece recién al guardar (algo raro: por ejemplo alguien
+      cargó el mismo camión mientras subías el archivo), la carga
+      <strong>se detiene en esa fila</strong> y el sistema te dice cuántas
+      alcanzó a guardar. Volver a subir el archivo completo es seguro: lo que ya
+      entró se actualiza, no se duplica.
+    </li>
+    <li>
+      Si una fila corresponde a algo que ya existe —la misma patente, el mismo
+      DNI— <strong>se actualiza</strong> en lugar de duplicarse. Por eso podés
+      bajar un listado, corregirlo en Excel y volver a subirlo.
+    </li>
+    <li>
+      Las columnas que el sistema calcula (estado, próximo vencimiento, fecha de
+      alta) salen en la descarga pero se ignoran al subir: las maneja el sistema.
+    </li>
+  </ul>
+  <p>
+    Lo que <strong>no</strong> se carga por Excel son los movimientos que el
+    sistema tiene que presenciar: viajes, rendiciones, órdenes de taller,
+    planillas OEA, cargas de combustible y accesos al sistema. Un viaje tiene
+    estados y checklist, una rendición se calcula sobre comprobantes, una
+    planilla OEA se firma en el celular y un acceso se da por invitación.
   </p>
 
   <h3>«¿Puedo imprimir este manual?»</h3>

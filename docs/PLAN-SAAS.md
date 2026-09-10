@@ -73,7 +73,7 @@
 | **No se envía el mail de invitación** | 6 | `EmailService.sendInvitacion` desde `InvitesService`. El envío **no propaga errores** y el token se sigue devolviendo: si el SMTP falla, la invitación ya es válida y el link se puede compartir a mano. |
 | **Las invitaciones no tenían pantalla** | 6 | `/admin/equipo`: usuarios con acceso, invitaciones pendientes con link copiable y alta con el rol recortado por el plan. Encuadrada como el camino de **quien no lleva legajo** (contador, despachante tercerizado, auditor); el personal propio sigue entrando por RRHH, que además arma el legajo. |
 | Correo en los tests de integración | — | `EMAIL_ENABLED=false` corta el envío en un solo punto (`EmailService.despachar`). Cada alta de empresa y cada invitación abrían una conexión SMTP real, con el riesgo de escribirle a una dirección de verdad usada como dato de prueba. |
-| Onboarding sin carga de logo | 6 | `PATCH /companies/me/logo` (multipart, la key de S3 la resuelve el backend) y una tarjeta opcional en `/initial`. La importación por Excel **no se hizo**: el paso 1 avisa que se puede pedir la carga asistida. |
+| Onboarding sin carga de logo | 6 | `PATCH /companies/me/logo` (multipart, la key de S3 la resuelve el backend) y una tarjeta opcional en `/initial`. La importación por Excel **ya está**: cada listado de datos propios tiene plantilla, validación previa y carga (ver "Excel en todas las tablas"). |
 | **El superadmin no puede reprocesar un aviso de MP fallido** | 9 | `GET /superadmin/mp-events` y `POST /superadmin/mp-events/:id/retry`, con pantalla en `/superadmin/pagos`. El reproceso pasa por el mismo camino que el reenvío de MP: la doble acreditación la sigue impidiendo el índice único de `payments.mpPaymentId`. |
 | Sin panel de pagos | 9 | `GET /superadmin/payments`: cobros de MP y conciliados a mano en un solo listado, con filtro por empresa, estado, medio y referencia. |
 | **Sin paginación** en empresas y cobranzas | 8 | Servidor: `{ items, meta }` con la misma forma que el resto de la API (`metaDePaginacion`). En cobranzas los totales se calculan sobre toda la deuda, no sobre la página. |
@@ -109,7 +109,7 @@
 | Alerta de producción del tripwire | 2 | Log `TENANT_LEAK` con prefijo estable y buscable + contadores estáticos (`TenantSubscriber.contadores()`) para el endpoint de salud. |
 | Medición del costo del `afterLoad` | 2 | Contador `filasVerificadas` incorporado; permite medirlo con datos reales en vez de suponerlo. |
 | Tests automatizados del gating | 3 | `test/plan-gating.e2e-spec.ts`, **24 casos**. |
-| Exportaciones Excel sin `EXPORT_EXCEL` | 3 | Gateadas en `trips` y `documents`. |
+| Exportaciones Excel sin `EXPORT_EXCEL` | 3 | Gateadas en todos los endpoints `*/export`. |
 | **R4.1** — reportes agregados sin declarar el recorte | 4 | `summary()` devuelve `coverage` con `from` efectivo, `retentionCutoff` y `truncatedByPlan`. La pantalla de indicadores muestra un aviso cuando el plan recortó los números. |
 | **R4.3** — excedente tras un downgrade | 4 | `ajustarExcedentePorDowngrade()`: apaga por antigüedad las reglas y pausa los planes que exceden el tope, **sin borrar nada**, y deja constancia en el histórico comercial. |
 | Tests automatizados de los límites | 4 | Incluidos en `plan-gating.e2e-spec.ts`. |
@@ -272,7 +272,11 @@ declaradas con su motivo en ese archivo.
   `/api/v1/` incluido (formato de Aturna) o sin él, con tests que lo fijan: si
   esa URL apunta a un 404, el cobro sale bien y **el pago no se acredita nunca,
   sin ningún error visible**.
-- **Sin comprobante fiscal**: se registra el pago, no se emite factura AFIP.
+- **Sin emisión fiscal automática**: se registra el pago y **se guarda el
+  comprobante que sube la administración** (§ Comprobante del abono), pero la
+  factura la emite una persona en AFIP. No hay integración con el web service de
+  facturación electrónica, y mientras el volumen sea de decenas de clientes
+  tampoco la necesita.
 - ~~**El superadmin no puede reprocesar un aviso fallido desde el panel**~~
   → cerrado el 14/8/2026: `/superadmin/pagos`, solapa «Avisos de Mercado Pago».
 - **Sin reintento propio**: si MP agota sus reenvíos con todos fallando, el pago
@@ -323,8 +327,8 @@ para tomar decisiones.
 > Cerrados el 14/8/2026: la paginación de empresas y cobranzas, la pantalla de
 > auditoría y el seeder del superadmin.
 
-- **El front no fue probado contra el backend**: las pantallas compilan y tipan, pero no
-  se abrió el panel en un navegador.
+- ~~**El front no fue probado contra el backend**~~ → cerrado: el panel se probó
+  en un navegador contra la API.
 - **El token de impersonación se copia a mano** desde la ficha: falta el botón que abra
   la sesión de soporte directamente.
 - ~~**Sin paginación** en el listado de empresas ni en cobranzas~~
@@ -405,15 +409,16 @@ abierto a internet es una decisión declarada, no un descuido.
 
 #### Pendiente de Fase 7
 
-- **Falta la imagen `public/og-camionex.png`**: las meta la referencian pero el archivo
-  no existe. Sin ella la previsualización sale sin imagen.
+- ~~**Falta la imagen `public/og-camionex.png`**~~ → cerrada: el archivo existe
+  (1730 × 909). Queda un detalle menor: pesa **1,2 MB** y la relación no es 1200 × 630,
+  así que conviene recomprimirla para que WhatsApp no descarte la previsualización.
 - **Sin Lighthouse**: no se midió el SEO ≥ 90 del criterio de aceptación.
 - **Sin prueba en un dispositivo real** con la PWA ya instalada, que es el caso difícil
   de R7.2 (manifest cacheado).
 - **No hay landings por segmento** (`/para-transportistas`) ni página `/planes`
   independiente: los planes viven como sección de la landing.
-- El dominio de `robots.txt` y `sitemap.xml` está puesto como
-  `www.camionex.com.ar`: hay que confirmarlo antes de publicar.
+- ~~El dominio de `robots.txt` y `sitemap.xml` hay que confirmarlo~~ → confirmado:
+  `www.camionex.com.ar` es el definitivo.
 
 ### Fase 6 — cómo quedó implementada
 
@@ -474,8 +479,9 @@ test paga su costo.
 - ~~**Sin verificación de email en el alta**~~ → cerrado el 14/8/2026. Quien no
   confirma no entra: el login lo dice y ofrece el reenvío.
 - **El onboarding guiado es de tres pasos con enlaces**, no formularios embebidos.
-  La carga de logo sí quedó embebida; **la importación de flota desde Excel no se
-  hizo** y el paso 1 avisa que se puede pedir la carga asistida.
+  La carga de logo quedó embebida. La importación de flota desde Excel ya existe,
+  pero **vive en cada listado**, no en el onboarding: el paso 1 lleva a Flota, y
+  ahí el botón Excel ofrece la plantilla y la carga.
 
 ### Fase 5 — cómo quedó implementada
 
@@ -531,8 +537,10 @@ podría haber quedado fuera del aislamiento sin que nadie lo notara.
 
 #### Pendiente de Fase 5
 
-- **Sin factura en PDF ni comprobantes en S3.** `Payment` e `invoiceUrl` existen como
-  modelo, pero no hay generación de PDF ni endpoint de carga de comprobante.
+- ~~**Sin factura en PDF ni comprobantes en S3**~~ → cerrado: el comprobante se
+  **sube**, no se genera (ver [§ Comprobante del abono](#comprobante-del-abono)).
+  Sigue sin emitirse la factura AFIP: el sistema registra el cobro y guarda el
+  PDF que emitió la administración.
 - **Sin endpoints de superadmin** para marcar pagado, emitir a mano o listar la
   cobranza de todas las empresas: corresponde a la Fase 8.
 - **El alta/baja de add-ons no tiene endpoint**: hoy se contrata por base de datos.
@@ -634,8 +642,10 @@ qué plan viene (MODELO-COMERCIAL §6.2). El texto de venta de cada módulo vive
 
 - El botón «Quiero activarlo» de la pantalla de upgrade lleva a contacto: el cambio de
   plan autogestionado es de la Fase 5 (facturación).
-- Los endpoints de exportación a Excel de `trips` y `documents` todavía **no** exigen
-  `EXPORT_EXCEL`; sólo están gateados los módulos completos.
+- Todos los endpoints `*/export` exigen `EXPORT_EXCEL` con `@RequiresFeature`,
+  además del gate del módulo. Los `*/import` **no** están gateados por plan: se
+  limitan por rol (admin y el rol dueño del módulo), porque cargar los propios
+  datos es parte del arranque y no una función premium.
 - Falta un test automatizado del gating (hoy verificado a mano contra la API).
 
 ### Fase 2 — cómo quedó implementada
@@ -2230,6 +2240,37 @@ vencimiento próximo, de pago recibido, de mora y de bloqueo.
 
 **Esfuerzo relativo: XL**. Se planifica por separado cuando exista el primer
 cliente Corporate real.
+
+### Comprobante del abono
+
+**Cerrado el 10/09/2026.** El cliente ya no tiene que pedir la factura por mail:
+la administración la sube al período y él se la baja de su propia pantalla.
+
+La decisión de fondo es que **el sistema no emite la factura**. Integrar el web
+service de AFIP es un proyecto en sí mismo —puntos de venta, tipos de
+comprobante, contingencia— y no es lo que hoy duele: lo que duele es que la
+factura exista en el mail de alguien y no en el sistema. Así que se resolvió la
+mitad que sí importa: donde vive el archivo y contra qué datos se emite.
+
+| Pieza | Archivo | Nota |
+|---|---|---|
+| Datos de facturación | `companies.invoiceTaxCondition`, `invoiceAddress` | Se suman a `invoiceName`, `invoiceCuit` e `invoiceEmail`, que ya existían. **Sin la condición frente al IVA no se sabe si va una A o una B**, así que con los tres campos viejos no se podía emitir. |
+| Pantalla del cliente | `components/billing/InvoiceDataCard.vue` en `/estado-plan` | Avisa qué falta en lugar de exigirlo: se puede operar sin completarlo, pero entonces la factura sale a nombre de la cuenta y sin condición de IVA. Los lee de `GET /companies/me` y **no de la sesión**, que se persiste en cada dispositivo. |
+| El archivo | `subscriptions.invoiceKey` (+ `invoiceNumber`, `invoiceUploadedAt`) | La columna se llamaba `invoiceUrl` y **nadie la escribía nunca**. Renombrada porque lo que guarda es la key de S3: un nombre que dice "url" termina dentro de un `href` que da 403. |
+| Carga | `POST /superadmin/companies/:id/billing/:subscriptionId/invoice` | Multipart, sólo PDF, la key la resuelve el backend. Auditada (`billing.invoice_uploaded`). |
+| Descarga | `GET /billing/subscriptions/:id/invoice` (cliente) y el equivalente en `superadmin` | Se sirve el archivo, **no una URL firmada**: el bucket no es público y una URL firmada que se filtra sigue valiendo hasta que expira. Mismo criterio que el PDF de la rendición. |
+| Baja | `DELETE .../invoice` | **El archivo queda en S3**: es documentación fiscal y borrarla por una carga equivocada sería irreversible. Se corta el vínculo y la key va a la bitácora, que es lo único que permite recuperarlo. |
+
+**El aislamiento es lo que se testeó.** Los tres métodos del servicio buscan el
+período **por id y por empresa**, porque el endpoint del superadmin recibe las
+dos cosas por la URL: si alguno filtrara sólo por id, pegarle con el id de un
+período ajeno dejaría subirle —o bajarle— la factura al cliente equivocado.
+`billing-invoice.service.spec.ts` lo fija con **10 casos**, cuatro de ellos
+cruzando empresa.
+
+**Los datos de facturación son de sólo lectura en el panel.** El superadmin los
+ve para emitir y ve qué le falta al cliente, pero no los edita: cambiárselos
+desde la plataforma sería facturarle a un CUIT que el cliente no eligió.
 
 ### Por qué la fase 10 espera
 
