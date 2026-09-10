@@ -23,6 +23,29 @@ export function extractErrorMessage(error: any): string {
 }
 
 /**
+ * Convierte el cuerpo de un error que llegó como `Blob` al error normal.
+ *
+ * Cuando la petición pide `responseType: "blob"`, axios envuelve **también el
+ * cuerpo del error** en un blob, así que `extractErrorMessage` no encuentra el
+ * `message` del backend y el usuario ve "[object Blob]" en lugar de "la
+ * descarga supera las 50.000 filas" o "el período todavía no tiene
+ * comprobante". Hay que llamar a esto antes de mostrar el error de cualquier
+ * descarga.
+ */
+export async function unwrapBlobError(error: any): Promise<any> {
+  const data = error?.response?.data;
+  if (!(data instanceof Blob)) return error;
+  try {
+    error.response.data = JSON.parse(await data.text());
+  } catch {
+    // Un blob que no es JSON (un 502 del proxy, por ejemplo): se deja en null
+    // para que el extractor caiga en su mensaje por código de estado.
+    error.response.data = null;
+  }
+  return error;
+}
+
+/**
  * Mapea errores de validación (422/400) a sus campos.
  * Soporta el formato de NestJS `class-validator` (`message: string[]` con el
  * nombre del campo al inicio) y el formato `{ errors: { campo: [...] } }`.

@@ -3,6 +3,7 @@ import { Feature } from "~/types/plan";
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import PageHeader from "~/components/shared/PageHeader.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import ResponsiveTable from "~/components/ResponsiveTable.vue";
 import ReportFilters from "~/components/shared/ReportFilters.vue";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
@@ -72,7 +73,21 @@ onMounted(async () => {
     <PageHeader
       title="Planillas OEA"
       subtitle="Control de seguridad y auditoría de camiones (Operador Económico Autorizado)"
-    />
+    >
+      <template #actions>
+        <!--
+          Solo descarga: una planilla OEA es un registro firmado en la app del
+          chofer, con fecha, ubicación y firma. Cargarla desde un Excel sería
+          fabricar evidencia de una inspección que nadie hizo.
+        -->
+        <TableExcelActions
+          export-url="oea/export/"
+          export-name="planillas-oea.xlsx"
+          :export-params="store.cleanParams()"
+          :disabled="!list.length"
+        />
+      </template>
+    </PageHeader>
 
     <RetentionNotice />
 

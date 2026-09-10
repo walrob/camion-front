@@ -11,6 +11,7 @@ import AssignTruckDialog from "~/components/hr/AssignTruckDialog.vue";
 import EmploymentMovementFormDialog from "~/components/hr/EmploymentMovementFormDialog.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type {
   Certification,
   TruckAssignment,
@@ -380,8 +381,18 @@ onMounted(() => hrStore.getEmployee(id));
 
         <!-- PERMISOS -->
         <v-window-item value="certs">
-          <div class="d-flex mb-3">
+          <div class="d-flex flex-wrap ga-2 mb-3">
             <v-spacer />
+            <TableExcelActions
+              export-url="hr/certifications/export/"
+              export-name="permisos.xlsx"
+              :export-params="{ employeeId: id }"
+              import-url="hr/certifications/import/"
+              template-url="hr/certifications/import/template/"
+              entidad="permisos"
+              :disabled="!certifications.length"
+              @imported="hrStore.getEmployee(id)"
+            />
             <v-btn color="primary" prepend-icon="mdi-plus" @click="openNewCert">
               Nuevo permiso
             </v-btn>
@@ -444,7 +455,20 @@ onMounted(() => hrStore.getEmployee(id));
             </div>
           </v-card>
 
-          <p class="text-subtitle-2 font-weight-bold mb-2">Historial</p>
+          <div class="d-flex flex-wrap ga-2 align-center mb-2">
+            <p class="text-subtitle-2 font-weight-bold mb-0">Historial</p>
+            <v-spacer />
+            <TableExcelActions
+              export-url="hr/assignments/export/"
+              export-name="asignaciones.xlsx"
+              :export-params="{ employeeId: id }"
+              import-url="hr/assignments/import/"
+              template-url="hr/assignments/import/template/"
+              entidad="asignaciones"
+              :disabled="!assignments.length"
+              @imported="hrStore.getEmployee(id)"
+            />
+          </div>
           <ResponsiveTable
             :headers="assignmentHeaders"
             :items="assignments"

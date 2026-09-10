@@ -6,6 +6,7 @@ import { useFleetStore } from "~/stores/fleet";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import FleetFormDialog from "~/components/fleet/FleetFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Fleet } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
@@ -64,6 +65,16 @@ onMounted(() => fleetStore.getFleets());
         @update:model-value="onSearch"
       />
       <v-spacer />
+      <TableExcelActions
+        export-url="fleets/export/"
+        export-name="flotas.xlsx"
+        :export-params="{ search: fleetStore.searchFleets }"
+        import-url="fleets/import/"
+        template-url="fleets/import/template/"
+        entidad="flotas"
+        :disabled="!fleets.length"
+        @imported="fleetStore.getFleets()"
+      />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">
         Nueva flota
       </v-btn>

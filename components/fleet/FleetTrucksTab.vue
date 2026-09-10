@@ -10,6 +10,7 @@ import {
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TruckFormDialog from "~/components/fleet/TruckFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Truck } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
@@ -111,6 +112,20 @@ onMounted(() => {
         @update:model-value="fleetStore.getTrucks()"
       />
       <v-spacer />
+      <TableExcelActions
+        export-url="trucks/export/"
+        export-name="camiones.xlsx"
+        :export-params="{
+          search: fleetStore.searchTrucks,
+          status: fleetStore.filterTruckStatus,
+          fleetId: fleetStore.filterTruckFleetId,
+        }"
+        import-url="trucks/import/"
+        template-url="trucks/import/template/"
+        entidad="camiones"
+        :disabled="!trucks.length"
+        @imported="fleetStore.getTrucks()"
+      />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">
         Nuevo camión
       </v-btn>

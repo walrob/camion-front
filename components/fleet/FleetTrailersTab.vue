@@ -10,6 +10,7 @@ import {
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TrailerFormDialog from "~/components/fleet/TrailerFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Trailer } from "~/types/fleet";
 
 const fleetStore = useFleetStore();
@@ -90,6 +91,19 @@ onMounted(() => fleetStore.getTrailers());
         @update:model-value="fleetStore.getTrailers()"
       />
       <v-spacer />
+      <TableExcelActions
+        export-url="trailers/export/"
+        export-name="acoplados.xlsx"
+        :export-params="{
+          search: fleetStore.searchTrailers,
+          status: fleetStore.filterTrailerStatus,
+        }"
+        import-url="trailers/import/"
+        template-url="trailers/import/template/"
+        entidad="acoplados"
+        :disabled="!trailers.length"
+        @imported="fleetStore.getTrailers()"
+      />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew">
         Nuevo acoplado
       </v-btn>

@@ -9,6 +9,7 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import TripFormDialog from "~/components/trip/TripFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Trip } from "~/types/trip";
 
 definePageMeta({
@@ -95,14 +96,25 @@ onMounted(async () => {
   <div>
     <PageHeader title="Viajes" subtitle="Planificación y asignación de viajes">
       <template #actions>
-        <v-btn
-          variant="tonal"
-          color="success"
-          prepend-icon="mdi-file-excel"
+        <!--
+          Solo descarga: un viaje tiene máquina de estados (asignado → en curso
+          → finalizado), checklist y bitácora. Crearlos desde una planilla
+          saltearía todo eso.
+        -->
+        <TableExcelActions
+          export-url="trips/export/"
+          export-name="viajes.xlsx"
+          :export-params="{
+            search: tripStore.search,
+            status: tripStore.filterStatus,
+            driverId: tripStore.filterDriver,
+            from: tripStore.filterFrom,
+            to: tripStore.filterTo,
+            sortBy: tripStore.sortBy,
+            order: tripStore.sortOrder,
+          }"
           :disabled="!trips.length"
-          @click="tripStore.exportXlsx()"
-          >Excel</v-btn
-        >
+        />
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
           >Nuevo viaje</v-btn
         >

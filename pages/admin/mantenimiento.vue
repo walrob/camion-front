@@ -8,6 +8,7 @@ import { useMaintenanceStatus } from "~/composables/useMaintenanceStatus";
 import MaintenancePlanDialog from "~/components/maintenance/MaintenancePlanDialog.vue";
 import MaintenanceOrderDialog from "~/components/maintenance/MaintenanceOrderDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 
 definePageMeta({
   feature: Feature.MAINTENANCE,
@@ -180,8 +181,17 @@ onMounted(async () => {
 
       <!-- PLANES -->
       <v-window-item value="plans">
-        <div class="d-flex mb-3">
+        <div class="d-flex flex-wrap ga-2 mb-3">
           <v-spacer />
+          <TableExcelActions
+            export-url="maintenance/plans/export/"
+            export-name="planes-mantenimiento.xlsx"
+            import-url="maintenance/plans/import/"
+            template-url="maintenance/plans/import/template/"
+            entidad="planes"
+            :disabled="!plans.length"
+            @imported="store.getPlans()"
+          />
           <v-btn color="primary" prepend-icon="mdi-plus" @click="openNewPlan">
             Nuevo plan
           </v-btn>
@@ -246,6 +256,17 @@ onMounted(async () => {
             style="max-width: 240px"
           />
           <v-spacer />
+          <!--
+            Solo descarga: una orden de trabajo mueve el estado del camión y
+            actualiza el plan preventivo al cerrarse. Cargarlas desde un Excel
+            saltearía esa cadena y dejaría la flota describiendo algo falso.
+          -->
+          <TableExcelActions
+            export-url="maintenance/orders/export/"
+            export-name="ordenes-mantenimiento.xlsx"
+            :export-params="{ truckId }"
+            :disabled="!orders.length"
+          />
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"

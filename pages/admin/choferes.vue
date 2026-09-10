@@ -12,6 +12,7 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import DriverFormDialog from "~/components/driver/DriverFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Driver } from "~/types/fleet";
 
 definePageMeta({
@@ -82,6 +83,19 @@ onMounted(() => driverStore.getDrivers());
       subtitle="Perfiles operativos y asignación de conductores"
     >
       <template #actions>
+        <TableExcelActions
+          export-url="drivers/export/"
+          export-name="choferes.xlsx"
+          :export-params="{
+            search: driverStore.search,
+            status: driverStore.filterStatus,
+          }"
+          import-url="drivers/import/"
+          template-url="drivers/import/template/"
+          entidad="choferes"
+          :disabled="!drivers.length"
+          @imported="driverStore.getDrivers()"
+        />
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
           >Nuevo chofer</v-btn
         >

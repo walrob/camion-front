@@ -157,25 +157,5 @@ export const useIndicatorStore = defineStore("indicator", {
       this.fleetOptions = fleets.data;
     },
 
-    async exportXlsx() {
-      const { $api } = useNuxtApp();
-      const general = useGeneralStore();
-      try {
-        const resp = await $api.get("indicators/export/", {
-          params: this.cleanParams(),
-          responseType: "blob",
-        });
-        const url = window.URL.createObjectURL(new Blob([resp.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "indicadores.xlsx");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      } catch (e) {
-        general.setErrorSnackbar(e);
-      }
-    },
   },
 });

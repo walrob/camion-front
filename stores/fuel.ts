@@ -103,27 +103,6 @@ export const useFuelStore = defineStore("fuel", {
       this.fleetOptions = fleets.data;
     },
 
-    async exportXlsx() {
-      const { $api } = useNuxtApp();
-      const general = useGeneralStore();
-      try {
-        const resp = await $api.get("fuel/report/export/", {
-          params: this.cleanParams(),
-          responseType: "blob",
-        });
-        const url = window.URL.createObjectURL(new Blob([resp.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "combustible.xlsx");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      } catch (e) {
-        general.setErrorSnackbar(e);
-      }
-    },
-
     // ───────── Chofer ─────────
     async getMine() {
       const { $api } = useNuxtApp();

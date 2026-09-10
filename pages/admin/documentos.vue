@@ -9,6 +9,7 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import DocumentFormDialog from "~/components/document/DocumentFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import { useAuthStore } from "~/stores/auth";
 
 definePageMeta({
@@ -219,6 +220,20 @@ onMounted(async () => {
             style="max-width: 200px"
           />
           <v-spacer />
+          <TableExcelActions
+            export-url="documents/export/"
+            export-name="documentos.xlsx"
+            :export-params="{
+              ownerType: store.ownerType,
+              ownerId: store.ownerType === 'company' ? undefined : store.ownerId,
+              category: store.category,
+            }"
+            import-url="documents/import/"
+            template-url="documents/import/template/"
+            entidad="documentos"
+            :disabled="!documents.length"
+            @imported="store.getDocuments()"
+          />
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
@@ -317,14 +332,11 @@ onMounted(async () => {
             style="max-width: 180px"
           />
           <v-spacer />
-          <v-btn
-            variant="tonal"
-            color="success"
-            prepend-icon="mdi-file-excel"
-            @click="store.exportExpiringXlsx()"
-          >
-            Excel
-          </v-btn>
+          <TableExcelActions
+            export-url="documents/expiring/export/"
+            export-name="vencimientos.xlsx"
+            :disabled="!expiring.length"
+          />
         </div>
 
         <EmptyState

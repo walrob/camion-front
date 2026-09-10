@@ -12,6 +12,7 @@ import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import EmployeeFormDialog from "~/components/hr/EmployeeFormDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Employee } from "~/types/hr";
 
 definePageMeta({
@@ -82,6 +83,20 @@ onMounted(() => {
       subtitle="Legajos, permisos y vencimientos del personal"
     >
       <template #actions>
+        <TableExcelActions
+          export-url="hr/employees/export/"
+          export-name="empleados.xlsx"
+          :export-params="{
+            search: hrStore.search,
+            position: hrStore.filterPosition,
+            employmentStatus: hrStore.filterStatus,
+          }"
+          import-url="hr/employees/import/"
+          template-url="hr/employees/import/template/"
+          entidad="empleados"
+          :disabled="!employees.length"
+          @imported="hrStore.getEmployees()"
+        />
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openNew"
           >Nuevo empleado</v-btn
         >

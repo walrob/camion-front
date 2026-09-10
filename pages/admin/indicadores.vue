@@ -3,6 +3,7 @@ import { Feature } from "~/types/plan";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
 import ReportFilters from "~/components/shared/ReportFilters.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import ChartCard from "~/components/dashboard/ChartCard.vue";
 import ChartDetailDialog from "~/components/dashboard/ChartDetailDialog.vue";
 import { onMounted, computed, ref } from "vue";
@@ -321,13 +322,11 @@ onMounted(async () => {
       subtitle="KPIs operativos con filtros y exportación"
     >
       <template #actions>
-        <v-btn
-          color="success"
-          prepend-icon="mdi-file-excel"
-          @click="store.exportXlsx()"
-        >
-          Exportar Excel
-        </v-btn>
+        <TableExcelActions
+          export-url="indicators/export/"
+          export-name="indicadores.xlsx"
+          :export-params="store.cleanParams()"
+        />
       </template>
     </PageHeader>
 

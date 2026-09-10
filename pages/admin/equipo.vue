@@ -3,6 +3,7 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import ResponsiveTable from "~/components/ResponsiveTable.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import { computed, onMounted, ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -331,6 +332,18 @@ onMounted(() => {
         clearable
         style="min-width: 240px; max-width: 360px"
         @update:model-value="buscar"
+      />
+      <v-spacer />
+      <!--
+        Solo descarga: un acceso al sistema se crea por invitación, con su mail
+        de verificación. Una planilla que diera de alta usuarios sería una forma
+        de repartir accesos sin que nadie los acepte.
+      -->
+      <TableExcelActions
+        export-url="users/export/"
+        export-name="equipo.xlsx"
+        :export-params="{ search: busqueda }"
+        :disabled="!usuarios.length"
       />
     </div>
 

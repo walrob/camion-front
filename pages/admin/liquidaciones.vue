@@ -8,6 +8,7 @@ import { useSettlementStore } from "~/stores/settlement";
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Settlement } from "~/types/trip";
 
 definePageMeta({
@@ -199,6 +200,22 @@ onMounted(() => settlementStore.getSettlements());
       subtitle="Cierres de gastos por viaje o período"
     >
       <template #actions>
+        <!--
+          Solo descarga: una rendición no se carga, se genera. Gastos, adelantos
+          y neto salen de la bitácora del viaje, así que importarlos escribiría
+          totales que no se corresponden con ningún comprobante.
+        -->
+        <TableExcelActions
+          export-url="settlements/export/"
+          export-name="rendiciones.xlsx"
+          :export-params="{
+            search: settlementStore.search,
+            status: settlementStore.filterStatus,
+            sortBy: settlementStore.sortBy,
+            order: settlementStore.sortOrder,
+          }"
+          :disabled="!settlements.length"
+        />
         <v-btn
           color="primary"
           prepend-icon="mdi-file-document-plus"

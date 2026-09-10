@@ -6,6 +6,7 @@ import PageHeader from "~/components/shared/PageHeader.vue";
 import KpiCard from "~/components/dashboard/KpiCard.vue";
 import ResponsiveTable from "~/components/ResponsiveTable.vue";
 import ReportFilters from "~/components/shared/ReportFilters.vue";
+import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import ChartCard from "~/components/dashboard/ChartCard.vue";
 import ChartDetailDialog from "~/components/dashboard/ChartDetailDialog.vue";
 import { useFuelStore } from "~/stores/fuel";
@@ -139,13 +140,17 @@ onMounted(async () => {
       subtitle="Consumo y gasto por camión y por chofer, alineado con los km"
     >
       <template #actions>
-        <v-btn
-          color="success"
-          prepend-icon="mdi-file-excel"
-          @click="store.exportXlsx()"
-        >
-          Exportar Excel
-        </v-btn>
+        <!--
+          Solo descarga, y con una hoja por tabla: el consumo por camión y por
+          chofer son totales calculados sobre las cargas, no datos que se
+          carguen. Las cargas se registran desde la app del chofer.
+        -->
+        <TableExcelActions
+          export-url="fuel/report/export/"
+          export-name="combustible.xlsx"
+          :export-params="store.cleanParams()"
+          :disabled="!report"
+        />
       </template>
     </PageHeader>
 
