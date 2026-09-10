@@ -116,7 +116,6 @@ onMounted(() => store.load(true));
               color="primary"
               density="comfortable"
               hide-details
-              inset
               @update:model-value="escribirBool(def, $event as boolean)"
             >
               <template #label>

@@ -144,7 +144,6 @@ onMounted(() => store.getRules());
               color="primary"
               density="compact"
               hide-details
-              inset
               class="regla__switch"
             />
           </div>

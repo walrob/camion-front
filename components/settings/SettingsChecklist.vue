@@ -664,7 +664,6 @@ onMounted(() => {
             color="error"
             density="compact"
             hide-details
-            inset
             label="Crítico: la planilla queda rechazada y el camión no sale"
           />
           <v-switch
@@ -672,7 +671,6 @@ onMounted(() => {
             color="warning"
             density="compact"
             hide-details
-            inset
             label="Requiere validación de Tráfico antes de liberar la unidad"
             :disabled="itemEnOpciones.isCritical"
             :messages="
@@ -690,7 +688,6 @@ onMounted(() => {
             color="warning"
             density="compact"
             hide-details
-            inset
             label="Exigir foto cuando el punto falla"
           />
           <v-switch
@@ -698,7 +695,6 @@ onMounted(() => {
             color="warning"
             density="compact"
             hide-details
-            inset
             label="Exigir foto siempre, salga como salga"
             :disabled="itemEnOpciones.type === 'photo'"
             :messages="
@@ -750,7 +746,6 @@ onMounted(() => {
             color="success"
             density="compact"
             hide-details
-            inset
             label="Activo"
             messages="Un punto desactivado deja de pedirse en las planillas nuevas. Las ya firmadas lo conservan."
           />
@@ -833,7 +828,6 @@ onMounted(() => {
             color="success"
             density="compact"
             hide-details
-            inset
             label="Activo"
           />
           <IconBtn

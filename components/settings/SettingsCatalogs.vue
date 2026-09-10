@@ -264,7 +264,6 @@ onMounted(() => store.load(true));
                   color="success"
                   density="compact"
                   hide-details
-                  inset
                   label="Activo"
                   class="elemento__flag"
                 />
