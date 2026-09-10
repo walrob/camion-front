@@ -68,6 +68,52 @@ export interface Company {
   primaryColor?: string | null
   /** Paso pendiente del onboarding guiado. `0` = terminado. */
   onboardingStep?: number
+
+  // ── Datos de facturación ──
+  // Son los que la administración usa para emitir el comprobante del abono, y
+  // pueden no coincidir con los operativos: se factura a una razón social y un
+  // domicilio fiscal que el cliente declara.
+  cuit?: string | null
+  invoiceName?: string | null
+  invoiceCuit?: string | null
+  invoiceEmail?: string | null
+  invoiceTaxCondition?: string | null
+  invoiceAddress?: string | null
+  billingDay?: number
+}
+
+/**
+ * Condición frente al IVA, igual que `TaxCondition` en el backend.
+ *
+ * Define qué comprobante corresponde: a un responsable inscripto va una factura
+ * A y a los demás una B. Sin este dato la administración no puede emitir.
+ */
+export const TAX_CONDITION_OPTIONS: { value: string; label: string }[] = [
+  { value: 'responsable_inscripto', label: 'Responsable inscripto' },
+  { value: 'monotributo', label: 'Monotributo' },
+  { value: 'exento', label: 'Exento' },
+  { value: 'consumidor_final', label: 'Consumidor final' },
+  { value: 'no_alcanzado', label: 'No alcanzado' },
+]
+
+export const taxConditionLabel = (v?: string | null): string =>
+  TAX_CONDITION_OPTIONS.find((o) => o.value === v)?.label ?? '—'
+
+/** Un período facturado, tal como lo devuelve `GET /billing/subscriptions`. */
+export interface BillingPeriod {
+  id: string
+  periodStart: string
+  periodEnd: string
+  expiration: string
+  amount: number
+  status: 'issued' | 'paid' | 'overdue' | 'void'
+  isPaid: boolean
+  paidAt?: string | null
+  isProrated: boolean
+  /** Presente sólo si la administración ya cargó el comprobante. */
+  invoiceKey?: string | null
+  invoiceNumber?: string | null
+  invoiceUploadedAt?: string | null
 }
 
 /**

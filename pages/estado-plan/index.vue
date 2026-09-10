@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import PageHeader from "~/components/shared/PageHeader.vue";
+import InvoiceDataCard from "~/components/billing/InvoiceDataCard.vue";
+import { useComprobantes } from "~/composables/useComprobantes";
 
 /**
  * Estado comercial de la empresa: qué plan tiene, qué consume y qué debe.
@@ -44,6 +46,33 @@ const ESTADOS: Record<string, { texto: string; color: string }> = {
 };
 
 const impagos = computed(() => periodos.value.filter((p) => !p.isPaid));
+
+/**
+ * Períodos con comprobante cargado, del más nuevo al más viejo.
+ *
+ * Se listan aparte de los pendientes porque son dos preguntas distintas: los
+ * pendientes son "qué debo" y esto es "dónde está mi factura", que es lo que el
+ * contador pide y hasta ahora había que reclamar por mail.
+ */
+const conComprobante = computed(() =>
+  periodos.value.filter((p) => p.invoiceKey),
+);
+
+const { abrirMio } = useComprobantes();
+const abriendo = ref<string | null>(null);
+
+async function verComprobante(periodo: any) {
+  abriendo.value = periodo.id;
+  await abrirMio(periodo.id);
+  abriendo.value = null;
+}
+
+/** "marzo 2026" a partir del `periodStart`, que llega como `aaaa-mm-dd`. */
+function nombreDePeriodo(valor: string): string {
+  const d = new Date(`${String(valor).slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return String(valor).slice(0, 10);
+  return d.toLocaleDateString("es-AR", { month: "long", year: "numeric" });
+}
 
 /**
  * Vuelta desde Mercado Pago.
@@ -214,6 +243,52 @@ onMounted(async () => {
                 Importes con IVA. Se factura el día
                 {{ cotizacion.company?.billingDay ?? 1 }} de cada mes.
               </p>
+            </div>
+          </v-card>
+
+          <InvoiceDataCard class="mt-4" />
+
+          <v-card border flat rounded="lg" class="pa-6 mt-4">
+            <div class="text-subtitle-1 font-weight-medium mb-1">
+              Comprobantes
+            </div>
+            <p class="text-body-2 text-medium-emphasis mb-3">
+              Las facturas de cada período, para descargar o imprimir.
+            </p>
+
+            <div
+              v-if="!conComprobante.length"
+              class="text-body-2 text-medium-emphasis"
+            >
+              Todavía no hay comprobantes cargados. Se suben una vez emitida la
+              factura del período.
+            </div>
+            <div
+              v-for="p in conComprobante"
+              :key="p.id"
+              class="d-flex align-center justify-space-between ga-2 py-2 border-b"
+            >
+              <div>
+                <div class="text-body-2 text-capitalize">
+                  {{ nombreDePeriodo(p.periodStart) }}
+                </div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ p.invoiceNumber ? `Factura ${p.invoiceNumber}` : "Comprobante" }}
+                </div>
+              </div>
+              <div class="d-flex align-center ga-2">
+                <strong class="text-body-2">{{ money(p.amount) }}</strong>
+                <v-btn
+                  size="small"
+                  variant="tonal"
+                  color="primary"
+                  prepend-icon="mdi-file-pdf-box"
+                  :loading="abriendo === p.id"
+                  @click="verComprobante(p)"
+                >
+                  Ver
+                </v-btn>
+              </div>
             </div>
           </v-card>
         </v-col>

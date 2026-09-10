@@ -2,6 +2,11 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import PageHeader from "~/components/shared/PageHeader.vue";
+import {
+  useComprobantes,
+  COMPROBANTE_ACCEPT,
+} from "~/composables/useComprobantes";
+import { taxConditionLabel } from "~/types/plan";
 
 /**
  * Ficha de una empresa: lo que se ve y lo que se puede hacer sobre ella.
@@ -57,6 +62,99 @@ const ESTADOS = [
 const impagos = computed(() =>
   (ficha.value?.periodos ?? []).filter((p: any) => !p.isPaid),
 );
+
+// ───────── Comprobantes ─────────
+
+/**
+ * Todos los períodos, no sólo los impagos: el comprobante se carga después de
+ * emitir la factura, y para entonces el período suele estar pagado.
+ */
+const periodos = computed(() => ficha.value?.periodos ?? []);
+
+/**
+ * Datos con los que hay que emitir. Los declara la empresa en su pantalla de
+ * plan; acá son de sólo lectura porque cambiárselos desde el panel sería
+ * facturarle a un CUIT que el cliente no eligió.
+ */
+const facturacion = computed(() => {
+  const c = ficha.value?.company;
+  if (!c) return null;
+  return {
+    razonSocial: c.invoiceName || c.name,
+    usaRazonSocialPropia: !!c.invoiceName,
+    cuit: c.invoiceCuit || c.cuit || "",
+    iva: taxConditionLabel(c.invoiceTaxCondition),
+    domicilio: c.invoiceAddress || c.address || "",
+    email: c.invoiceEmail || "",
+    diaDeFacturacion: c.billingDay ?? 1,
+  };
+});
+
+/** Qué le falta al cliente para que se le pueda emitir bien. */
+const faltaParaFacturar = computed(() => {
+  const c = ficha.value?.company;
+  if (!c) return [];
+  const f: string[] = [];
+  if (!c.invoiceName) f.push("razón social");
+  if (!c.invoiceCuit && !c.cuit) f.push("CUIT");
+  if (!c.invoiceTaxCondition) f.push("condición frente al IVA");
+  if (!c.invoiceEmail) f.push("email");
+  return f;
+});
+
+const comprobantes = useComprobantes();
+const dialogoComprobante = ref(false);
+const periodoElegido = ref<any>(null);
+const archivo = ref<File | null>(null);
+const numeroDeFactura = ref("");
+const subiendo = ref(false);
+const abriendo = ref<string | null>(null);
+
+function abrirCarga(periodo: any) {
+  periodoElegido.value = periodo;
+  archivo.value = null;
+  numeroDeFactura.value = periodo.invoiceNumber ?? "";
+  dialogoComprobante.value = true;
+}
+
+// El archivo se toma del evento del DOM, como en el resto de los diálogos:
+// `v-file-input` entrega `File` o `File[]` según la versión.
+function onArchivo(e: Event) {
+  archivo.value = (e.target as HTMLInputElement).files?.[0] ?? null;
+}
+
+async function subirComprobante() {
+  if (!archivo.value || !periodoElegido.value) return;
+  subiendo.value = true;
+  const ok = await comprobantes.subir(
+    id,
+    periodoElegido.value.id,
+    archivo.value,
+    numeroDeFactura.value.trim() || undefined,
+  );
+  subiendo.value = false;
+  if (ok) {
+    dialogoComprobante.value = false;
+    await cargar();
+  }
+}
+
+async function verComprobante(periodo: any) {
+  abriendo.value = periodo.id;
+  await comprobantes.abrirDeEmpresa(id, periodo.id);
+  abriendo.value = null;
+}
+
+async function quitarComprobante(periodo: any) {
+  if (await comprobantes.quitar(id, periodo.id)) await cargar();
+}
+
+/** "marzo 2026" a partir del `periodStart`, que llega como `aaaa-mm-dd`. */
+function nombreDePeriodo(valor: string): string {
+  const d = new Date(`${String(valor).slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return String(valor).slice(0, 10);
+  return d.toLocaleDateString("es-AR", { month: "long", year: "numeric" });
+}
 
 const cargar = async () => {
   cargando.value = true;
@@ -294,6 +392,143 @@ onMounted(() => {
               <strong class="text-body-2">{{ money(p.amount) }}</strong>
             </div>
           </v-card>
+
+          <!-- Datos con los que se emite la factura -->
+          <v-card v-if="facturacion" border flat rounded="lg" class="pa-5 mt-4">
+            <div class="text-subtitle-1 font-weight-medium">
+              Datos de facturación
+            </div>
+            <p class="text-caption text-medium-emphasis mb-3">
+              Los declara el cliente en su pantalla de plan. Acá son de sólo
+              lectura: cambiárselos desde el panel sería emitirle a un CUIT que
+              no eligió.
+            </p>
+
+            <v-alert
+              v-if="faltaParaFacturar.length"
+              type="warning"
+              variant="tonal"
+              density="compact"
+              class="mb-3"
+            >
+              Falta {{ faltaParaFacturar.join(", ") }}. Conviene pedirlo antes de
+              emitir.
+            </v-alert>
+
+            <div class="d-flex justify-space-between ga-4 py-1">
+              <span class="text-body-2 text-medium-emphasis">Razón social</span>
+              <strong class="text-body-2 text-right">
+                {{ facturacion.razonSocial }}
+                <v-chip
+                  v-if="!facturacion.usaRazonSocialPropia"
+                  size="x-small"
+                  variant="tonal"
+                  class="ml-1"
+                >
+                  nombre de la cuenta
+                </v-chip>
+              </strong>
+            </div>
+            <div class="d-flex justify-space-between ga-4 py-1">
+              <span class="text-body-2 text-medium-emphasis">CUIT</span>
+              <strong class="text-body-2 text-right">
+                {{ facturacion.cuit || "—" }}
+              </strong>
+            </div>
+            <div class="d-flex justify-space-between ga-4 py-1">
+              <span class="text-body-2 text-medium-emphasis">
+                Condición frente al IVA
+              </span>
+              <strong class="text-body-2 text-right">{{ facturacion.iva }}</strong>
+            </div>
+            <div class="d-flex justify-space-between ga-4 py-1">
+              <span class="text-body-2 text-medium-emphasis">
+                Domicilio fiscal
+              </span>
+              <strong class="text-body-2 text-right">
+                {{ facturacion.domicilio || "—" }}
+              </strong>
+            </div>
+            <div class="d-flex justify-space-between ga-4 py-1">
+              <span class="text-body-2 text-medium-emphasis">Email</span>
+              <strong class="text-body-2 text-right">
+                {{ facturacion.email || "—" }}
+              </strong>
+            </div>
+            <div class="d-flex justify-space-between ga-4 py-1">
+              <span class="text-body-2 text-medium-emphasis">Se factura el</span>
+              <strong class="text-body-2 text-right">
+                {{ facturacion.diaDeFacturacion }} de cada mes
+              </strong>
+            </div>
+          </v-card>
+
+          <!-- Comprobantes por período -->
+          <v-card border flat rounded="lg" class="pa-5 mt-4">
+            <div class="text-subtitle-1 font-weight-medium">Comprobantes</div>
+            <p class="text-caption text-medium-emphasis mb-3">
+              El sistema no emite la factura: se emite por fuera y se sube acá.
+              El cliente la ve en su pantalla de plan y se la baja solo.
+            </p>
+
+            <div
+              v-if="!periodos.length"
+              class="text-body-2 text-medium-emphasis"
+            >
+              Todavía no hay períodos emitidos.
+            </div>
+            <div
+              v-for="p in periodos"
+              :key="p.id"
+              class="d-flex justify-space-between align-center ga-2 py-2 border-b"
+            >
+              <div>
+                <div class="text-body-2 text-capitalize">
+                  {{ nombreDePeriodo(p.periodStart) }}
+                  <v-chip v-if="p.isProrated" size="x-small" class="ml-1">
+                    prorrateo
+                  </v-chip>
+                </div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ money(p.amount) }} ·
+                  <template v-if="p.invoiceKey">
+                    {{ p.invoiceNumber ? `Factura ${p.invoiceNumber}` : "cargado" }}
+                  </template>
+                  <span v-else class="text-warning">sin comprobante</span>
+                </div>
+              </div>
+              <div class="d-flex align-center ga-1">
+                <IconBtn
+                  v-if="p.invoiceKey"
+                  icon="mdi-file-pdf-box"
+                  size="small"
+                  variant="text"
+                  color="primary"
+                  :loading="abriendo === p.id"
+                  title="Ver comprobante"
+                  @click="verComprobante(p)"
+                />
+                <IconBtn
+                  v-if="p.invoiceKey"
+                  icon="mdi-close"
+                  size="small"
+                  variant="text"
+                  color="error"
+                  title="Dar de baja el comprobante"
+                  @click="quitarComprobante(p)"
+                />
+                <v-btn
+                  size="small"
+                  variant="tonal"
+                  :color="p.invoiceKey ? 'secondary' : 'primary'"
+                  :prepend-icon="p.invoiceKey ? 'mdi-autorenew' : 'mdi-upload'"
+                  @click="abrirCarga(p)"
+                >
+                  {{ p.invoiceKey ? "Reemplazar" : "Subir" }}
+                </v-btn>
+              </div>
+            </div>
+          </v-card>
         </v-col>
 
         <!-- Acciones -->
@@ -450,6 +685,73 @@ onMounted(() => {
         </template>
       </v-card>
     </template>
+
+    <!-- Carga del comprobante de un período -->
+    <v-dialog v-model="dialogoComprobante" max-width="520">
+      <v-card rounded="lg" class="pa-5">
+        <div class="text-h6 font-weight-bold mb-1">
+          {{ periodoElegido?.invoiceKey ? "Reemplazar" : "Subir" }} comprobante
+        </div>
+        <div
+          v-if="periodoElegido"
+          class="text-body-2 text-medium-emphasis mb-4 text-capitalize"
+        >
+          {{ nombreDePeriodo(periodoElegido.periodStart) }} ·
+          {{ money(periodoElegido.amount) }}
+        </div>
+
+        <v-alert
+          v-if="faltaParaFacturar.length"
+          type="warning"
+          variant="tonal"
+          density="compact"
+          rounded="lg"
+          class="mb-4"
+        >
+          Al cliente le falta cargar {{ faltaParaFacturar.join(", ") }}.
+          Verificá contra qué datos estás emitiendo.
+        </v-alert>
+
+        <v-file-input
+          :accept="COMPROBANTE_ACCEPT"
+          label="Factura en PDF"
+          prepend-icon=""
+          prepend-inner-icon="mdi-file-pdf-box"
+          variant="outlined"
+          density="compact"
+          show-size
+          hide-details="auto"
+          class="mb-3"
+          @change="onArchivo"
+        />
+
+        <v-text-field
+          v-model="numeroDeFactura"
+          label="Número de comprobante"
+          placeholder="0001-00001234"
+          variant="outlined"
+          density="compact"
+          hide-details="auto"
+        />
+        <p class="text-caption text-medium-emphasis mt-1">
+          Opcional, pero es por dónde el cliente reclama una factura.
+        </p>
+
+        <div class="d-flex justify-end ga-2 mt-4">
+          <v-btn variant="text" @click="dialogoComprobante = false">
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="primary"
+            :loading="subiendo"
+            :disabled="!archivo"
+            @click="subirComprobante"
+          >
+            {{ periodoElegido?.invoiceKey ? "Reemplazar" : "Subir" }}
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
 
     <!-- Cambio de plan -->
     <v-dialog v-model="dialogoPlan" max-width="440">
