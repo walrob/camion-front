@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useValidations } from "~/composables/useValidations";
 import { useDocumentStore } from "~/stores/document";
 import { useGeneralStore } from "~/stores/general";
@@ -9,10 +9,12 @@ import { useCatalogOptions, CATALOG } from "~/stores/catalog";
 // Las categorías las define cada empresa (docs/CONFIGURACION.md §5).
 const categoriasDoc = useCatalogOptions(CATALOG.DOCUMENT_CATEGORY);
 import FormDialog from "~/components/shared/FormDialog.vue";
+import { useDocumentStatus } from "~/composables/useDocumentStatus";
 
 const props = defineProps<{
   modelValue: boolean;
   ownerType: string;
+  /** Dueño preseleccionado. Si viene vacío, se elige dentro del diálogo. */
   ownerId: string | null;
 }>();
 const emit = defineEmits(["update:modelValue", "saved"]);
@@ -27,7 +29,12 @@ const valid = ref(true);
 const saving = ref(false);
 const file = ref<File | null>(null);
 
+const { ownerType: ownerTypeLabel } = useDocumentStatus();
+// El dueño se pide acá solo cuando la pantalla está en "Todos".
+const askOwner = computed(() => props.ownerType !== "company" && !props.ownerId);
+
 const empty = () => ({
+  ownerId: null as string | null,
   category: "insurance",
   number: "",
   issueDate: "",
@@ -58,8 +65,8 @@ const submit = async () => {
 
   const fd = new FormData();
   fd.append("ownerType", props.ownerType);
-  if (props.ownerType !== "company" && props.ownerId)
-    fd.append("ownerId", props.ownerId);
+  const ownerId = props.ownerId || form.value.ownerId;
+  if (props.ownerType !== "company" && ownerId) fd.append("ownerId", ownerId);
   fd.append("category", form.value.category);
   if (form.value.number) fd.append("number", form.value.number);
   if (form.value.issueDate) fd.append("issueDate", form.value.issueDate);
@@ -91,6 +98,17 @@ const submit = async () => {
   >
     <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
       <v-row dense>
+        <v-col v-if="askOwner" cols="12">
+          <v-autocomplete
+            v-model="form.ownerId"
+            :error-messages="formErrors.messages('ownerId')"
+            :items="store.ownerOptions"
+            item-title="label"
+            item-value="id"
+            :label="`${ownerTypeLabel(ownerType).label} *`"
+            :rules="[r.isRequired]"
+          />
+        </v-col>
         <v-col cols="12" sm="6">
           <v-select
             v-model="form.category"

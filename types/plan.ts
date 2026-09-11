@@ -50,6 +50,37 @@ export enum Feature {
   WHITE_LABEL = 'white_label',
 }
 
+/**
+ * Lo que resume cada plan en una tarjeta (landing y «Cambiar de plan»). Cuatro
+ * líneas por plan, en lenguaje del transportista, no la lista de features.
+ */
+export const PLAN_DESTACADOS: Record<string, string[]> = {
+  control: [
+    "Flota, documentación y vencimientos",
+    "Viajes, checklists e incidentes",
+    "App del chofer con carga offline",
+    "Bandeja de alertas por prioridad",
+  ],
+  operacion: [
+    "Todo lo de Control",
+    "Bitácora de gastos y rendiciones",
+    "Combustible y mantenimiento preventivo",
+    "Legajos y planilla OEA de AFIP",
+  ],
+  gestion: [
+    "Todo lo de Operación",
+    "Costo por kilómetro e indicadores",
+    "Ranking de consumo por chofer",
+    "Reportes programados y rol auditor",
+  ],
+  corporate: [
+    "Todo lo de Gestión",
+    "Varias empresas en una operación",
+    "API de integración y SSO",
+    "Entorno de pruebas y soporte dedicado",
+  ],
+};
+
 export interface PlanLimits {
   retentionMonths: number | null
   storageGb: number | null

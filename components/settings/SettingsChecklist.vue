@@ -228,8 +228,17 @@ const SECCIONES_OEA = [
 ];
 
 const oeaBase = ref<{ key: string; label: string }[]>([]);
+// `enUso`: en cuántas planillas ya se revisó el punto. Uno usado no se puede
+// eliminar (la planilla firmada tiene que seguir explicando qué se revisó): se
+// desactiva. Uno sin uso se quita con la X y al guardar se elimina.
 const oeaPropios = ref<
-  { key: string; label: string; section: string; isActive: boolean }[]
+  {
+    key: string;
+    label: string;
+    section: string;
+    isActive: boolean;
+    enUso: number;
+  }[]
 >([]);
 const oeaGuardando = ref(false);
 
@@ -254,6 +263,7 @@ const agregarPuntoOea = () =>
     label: "",
     section: "physical",
     isActive: true,
+    enUso: 0,
   });
 
 const guardarOea = async () => {
@@ -831,12 +841,22 @@ onMounted(() => {
             label="Activo"
           />
           <IconBtn
+            v-if="!punto.enUso"
             tooltip="Quitar punto"
             icon="mdi-close"
             size="small"
             variant="text"
             color="error"
             @click="oeaPropios.splice(i, 1)"
+          />
+          <!-- Usado en planillas firmadas: no se elimina, se desactiva. -->
+          <IconBtn
+            v-else
+            :tooltip="`Revisado en ${punto.enUso} planilla${punto.enUso === 1 ? '' : 's'}: no se puede eliminar, solo desactivar.`"
+            icon="mdi-lock-outline"
+            size="small"
+            variant="text"
+            class="text-medium-emphasis"
           />
         </div>
 

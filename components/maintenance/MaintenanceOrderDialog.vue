@@ -11,8 +11,8 @@ import FormDialog from "~/components/shared/FormDialog.vue";
 const props = defineProps<{
   modelValue: boolean;
   order: any | null;
+  /** Camión preseleccionado en la pantalla. Vacío = se elige acá. */
   truckId: string;
-  plans: any[];
 }>();
 const emit = defineEmits(["update:modelValue", "saved"]);
 
@@ -25,9 +25,20 @@ const formRef = ref();
 const valid = ref(true);
 const saving = ref(false);
 const isEdit = computed(() => !!props.order?.id);
+// Camión de la orden: el que trae la OT en edición, el filtro de la pantalla,
+// o el que se elija en el diálogo cuando la pantalla está en "Todos".
+const askTruck = computed(() => !isEdit.value && !props.truckId);
+const effectiveTruckId = computed(
+  () => props.order?.truckId || props.truckId || form.value.truckId,
+);
+// Solo se puede asociar un plan del mismo camión.
+const plans = computed(() =>
+  store.plans.filter((p: any) => p.truckId === effectiveTruckId.value),
+);
 
 const today = () => new Date().toISOString().slice(0, 10);
 const empty = () => ({
+  truckId: null as string | null,
   planId: null as string | null,
   date: today(),
   odometerKm: null as number | null,
@@ -37,6 +48,14 @@ const empty = () => ({
   notes: "",
 });
 const form = ref<Record<string, any>>(empty());
+
+// Si cambia el camión, el plan elegido deja de corresponder.
+watch(
+  () => form.value.truckId,
+  () => {
+    if (askTruck.value) form.value.planId = null;
+  },
+);
 
 watch(
   () => props.modelValue,
@@ -54,7 +73,7 @@ const submit = async () => {
   const res = await formRef.value?.validate();
   if (!res?.valid) return;
   saving.value = true;
-  const payload: any = { ...form.value, truckId: props.truckId };
+  const payload: any = { ...form.value, truckId: effectiveTruckId.value };
   if (!payload.planId) delete payload.planId;
   ["odometerKm", "cost"].forEach((k) => {
     if (payload[k] === "" || payload[k] == null) delete payload[k];
@@ -64,7 +83,7 @@ const submit = async () => {
   try {
     if (isEdit.value) {
       delete payload.truckId;
-      await store.updateOrder(props.order.id, props.truckId, payload);
+      await store.updateOrder(props.order.id, payload);
     } else {
       await store.createOrder(payload);
     }
@@ -91,6 +110,17 @@ const submit = async () => {
   >
     <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
       <v-row dense>
+        <v-col v-if="askTruck" cols="12">
+          <v-autocomplete
+            v-model="form.truckId"
+            :error-messages="formErrors.messages('truckId')"
+            :items="store.truckOptions"
+            item-value="id"
+            :item-title="(t: any) => t.plate"
+            label="Camión *"
+            :rules="[r.isRequired]"
+          />
+        </v-col>
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="form.date"

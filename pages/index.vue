@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PLAN_DESTACADOS } from "~/types/plan";
 import { computed, onMounted, ref } from "vue";
 import type { DirectiveBinding } from "vue";
 
@@ -405,33 +406,6 @@ const PASOS = [
 ];
 
 /** Lo que se muestra en la tarjeta del plan: el detalle fino va en el modal. */
-const DESTACADOS: Record<string, string[]> = {
-  control: [
-    "Flota, documentación y vencimientos",
-    "Viajes, checklists e incidentes",
-    "App del chofer con carga offline",
-    "Bandeja de alertas por prioridad",
-  ],
-  operacion: [
-    "Todo lo de Control",
-    "Bitácora de gastos y rendiciones",
-    "Combustible y mantenimiento preventivo",
-    "Legajos y planilla OEA de AFIP",
-  ],
-  gestion: [
-    "Todo lo de Operación",
-    "Costo por kilómetro e indicadores",
-    "Ranking de consumo por chofer",
-    "Reportes programados y rol auditor",
-  ],
-  corporate: [
-    "Todo lo de Gestión",
-    "Varias empresas en una operación",
-    "API de integración y SSO",
-    "Entorno de pruebas y soporte dedicado",
-  ],
-};
-
 const FAQ = [
   {
     p: `¿Qué pasa cuando terminan los ${DIAS_DE_PRUEBA} días?`,
@@ -1385,7 +1359,7 @@ useDatosEstructurados(datosEstructurados);
 
               <div class="flex-grow-1 mb-5">
                 <div
-                  v-for="b in DESTACADOS[p.code] ?? []"
+                  v-for="b in PLAN_DESTACADOS[p.code] ?? []"
                   :key="b"
                   class="d-flex align-start ga-2 mb-2"
                 >

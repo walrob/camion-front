@@ -18,10 +18,8 @@ export const useDocumentStore = defineStore("document", {
     async getDocuments() {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
-      if (this.ownerType !== "company" && !this.ownerId) {
-        this.documents = [];
-        return;
-      }
+      // Sin dueño elegido se listan todos los de la entidad (el back adjunta
+      // el `owner` de cada uno para mostrar la patente o el nombre).
       this.loading = true;
       this.error = false;
       return await $api
@@ -73,7 +71,9 @@ export const useDocumentStore = defineStore("document", {
         id: o.id,
         label:
           ownerType === "driver"
-            ? o.user?.name || o.licenseNumber || o.id
+            ? o.employee
+              ? `${o.employee.firstName} ${o.employee.lastName}`
+              : o.licenseNumber || o.id
             : o.plate,
       }));
     },

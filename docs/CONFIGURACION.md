@@ -253,7 +253,10 @@ temperatura de un furgón refrigerado—. Los de norma no se editan ni se
 desactivan: no son una preferencia.
 
 `OeaTemplateItem` guarda sólo los puntos propios; la planilla se arma con
-«norma + propios activos». `oea_inspection_items.key` dejó de ser `enum`, el
+«norma + propios activos». Un propio que se quita de la lista se **elimina** si
+ninguna planilla lo revisó todavía; si ya aparece en alguna, se **desactiva**
+(la pantalla lo muestra con un candado en vez de la X): la planilla firmada
+tiene que seguir explicando qué se revisó. `oea_inspection_items.key` dejó de ser `enum`, el
 mismo desbloqueo del checklist y los catálogos. Editar la plantilla entra con
 `checklist_templates`, la feature que vende «plantillas de inspección propias»;
 leerla la puede cualquiera, porque el chofer ve la planilla que va a completar.

@@ -99,7 +99,7 @@ onMounted(() => store.getRules());
           <div class="d-flex align-center ga-3 flex-wrap">
             <v-icon :color="COLOR_NIVEL[regla.level]" size="14">mdi-circle</v-icon>
 
-            <div class="min-w-0 flex-grow-1">
+            <div class="regla__texto">
               <div class="text-body-2 font-weight-medium d-flex align-center ga-2">
                 {{ regla.label }}
                 <v-chip v-if="regla.personalizada" size="x-small" label variant="tonal">
@@ -184,12 +184,29 @@ onMounted(() => store.getRules());
     border-top: 1px solid rgb(var(--v-theme-borderColor));
   }
 
+  // Base 0 y no auto: con base auto el bloque mide lo que mide la descripción
+  // entera, y una larga empuja el campo y el switch a la fila de abajo. Con
+  // base 0 el texto se acomoda al espacio que queda y la fila se mantiene.
+  &__texto {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
   &__umbral {
     flex: 0 0 190px;
   }
 
   &__switch {
     flex: 0 0 auto;
+  }
+}
+
+// En pantallas chicas no entra todo en una fila: el texto ocupa la fila
+// completa y el campo y el switch bajan.
+@media (max-width: 599px) {
+  .regla__texto {
+    // 100 % menos el punto de color y su gap, para que queden en la misma línea.
+    flex-basis: calc(100% - 26px);
   }
 }
 

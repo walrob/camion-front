@@ -73,6 +73,18 @@ html {
 .v-alert {
     align-content: center;
     border-radius: $border-radius-root * 2;
+
+    // Vuetify usa cuerpo 1rem (16px) en las alertas: queda muy grande al lado
+    // del resto de la pantalla. Se baja a body-2 y el título a subtitle-1.
+    .v-alert__content {
+        font-size: 0.875rem;
+        line-height: 1.45;
+    }
+
+    .v-alert-title {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
 }
 
 .v-row--dense>.v-col,

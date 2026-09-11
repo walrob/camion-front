@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import { FEATURE_INFO } from "~/types/plan";
+import { CONTACTO } from "~/composables/useContacto";
 
 definePageMeta({ layout: "admin" });
 
@@ -79,12 +80,20 @@ useHead(() => ({
             capacitar de nuevo al equipo.
           </p>
 
-          <!--
-            El alta autogestionada del cambio de plan llega en la fase 5
-            (facturación). Hasta entonces el camino es comercial.
-          -->
-          <v-btn color="primary" block class="mb-2" to="/contacto">
-            Quiero activarlo
+          <!-- Dos caminos: lo cambia el admin desde Mi plan, o lo pide a soporte. -->
+          <v-btn color="primary" block class="mb-2" to="/estado-plan#planes">
+            Ver planes y cambiar
+          </v-btn>
+          <v-btn
+            variant="tonal"
+            block
+            class="mb-2"
+            prepend-icon="mdi-whatsapp"
+            :href="CONTACTO.whatsappUrl"
+            target="_blank"
+            rel="noopener"
+          >
+            Pedirlo a soporte
           </v-btn>
           <v-btn variant="text" block @click="$router.back()">Volver</v-btn>
         </v-card>

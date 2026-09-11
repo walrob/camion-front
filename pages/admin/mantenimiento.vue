@@ -9,6 +9,7 @@ import MaintenancePlanDialog from "~/components/maintenance/MaintenancePlanDialo
 import MaintenanceOrderDialog from "~/components/maintenance/MaintenanceOrderDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import TableExcelActions from "~/components/shared/TableExcelActions.vue";
+import EmptyState from "~/components/shared/EmptyState.vue";
 
 definePageMeta({
   feature: Feature.MAINTENANCE,
@@ -28,7 +29,8 @@ const orderDialog = ref(false);
 const selectedOrder = ref<any | null>(null);
 const confirm = ref(false);
 const toDelete = ref<any | null>(null);
-const truckId = ref("");
+// Filtro del historial de OT: vacío = todas las unidades.
+const truckId = ref<string | null>(null);
 
 const planHeaders = [
   { title: "Camión", value: "truck.plate" },
@@ -38,16 +40,23 @@ const planHeaders = [
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions", sortable: false },
 ];
-const orderHeaders = [
+// Sin camión elegido se ve todo el taller: hace falta la patente por fila.
+const orderHeaders = computed(() => [
+  ...(truckId.value ? [] : [{ title: "Camión", value: "truck.plate" }]),
   { title: "Fecha", value: "date" },
   { title: "Descripción", value: "description" },
   { title: "Costo", value: "cost" },
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions", sortable: false },
-];
+]);
 
-const truckPlans = computed(() =>
-  plans.value.filter((p) => p.truckId === truckId.value),
+const selectedPlate = computed(
+  () => truckOptions.value.find((t) => t.id === truckId.value)?.plate,
+);
+const ordersEmptyText = computed(() =>
+  truckId.value
+    ? `${selectedPlate.value ?? "Este camión"} no tiene órdenes de trabajo.`
+    : "Todavía no hay órdenes de trabajo. Elegí un camión para ver solo las suyas, o cargá la primera.",
 );
 
 const nextLabel = (p: any) =>
@@ -99,21 +108,20 @@ const pedirReapertura = (o: any) => {
 
 const confirmarReapertura = async (motivo: string) => {
   reabriendo.value = true;
-  const ok = await store.reopenOrder(reapertura.value.id, truckId.value, motivo);
+  const ok = await store.reopenOrder(reapertura.value.id, motivo);
   reabriendo.value = false;
   if (ok) reapertura.value.abierto = false;
 };
 const { moneyFixed: money, fmtDate } = useFormatters();
 
-watch(truckId, (id) => {
-  if (id) store.getOrders(id);
-});
+watch(truckId, (id) => store.getOrders(id));
 
 onMounted(async () => {
   await Promise.all([
     store.getUpcoming(),
     store.getPlans(),
     store.getTruckOptions(),
+    store.getOrders(truckId.value),
   ]);
 });
 </script>
@@ -250,8 +258,11 @@ onMounted(async () => {
             item-value="id"
             :item-title="(t: any) => t.plate"
             label="Camión"
+            placeholder="Todos"
+            persistent-placeholder
             variant="outlined"
             density="compact"
+            clearable
             hide-details
             style="max-width: 240px"
           />
@@ -264,13 +275,12 @@ onMounted(async () => {
           <TableExcelActions
             export-url="maintenance/orders/export/"
             export-name="ordenes-mantenimiento.xlsx"
-            :export-params="{ truckId }"
+            :export-params="{ truckId: truckId || undefined }"
             :disabled="!orders.length"
           />
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
-            :disabled="!truckId"
             @click="openNewOrder"
           >
             Nueva OT
@@ -278,16 +288,31 @@ onMounted(async () => {
         </div>
 
         <ResponsiveTable
-          v-if="truckId"
           :headers="orderHeaders"
           :items="orders"
           :loading="loading"
           :error="store.error"
           all-items
           searchable
-          search-label="Buscar descripción"
-          @retry="store.getOrders(truckId)"
+          search-label="Buscar patente / descripción"
+          empty-icon="mdi-wrench-outline"
+          :no-data-text="ordersEmptyText"
+          @retry="store.getOrders()"
         >
+          <template #empty>
+            <EmptyState icon="mdi-wrench-outline" :text="ordersEmptyText">
+              <template #action>
+                <v-btn
+                  color="primary"
+                  variant="tonal"
+                  prepend-icon="mdi-plus"
+                  @click="openNewOrder"
+                >
+                  Nueva OT
+                </v-btn>
+              </template>
+            </EmptyState>
+          </template>
           <template #item.date="{ item }">{{ fmtDate(item.date) }}</template>
           <template #item.cost="{ item }">{{ money(item.cost) }}</template>
           <template #item.status="{ item }">
@@ -322,9 +347,6 @@ onMounted(async () => {
             />
           </template>
         </ResponsiveTable>
-        <p v-else class="text-body-2 text-medium-emphasis">
-          Elegí un camión para ver sus órdenes de trabajo.
-        </p>
       </v-window-item>
     </v-window>
 
@@ -336,8 +358,7 @@ onMounted(async () => {
     <MaintenanceOrderDialog
       v-model="orderDialog"
       :order="selectedOrder"
-      :truck-id="truckId"
-      :plans="truckPlans"
+      :truck-id="truckId ?? ''"
       @saved="store.getUpcoming()"
     />
     <ModalConfirm

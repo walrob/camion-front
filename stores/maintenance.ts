@@ -7,6 +7,9 @@ export const useMaintenanceStore = defineStore("maintenance", {
     plans: [] as any[],
     upcoming: [] as any[],
     orders: [] as any[],
+    // Filtro vigente del historial de OT (null = todas las unidades). Las
+    // mutaciones recargan con este mismo filtro.
+    ordersTruckId: null as string | null,
     truckOptions: [] as Truck[],
     selectedTruckId: null as string | null,
     loading: false,
@@ -55,13 +58,16 @@ export const useMaintenanceStore = defineStore("maintenance", {
         .catch((e) => general.setErrorSnackbar(e));
     },
 
-    async getOrders(truckId: string) {
+    async getOrders(truckId?: string | null) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
+      if (truckId !== undefined) this.ordersTruckId = truckId || null;
       this.loading = true;
       this.error = false;
       return await $api
-        .get(`maintenance/trucks/${truckId}/orders/`)
+        .get("maintenance/orders/", {
+          params: { truckId: this.ordersTruckId || undefined },
+        })
         .then((resp) => (this.orders = resp.data))
         .catch((e) => {
           this.error = true;
@@ -92,10 +98,10 @@ export const useMaintenanceStore = defineStore("maintenance", {
     },
 
     async createOrder(payload: any) {
-      return this.mutate("post", "maintenance/orders/", payload, "OT creada", () => this.getOrders(payload.truckId), true);
+      return this.mutate("post", "maintenance/orders/", payload, "OT creada", () => this.getOrders(), true);
     },
-    async updateOrder(id: string, truckId: string, payload: any) {
-      return this.mutate("patch", `maintenance/orders/${id}/`, payload, "OT actualizada", () => this.getOrders(truckId), true);
+    async updateOrder(id: string, payload: any) {
+      return this.mutate("patch", `maintenance/orders/${id}/`, payload, "OT actualizada", () => this.getOrders(), true);
     },
     /**
      * Reabre una OT finalizada para poder corregirla.
@@ -104,13 +110,13 @@ export const useMaintenanceStore = defineStore("maintenance", {
      * service quedó contado desde esta orden) no se revierte: se recalcula al
      * cerrarla de nuevo.
      */
-    async reopenOrder(id: string, truckId: string, reason: string) {
+    async reopenOrder(id: string, reason: string) {
       return this.mutate(
         "patch",
         `maintenance/orders/${id}/reopen/`,
         { reason },
         "OT reabierta",
-        () => this.getOrders(truckId),
+        () => this.getOrders(),
       );
     },
 

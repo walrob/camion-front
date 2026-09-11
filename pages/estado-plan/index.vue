@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import InvoiceDataCard from "~/components/billing/InvoiceDataCard.vue";
+import PlanChangeCard from "~/components/billing/PlanChangeCard.vue";
 import { useComprobantes } from "~/composables/useComprobantes";
 
 /**
@@ -161,6 +162,13 @@ onMounted(async () => {
   } finally {
     cargando.value = false;
   }
+
+  // Llegada desde /upgrade/<feature>: la tarjeta de planes se renderiza recién
+  // después de cargar, así que el scroll al ancla se hace a mano.
+  if (route.hash === "#planes") {
+    await nextTick();
+    document.getElementById("planes")?.scrollIntoView({ behavior: "smooth" });
+  }
 });
 </script>
 
@@ -245,6 +253,9 @@ onMounted(async () => {
               </p>
             </div>
           </v-card>
+
+          <!-- Un cambio de plan mueve la cotización de arriba: se recarga. -->
+          <PlanChangeCard class="mt-4" @changed="cargar" />
 
           <InvoiceDataCard class="mt-4" />
 

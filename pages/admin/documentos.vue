@@ -64,14 +64,38 @@ const filteredExpiring = computed(() => {
   });
 });
 
-const headers = [
+// Sin dueño elegido la tabla lista toda la entidad, así que hace falta ver de
+// quién es cada documento. Con un dueño (o para la empresa) la columna sobra.
+const showOwner = computed(
+  () => store.ownerType !== "company" && !store.ownerId,
+);
+const headers = computed(() => [
+  ...(showOwner.value ? [{ title: "Dueño", value: "owner.label" }] : []),
   { title: "Categoría", value: "category" },
   { title: "Número", value: "number" },
   { title: "Emisión", value: "issueDate" },
   { title: "Vencimiento", value: "expiryDate" },
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions", sortable: false },
-];
+]);
+
+// Texto del vacío según el filtro: no es lo mismo "no hay nada cargado" que
+// "este camión no tiene documentos".
+const OWNER_PLURAL: Record<string, string> = {
+  truck: "camiones",
+  trailer: "acoplados",
+  driver: "choferes",
+};
+const selectedOwnerLabel = computed(
+  () => ownerOptions.value.find((o) => o.id === store.ownerId)?.label,
+);
+const emptyText = computed(() => {
+  if (store.ownerType === "company")
+    return "La empresa todavía no tiene documentos cargados.";
+  if (store.ownerId)
+    return `${selectedOwnerLabel.value ?? "Este registro"} no tiene documentos cargados.`;
+  return `Todavía no hay documentos de ${OWNER_PLURAL[store.ownerType] ?? "esta entidad"}. Elegí uno en el selector para ver solo los suyos, o cargá el primero.`;
+});
 
 const STATUS_HEX: Record<string, string> = {
   valid: "#4CAF50",
@@ -79,8 +103,6 @@ const STATUS_HEX: Record<string, string> = {
   expired: "#F44336",
 };
 const statusHex = (s: string) => STATUS_HEX[s] ?? "#9E9E9E";
-
-const canAdd = () => store.ownerType === "company" || !!store.ownerId;
 
 const OWNER_ICON: Record<string, string> = {
   truck: "mdi-truck",
@@ -201,9 +223,12 @@ onMounted(async () => {
             :items="ownerOptions"
             item-title="label"
             item-value="id"
-            label="Seleccionar"
+            :label="ownerTypeLabel(store.ownerType).label"
+            placeholder="Todos"
+            persistent-placeholder
             variant="outlined"
             density="compact"
+            clearable
             hide-details
             style="max-width: 220px"
           />
@@ -237,7 +262,6 @@ onMounted(async () => {
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
-            :disabled="!canAdd()"
             @click="dialog = true"
           >
             Nuevo documento
@@ -251,9 +275,39 @@ onMounted(async () => {
           :error="store.error"
           all-items
           searchable
-          search-label="Buscar número / categoría"
+          search-label="Buscar dueño / número / categoría"
+          empty-icon="mdi-file-document-outline"
+          :no-data-text="emptyText"
           @retry="store.getDocuments()"
         >
+          <template #empty>
+            <EmptyState icon="mdi-file-document-outline" :text="emptyText">
+              <template #action>
+                <v-btn
+                  color="primary"
+                  variant="tonal"
+                  prepend-icon="mdi-plus"
+                  @click="dialog = true"
+                >
+                  Nuevo documento
+                </v-btn>
+              </template>
+            </EmptyState>
+          </template>
+          <template #item.owner.label="{ item }">
+            <span class="d-flex align-center ga-1">
+              <v-icon size="16" class="text-medium-emphasis">
+                {{ ownerIcon(item.ownerType) }}
+              </v-icon>
+              {{ item.owner?.label || "—" }}
+              <span
+                v-if="item.owner?.sublabel"
+                class="text-caption text-medium-emphasis"
+              >
+                · {{ item.owner.sublabel }}
+              </span>
+            </span>
+          </template>
           <template #item.category="{ item }">
             {{ documentCategory(item.category).label }}
           </template>
