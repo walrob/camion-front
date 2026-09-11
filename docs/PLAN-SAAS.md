@@ -329,8 +329,12 @@ para tomar decisiones.
 
 - ~~**El front no fue probado contra el backend**~~ → cerrado: el panel se probó
   en un navegador contra la API.
-- **El token de impersonación se copia a mano** desde la ficha: falta el botón que abra
-  la sesión de soporte directamente.
+- ~~**El token de impersonación se copia a mano** desde la ficha~~ → cerrado el
+  11/9/2026: «Ver como el cliente» abre el backoffice del cliente en la misma
+  pestaña (`auth.entrarComoSoporte`), guardando la sesión del superadmin en
+  `soporte.*`. «Salir» del banner —o el vencimiento del token— la restaura y
+  vuelve a la ficha (`auth.salirDeSoporte`). Las escrituras rechazadas
+  (`IMPERSONATION_READ_ONLY`) muestran un aviso de solo lectura.
 - ~~**Sin paginación** en el listado de empresas ni en cobranzas~~
   → cerrado el 14/8/2026, contra el servidor y con los totales de cobranza
   calculados sobre toda la deuda, no sobre la página visible.

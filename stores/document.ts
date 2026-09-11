@@ -5,6 +5,8 @@ export const useDocumentStore = defineStore("document", {
   state: () => ({
     documents: [] as any[],
     expiring: [] as any[],
+    /** Horizonte con el que se pidió `expiring` (null = ventana de la empresa). */
+    expiringDays: null as number | null,
     myDocuments: [] as any[],
     ownerOptions: [] as { id: string; label: string }[],
     loading: false,
@@ -38,11 +40,17 @@ export const useDocumentStore = defineStore("document", {
         .finally(() => (this.loading = false));
     },
 
-    async getExpiring() {
+    /**
+     * Sin `days` es la bandeja (vencidos y por vencer según la ventana de la
+     * empresa). Con `days`, todo lo que vence de acá a N días: lo usa el
+     * drill-down del panel, cuyos cortes llegan hasta 90 días.
+     */
+    async getExpiring(days?: number) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
+      this.expiringDays = days ?? null;
       return await $api
-        .get("documents/expiring/")
+        .get("documents/expiring/", { params: { days } })
         .then((resp) => (this.expiring = resp.data))
         .catch((e) => general.setErrorSnackbar(e));
     },

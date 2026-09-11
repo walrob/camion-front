@@ -40,9 +40,14 @@ const hora = computed(() =>
     : "",
 );
 
+/**
+ * Vuelve a la sesión del superadmin, a la ficha desde la que entró. Si esa
+ * sesión ya no existe (venció mientras daba soporte), no queda otra que
+ * loguearse de nuevo.
+ */
 const salir = async () => {
-  await auth.logout();
-  router.push("/auth/login");
+  const volverA = await auth.salirDeSoporte();
+  await router.push(volverA ?? "/auth/login");
 };
 </script>
 

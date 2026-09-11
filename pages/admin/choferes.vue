@@ -73,7 +73,13 @@ const changePage = (page: number) => {
   driverStore.getDrivers();
 };
 
-onMounted(() => driverStore.getDrivers());
+const route = useRoute();
+
+onMounted(() => {
+  // Desde el panel ("choferes con novedades") se llega con el corte aplicado.
+  if (route.query.withNews === "true") driverStore.filterWithNews = true;
+  driverStore.getDrivers();
+});
 </script>
 
 <template>
@@ -89,6 +95,7 @@ onMounted(() => driverStore.getDrivers());
           :export-params="{
             search: driverStore.search,
             status: driverStore.filterStatus,
+            withNews: driverStore.filterWithNews || undefined,
           }"
           import-url="drivers/import/"
           template-url="drivers/import/template/"
@@ -123,6 +130,15 @@ onMounted(() => driverStore.getDrivers());
         clearable
         hide-details
         style="max-width: 200px"
+        @update:model-value="driverStore.getDrivers()"
+      />
+      <v-switch
+        v-model="driverStore.filterWithNews"
+        label="Con novedades"
+        color="primary"
+        density="compact"
+        hide-details
+        inset
         @update:model-value="driverStore.getDrivers()"
       />
     </div>

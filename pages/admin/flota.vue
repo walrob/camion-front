@@ -12,7 +12,15 @@ definePageMeta({
 
 useHead({ title: "Flota" });
 
-const tab = ref("fleets");
+// Desde el panel se llega directo a la pestaña que corresponde (?tab=trucks);
+// el estado del camión (?status) lo aplica la pestaña al montarse.
+const tabInicial = useRoute().query.tab;
+const tab = ref(
+  typeof tabInicial === "string" &&
+    ["fleets", "trucks", "trailers"].includes(tabInicial)
+    ? tabInicial
+    : "fleets",
+);
 </script>
 
 <template>

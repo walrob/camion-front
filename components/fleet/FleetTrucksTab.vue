@@ -67,8 +67,13 @@ const changePage = (page: number) => {
   fleetStore.getTrucks();
 };
 
+const route = useRoute();
+
 onMounted(() => {
   if (!fleetOptions.value.length) fleetStore.getFleetOptions();
+  // Desde el panel (corte de flota por estado) se llega con el filtro puesto.
+  const { status } = route.query;
+  if (typeof status === "string") fleetStore.filterTruckStatus = status;
   fleetStore.getTrucks();
 });
 </script>

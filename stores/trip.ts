@@ -19,6 +19,7 @@ export const useTripStore = defineStore("trip", {
       loading: false,
       error: false,
       search: null as string | null,
+      /** Un estado del viaje, o `delayed` (en curso con llegada vencida). */
       filterStatus: null as string | null,
       filterDriver: null as string | null,
       filterFrom: from as string | null,
@@ -70,6 +71,15 @@ export const useTripStore = defineStore("trip", {
     },
 
     // ───────── Backoffice ─────────
+    /**
+     * "Demorado" no es un estado de la máquina sino un corte sobre los "en
+     * curso": viaja como `delayed=true` y no como `status`.
+     */
+    statusParams(): { status?: string; delayed?: boolean } {
+      if (this.filterStatus === "delayed") return { delayed: true };
+      return { status: this.filterStatus || undefined };
+    },
+
     async getTrips() {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();
@@ -81,7 +91,7 @@ export const useTripStore = defineStore("trip", {
             page: this.pagination.currentPage,
             limit: this.pagination.itemsPerPage,
             search: this.search || undefined,
-            status: this.filterStatus || undefined,
+            ...this.statusParams(),
             driverId: this.filterDriver || undefined,
             from: this.filterFrom || undefined,
             to: this.filterTo || undefined,

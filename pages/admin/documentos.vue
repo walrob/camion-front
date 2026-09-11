@@ -45,11 +45,33 @@ const expStatusOptions = [
   { value: "expired", label: "Vencido" },
 ];
 
+// Plazo hasta el vencimiento: los mismos cortes que el panel
+// (`DashboardService.documentExpirations`). Un plazo excluye lo ya vencido.
+const expPlazo = ref<string | null>(null);
+const expPlazoOptions = [
+  { value: "in7", label: "≤ 7 días", desde: 0, hasta: 7 },
+  { value: "in30", label: "8 a 30 días", desde: 8, hasta: 30 },
+  { value: "in90", label: "31 a 90 días", desde: 31, hasta: 90 },
+];
+/** Días desde hoy hasta el vencimiento (negativo si ya venció). */
+const diasHasta = (expiryDate?: string | null) => {
+  if (!expiryDate) return null;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const [y, m, d] = expiryDate.slice(0, 10).split("-").map(Number);
+  return Math.round((new Date(y, m - 1, d).getTime() - hoy.getTime()) / 86_400_000);
+};
+
 const filteredExpiring = computed(() => {
   const q = expSearch.value.trim().toLowerCase();
+  const plazo = expPlazoOptions.find((p) => p.value === expPlazo.value);
   return expiring.value.filter((d) => {
     if (expStatus.value && d.status !== expStatus.value) return false;
     if (expOwnerType.value && d.ownerType !== expOwnerType.value) return false;
+    if (plazo) {
+      const dias = diasHasta(d.expiryDate);
+      if (dias === null || dias < plazo.desde || dias > plazo.hasta) return false;
+    }
     if (!q) return true;
     const haystack = [
       documentCategory(d.category).label,
@@ -161,9 +183,34 @@ watch(
   },
 );
 
+/**
+ * Desde el panel se llega a la pestaña Vencimientos con el corte ya aplicado
+ * (?tab=expiring&ventana=expired|in7|in30|in90). Los plazos piden la lista
+ * hasta su tope en días: la bandeja normal sólo trae lo que entra en la
+ * ventana de aviso de la empresa y dejaría vacío el corte "31 a 90 días".
+ */
+const aplicarVentana = (ventana: string): number | undefined => {
+  if (ventana === "expired") {
+    expStatus.value = "expired";
+    return undefined;
+  }
+  const plazo = expPlazoOptions.find((p) => p.value === ventana);
+  if (!plazo) return undefined;
+  expPlazo.value = plazo.value;
+  return plazo.hasta;
+};
+
 onMounted(async () => {
   const qType = route.query.ownerType;
   const qId = route.query.ownerId;
+  const qTab = route.query.tab;
+  const qVentana = route.query.ventana;
+
+  let diasVencimientos: number | undefined;
+  if (qTab === "expiring") {
+    tab.value = "expiring";
+    if (typeof qVentana === "string") diasVencimientos = aplicarVentana(qVentana);
+  }
 
   // Llegada desde Flota (u otra pantalla) con el dueño ya elegido.
   if (typeof qType === "string") {
@@ -177,7 +224,7 @@ onMounted(async () => {
     await store.loadOwnerOptions(store.ownerType);
     store.getDocuments();
   }
-  store.getExpiring();
+  store.getExpiring(diasVencimientos);
 });
 </script>
 
@@ -327,7 +374,9 @@ onMounted(async () => {
             </v-chip>
           </template>
           <template #item.actions="{ item }">
+            <!-- Sin adjunto no hay nada que ver: el botón no aparece. -->
             <IconBtn
+              v-if="item.fileKey"
               tooltip="Ver archivo"
               icon="mdi-file-eye"
               size="small"
@@ -385,10 +434,23 @@ onMounted(async () => {
             hide-details
             style="max-width: 180px"
           />
+          <v-select
+            v-model="expPlazo"
+            :items="expPlazoOptions"
+            item-title="label"
+            item-value="value"
+            label="Plazo"
+            variant="outlined"
+            density="compact"
+            clearable
+            hide-details
+            style="max-width: 180px"
+          />
           <v-spacer />
           <TableExcelActions
             export-url="documents/expiring/export/"
             export-name="vencimientos.xlsx"
+            :export-params="{ days: store.expiringDays ?? undefined }"
             :disabled="!expiring.length"
           />
         </div>

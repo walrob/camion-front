@@ -17,6 +17,7 @@ import { incidentSeverityOptions } from "~/composables/useIncidentStatus";
 import { alertLevelOptions } from "~/composables/useAlertStatus";
 import { useAlertSocket } from "~/composables/useAlertSocket";
 import { useIncidentSocket } from "~/composables/useIncidentSocket";
+import { lastNDaysRange } from "~/composables/useDateRange";
 
 definePageMeta({ layout: "admin" });
 useHead({ title: "Dashboard" });
@@ -64,6 +65,19 @@ const variacion = (m?: TrendMetric | null) => {
 
 const trends = computed(() => overview.value?.trends);
 
+// ───────────────────── Drill-down con filtro ─────────────────────
+//
+// Cada número del panel lleva a su listado **ya filtrado** con el mismo corte:
+// quien hace click en "viajes demorados" quiere ver esos, no todos los viajes.
+// El listado lee la query al entrar y la aplica a sus filtros normales, así que
+// el usuario limpia el filtro como cualquier otro y ve el resto.
+
+/**
+ * El período del panel como `from`/`to` de un listado: hoy y los N-1 días
+ * previos, igual que `DashboardService.buildTrends`.
+ */
+const periodo = computed(() => lastNDaysRange(dias.value - 1));
+
 const disponibilidad = computed(() => {
   const total = totalTrucks.value;
   if (!total) return 0;
@@ -95,7 +109,7 @@ const kpis = computed(() => {
       series: t.tripsFinished.series,
       icon: "mdi-check-decagram-outline",
       tone: "primary",
-      to: "/admin/viajes",
+      to: `/admin/viajes?status=finished&from=${periodo.value.from}&to=${periodo.value.to}`,
     },
     {
       label: "Incidentes reportados",
@@ -105,7 +119,7 @@ const kpis = computed(() => {
       series: t.incidentsReported.series,
       icon: "mdi-alert-circle-outline",
       tone: "error",
-      to: "/admin/incidentes",
+      to: `/admin/incidentes?from=${periodo.value.from}&to=${periodo.value.to}`,
     },
     {
       label: "Disponibilidad de flota",
@@ -114,7 +128,7 @@ const kpis = computed(() => {
       // exista historial de estados de la flota.
       icon: "mdi-truck-check-outline",
       tone: "info",
-      to: "/admin/flota",
+      to: "/admin/flota?tab=trucks",
     },
   ];
 });
@@ -134,7 +148,7 @@ const truckItems = computed(() => {
     label: o.label,
     value: data[o.value] ?? 0,
     color: o.color,
-    to: "/admin/flota",
+    to: `/admin/flota?tab=trucks&status=${o.value}`,
   }));
 });
 
@@ -144,7 +158,8 @@ const alertItems = computed(() => {
     label: l.label,
     value: data[l.value] ?? 0,
     color: l.color,
-    to: "/admin/alertas",
+    // Las del panel son las activas: el listado arranca con ese mismo corte.
+    to: `/admin/alertas?level=${l.value}&status=active`,
   }));
 });
 
@@ -155,18 +170,19 @@ const incidentItems = computed(() => {
     label: s.label,
     value: data[s.value] ?? 0,
     color: s.color,
-    to: "/admin/incidentes",
+    to: `/admin/incidentes?severity=${s.value}`,
   }));
 });
 
 const expirationItems = computed(() => {
   const e = overview.value?.expirations;
+  // `ventana` es la misma que calcula el backend (`documentExpirations`).
   return [
-    { label: "Vencidos", value: e?.expired ?? 0, color: "error" },
-    { label: "≤ 7 días", value: e?.in7 ?? 0, color: "warning" },
-    { label: "8 a 30 días", value: e?.in30 ?? 0, color: "amber" },
-    { label: "31 a 90 días", value: e?.in90 ?? 0, color: "info" },
-  ].map((i) => ({ ...i, to: "/admin/documentos" }));
+    { label: "Vencidos", value: e?.expired ?? 0, color: "error", ventana: "expired" },
+    { label: "≤ 7 días", value: e?.in7 ?? 0, color: "warning", ventana: "in7" },
+    { label: "8 a 30 días", value: e?.in30 ?? 0, color: "amber", ventana: "in30" },
+    { label: "31 a 90 días", value: e?.in90 ?? 0, color: "info", ventana: "in90" },
+  ].map((i) => ({ ...i, to: `/admin/documentos?tab=expiring&ventana=${i.ventana}` }));
 });
 
 // ───────────────────── Evolución del gasto ─────────────────────
@@ -219,7 +235,7 @@ const attention = computed(() => {
       count: o.alerts.active,
       icon: "mdi-bell-ring",
       tone: "warning",
-      to: "/admin/alertas",
+      to: "/admin/alertas?status=active",
     },
     {
       label: "mantenimientos próximos",
@@ -233,14 +249,14 @@ const attention = computed(() => {
       count: o.delayedTrips,
       icon: "mdi-clock-alert",
       tone: "warning",
-      to: "/admin/viajes",
+      to: "/admin/viajes?status=delayed",
     },
     {
       label: "choferes con novedades",
       count: o.driversWithNews,
       icon: "mdi-account-alert",
       tone: "accent",
-      to: "/admin/choferes",
+      to: "/admin/choferes?withNews=true",
     },
   ].filter((i) => i.count > 0);
 });

@@ -70,7 +70,23 @@ const tiposDeIncidente = computed(() =>
   catalogStore.todos(CATALOG.INCIDENT_TYPE),
 );
 
+const route = useRoute();
+
 onMounted(() => {
+  // Desde el panel se llega con el corte ya aplicado: una severidad (los
+  // abiertos, sin importar la fecha) o el período (?from&to) del KPI
+  // "incidentes reportados".
+  const { severity, from, to } = route.query;
+  if (typeof severity === "string") {
+    incidentStore.filterSeverity = severity;
+    incidentStore.filterFrom = null;
+    incidentStore.filterTo = null;
+  }
+  if (typeof from === "string" && typeof to === "string") {
+    incidentStore.filterFrom = from;
+    incidentStore.filterTo = to;
+  }
+
   incidentStore.getIncidents();
   if (!staffUsers.value.length) incidentStore.loadStaffUsers();
   catalogStore.load();

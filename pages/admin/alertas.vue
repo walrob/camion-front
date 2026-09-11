@@ -31,10 +31,33 @@ const levelHex = (level: string) => LEVEL_HEX[level] ?? "#9E9E9E";
 
 // Las actualizaciones en vivo llegan por el centro de alertas global del navbar
 // (NotificationDD), que alimenta este mismo store. Acá solo cargamos el listado.
+const route = useRoute();
+
 onMounted(() => {
+  // Desde el panel se llega con el corte ya aplicado (?level y/o ?status).
+  const { level, status } = route.query;
+  if (typeof level === "string") alertStore.filterLevel = level;
+  if (typeof status === "string") {
+    alertStore.filterStatus = status;
+    // Lo activo no tiene fecha: la pregunta es "qué está sin resolver", no
+    // "qué pasó en los últimos 15 días".
+    if (status === "active") {
+      alertStore.filterFrom = null;
+      alertStore.filterTo = null;
+    }
+  }
+
   alertStore.getAlerts();
   alertStore.getCount();
 });
+
+// "Activas" no es un estado sino el corte del panel (todo lo no resuelto). Va
+// en el mismo selector para que el filtro con el que se llega se vea y se
+// pueda sacar como cualquier otro.
+const opcionesDeEstado = [
+  { value: "active", label: "Activas (sin resolver)", color: "warning" },
+  ...alertStatusOptions,
+];
 
 // ── Reapertura ──────────────────────────────────────────────────────────────
 // Una alerta resuelta no vuelve atrás con un click: se reabre con motivo y eso
@@ -96,7 +119,7 @@ const confirmarReapertura = async (motivo: string) => {
       />
       <v-select
         v-model="alertStore.filterStatus"
-        :items="alertStatusOptions"
+        :items="opcionesDeEstado"
         item-title="label"
         item-value="value"
         label="Estado"

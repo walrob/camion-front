@@ -31,6 +31,14 @@ const confirm = ref(false);
 const action = ref<(() => Promise<any>) | null>(null);
 const confirmText = ref("");
 
+// "Demorado" es un corte del panel (en curso con llegada planificada vencida),
+// no un estado del viaje: se ofrece en el mismo selector para que el filtro
+// con el que se llega desde el panel se vea y se pueda sacar como cualquier otro.
+const opcionesDeEstado = [
+  ...tripStatusOptions,
+  { value: "delayed", label: "Demorado", color: "warning" },
+];
+
 const headers = [
   { title: "Código", value: "code" },
   { title: "Origen", value: "origin" },
@@ -80,12 +88,21 @@ onMounted(async () => {
   // contra el legajo del chofer).
   if (!driverOptions.value.length) await tripStore.loadFormOptions();
 
-  const { driverId, employeeId } = route.query;
+  const { driverId, employeeId, status, from, to } = route.query;
   if (typeof driverId === "string") {
     tripStore.filterDriver = driverId;
   } else if (typeof employeeId === "string") {
     const match = driverOptions.value.find((d) => d.employeeId === employeeId);
     if (match) tripStore.filterDriver = match.id;
+  }
+
+  // Desde el panel se llega con el corte ya aplicado (?status=finished&from&to,
+  // o ?status=delayed). El rango, si viene, reemplaza al precargado: la
+  // pregunta es "los del período", no "los de los últimos 15 días".
+  if (typeof status === "string") {
+    tripStore.filterStatus = status;
+    tripStore.filterFrom = typeof from === "string" ? from : null;
+    tripStore.filterTo = typeof to === "string" ? to : null;
   }
 
   tripStore.getTrips();
@@ -106,7 +123,7 @@ onMounted(async () => {
           export-name="viajes.xlsx"
           :export-params="{
             search: tripStore.search,
-            status: tripStore.filterStatus,
+            ...tripStore.statusParams(),
             driverId: tripStore.filterDriver,
             from: tripStore.filterFrom,
             to: tripStore.filterTo,
@@ -135,7 +152,7 @@ onMounted(async () => {
       />
       <v-select
         v-model="tripStore.filterStatus"
-        :items="tripStatusOptions"
+        :items="opcionesDeEstado"
         item-title="label"
         item-value="value"
         label="Estado"

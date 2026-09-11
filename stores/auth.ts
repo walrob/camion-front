@@ -148,7 +148,61 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
+      // Cerrar sesión desde adentro de una sesión de soporte cierra todo: no
+      // puede quedar un respaldo del superadmin colgado para un próximo login.
+      for (const k of ['token', 'expiresAt', 'user', 'volverA']) {
+        await persistRemove(`soporte.${k}`)
+      }
       await this.clearAuth()
+    },
+
+    // ── Sesión de soporte (superadmin viendo la cuenta de un cliente) ──────
+    // El backend emite un token de solo lectura sobre la empresa. Acá se abre
+    // como si fuera un login común, pero antes se guarda la sesión del
+    // superadmin para poder volver a ella sin pedirle la contraseña de nuevo.
+
+    /** ¿Hay una sesión de superadmin guardada para volver? */
+    async tieneSesionDeSoporte() {
+      return !!(await persistGet('soporte.token'))
+    },
+
+    async entrarComoSoporte(
+      token: string,
+      expiresAt: string,
+      user: any,
+      volverA: string,
+    ) {
+      // Sólo se guarda una vez: si ya hay un respaldo, entrar a un segundo
+      // cliente sin salir del primero no puede pisar al superadmin con el token
+      // de soporte del primero.
+      if (!(await this.tieneSesionDeSoporte())) {
+        await persistSet('soporte.token', this.token ?? '')
+        await persistSet('soporte.expiresAt', this.expiresAt?.toISOString() ?? '')
+        await persistSet('soporte.user', JSON.stringify(this.user))
+      }
+      await persistSet('soporte.volverA', volverA)
+      await this.clearAuth()
+      await this.setAuth(token, expiresAt, user)
+    },
+
+    /**
+     * Restaura la sesión del superadmin. Devuelve a dónde volver, o `null` si
+     * no había respaldo (o ya venció: ahí no queda otra que loguearse).
+     */
+    async salirDeSoporte(): Promise<string | null> {
+      const token = await persistGet('soporte.token')
+      const expiresAt = await persistGet('soporte.expiresAt')
+      const userStr = await persistGet('soporte.user')
+      const volverA = (await persistGet('soporte.volverA')) || '/superadmin'
+
+      for (const k of ['token', 'expiresAt', 'user', 'volverA']) {
+        await persistRemove(`soporte.${k}`)
+      }
+      await this.clearAuth()
+
+      if (!token || !expiresAt || new Date() > new Date(expiresAt)) return null
+      await this.setAuth(token, expiresAt, userStr ? JSON.parse(userStr) : null)
+      return volverA
     },
 
     async loadAuth() {
@@ -160,6 +214,12 @@ export const useAuthStore = defineStore('auth', {
       if (!token || !expiresAt) return
       const expDate = new Date(expiresAt)
       if (now > expDate) {
+        // Si lo que venció es la sesión de soporte (30 min), se vuelve al
+        // superadmin en vez de mandarlo al login.
+        if (await this.tieneSesionDeSoporte()) {
+          await this.salirDeSoporte()
+          return
+        }
         await this.clearAuth()
         return
       }

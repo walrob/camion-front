@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import {
   useComprobantes,
@@ -17,6 +17,8 @@ import { taxConditionLabel } from "~/types/plan";
 definePageMeta({ layout: "superadmin", roles: ["superadmin"] });
 
 const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
 const { get, post, patch } = useApi();
 const { money, num } = useFormatters();
 
@@ -32,8 +34,6 @@ const dialogoEstado = ref(false);
 const planNuevo = ref("");
 const estadoNuevo = ref("");
 const motivo = ref("");
-
-const impersonacion = ref<any>(null);
 
 /** Identificación de la empresa bajo el título: slug y, si lo tiene, CUIT. */
 const subtituloFicha = computed(() => {
@@ -232,13 +232,19 @@ const emitir = () =>
     "Período emitido.",
   );
 
+/**
+ * Entra al backoffice del cliente con el token de soporte (solo lectura, 30
+ * minutos). La sesión del superadmin queda guardada: el «Salir» del banner
+ * vuelve a esta ficha sin pedir la contraseña de nuevo.
+ */
 const impersonar = async () => {
   trabajando.value = true;
   try {
-    impersonacion.value = await post(
-      `superadmin/companies/${id}/impersonate`,
-      { motivo: motivo.value || "Soporte" },
-    );
+    const r: any = await post(`superadmin/companies/${id}/impersonate`, {
+      motivo: "Soporte",
+    });
+    await auth.entrarComoSoporte(r.token, r.expiresAt, r.user, route.fullPath);
+    await router.push("/admin");
   } finally {
     trabajando.value = false;
   }
@@ -282,12 +288,6 @@ const comoTexto = (def: any): string => {
     return def.options?.find((o: any) => o.value === def.value)?.label ?? def.value;
   return def.value === "" || def.value == null ? "—" : String(def.value);
 };
-
-const horaDeVencimiento = computed(() =>
-  impersonacion.value
-    ? new Date(impersonacion.value.expiresAt).toLocaleTimeString("es-AR")
-    : "",
-);
 
 onMounted(() => {
   cargar();
@@ -546,39 +546,21 @@ onMounted(() => {
             <v-divider class="my-3" />
 
             <div class="text-caption text-medium-emphasis mb-2">
-              Soporte: acceso de <strong>solo lectura</strong> por 30 minutos.
-              Queda registrado en la auditoría.
+              Soporte: entrás al sistema del cliente como su administrador, en
+              <strong>solo lectura</strong> y por 30 minutos. Queda registrado
+              en la auditoría. Para volver acá, usá «Salir» en la barra
+              amarilla.
             </div>
             <v-btn
               block
               variant="outlined"
               color="warning"
+              prepend-icon="mdi-eye-outline"
               :loading="trabajando"
               @click="impersonar"
             >
               Ver como el cliente
             </v-btn>
-
-            <v-alert
-              v-if="impersonacion"
-              type="warning"
-              variant="tonal"
-              density="compact"
-              rounded="lg"
-              class="mt-3"
-            >
-              <div class="text-body-2 mb-2">
-                Token de soporte generado. Vence {{ horaDeVencimiento }}.
-              </div>
-              <v-textarea
-                :model-value="impersonacion.token"
-                rows="3"
-                variant="outlined"
-                density="compact"
-                hide-details
-                readonly
-              />
-            </v-alert>
           </v-card>
 
           <v-card border flat rounded="lg" class="pa-5">

@@ -36,8 +36,13 @@ export default defineNuxtPlugin(() => {
       // Solo redirigir a login por 401 si el usuario tenía una sesión activa.
       // Si es un guest (sin token), no redirigir para no interrumpir el flujo de compra.
       if (error.response?.status === 401 && authStore.token) {
-        authStore.clearAuth();
-        navigateTo("/auth/login");
+        // Si lo que venció es una sesión de soporte, se vuelve al superadmin
+        // en vez de dejarlo en el login.
+        const volverA = (await authStore.tieneSesionDeSoporte())
+          ? await authStore.salirDeSoporte()
+          : null;
+        if (!volverA) await authStore.clearAuth();
+        navigateTo(volverA ?? "/auth/login");
       }
       // Cuenta demo: cualquier escritura la corta el backend con 403. En vez de un
       // error crudo, se avisa que la demo es de solo lectura.
@@ -45,6 +50,16 @@ export default defineNuxtPlugin(() => {
         generalStore.setSnackbar({
           color: "info",
           message: "Modo demo: solo lectura. Esta acción no está disponible.",
+        });
+      }
+      // Sesión de soporte (superadmin viendo a un cliente): mismo caso.
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.error === "IMPERSONATION_READ_ONLY"
+      ) {
+        generalStore.setSnackbar({
+          color: "info",
+          message: "Modo soporte: solo lectura. Esta acción no está disponible.",
         });
       }
       return Promise.reject(error);

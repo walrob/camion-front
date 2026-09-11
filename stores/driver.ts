@@ -13,6 +13,8 @@ export const useDriverStore = defineStore("driver", {
     error: false,
     search: null as string | null,
     filterStatus: null as string | null,
+    /** Sólo choferes con incidentes sin resolver: el corte del panel. */
+    filterWithNews: false,
     sortBy: null as string | null,
     sortOrder: null as "asc" | "desc" | null,
     pagination: {
@@ -37,6 +39,7 @@ export const useDriverStore = defineStore("driver", {
             limit: this.pagination.itemsPerPage,
             search: this.search || undefined,
             status: this.filterStatus || undefined,
+            withNews: this.filterWithNews || undefined,
             sortBy: this.sortBy || undefined,
             order: this.sortOrder || undefined,
           },
