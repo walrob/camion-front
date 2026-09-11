@@ -105,8 +105,10 @@ const submit = async () => {
     @save="submit"
   >
     <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-      <!-- Empleado: el chofer es un empleado de RRHH con puesto «Chofer». -->
-      <FormSection title="Empleado" hint="El chofer corresponde a un empleado de RRHH con puesto «Chofer». El nombre, documento y contacto se gestionan en RRHH.">
+      <!-- Empleado: el chofer es un empleado de RRHH con puesto «Chofer». Al dar
+           de alta un empleado con ese puesto el perfil se crea solo; este alta
+           manual queda para legajos anteriores que no lo tengan. -->
+      <FormSection title="Empleado" hint="Los empleados con puesto «Chofer» aparecen acá automáticamente. Este alta es para legajos que todavía no tengan perfil. El nombre, documento y contacto se gestionan en RRHH.">
         <v-row dense>
           <v-col cols="12">
             <v-autocomplete

@@ -181,6 +181,12 @@ const submit = async () => {
               item-title="label"
               item-value="value"
               label="Puesto"
+              :hint="
+                roleForPosition(form.position).value === 'driver'
+                  ? 'Aparece en Choferes automáticamente; la licencia se carga ahí.'
+                  : ''
+              "
+              persistent-hint
             />
           </v-col>
           <v-col cols="12" sm="6">
