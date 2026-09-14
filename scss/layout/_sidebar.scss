@@ -79,7 +79,14 @@
             font-size: 0.875rem;
 
             .v-icon {
-                margin-inline-start: 13px;
+                margin-inline-start: 8px;
+            }
+
+            // Vuetify agrega un espaciador de 32px después del ícono del
+            // `append`. En un drawer de 270px eso deja 61px para un candado
+            // de 16px y trunca títulos largos ("Mantenimien…").
+            .v-list-item__spacer {
+                width: 0;
             }
         }
 
@@ -165,11 +172,5 @@
                 opacity: 1;
             }
         }
-    }
-}
-
-@media screen and (max-width:1280px) {
-    .leftSidebar {
-        top: 0 !important;
     }
 }

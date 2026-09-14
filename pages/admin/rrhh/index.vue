@@ -46,6 +46,7 @@ const headers = [
   { title: "Apellido", value: "lastName" },
   { title: "Nombre", value: "firstName" },
   { title: "DNI/CUIL", value: "documentId" },
+  { title: "Email", value: "user.email", sortable: false },
   { title: "Puesto", value: "position" },
   { title: "Estado", value: "employmentStatus" },
   { title: "Acciones", value: "actions", sortable: false },
@@ -194,6 +195,9 @@ onMounted(() => {
       @retry="hrStore.getEmployees()"
       @sort="hrStore.setSort"
     >
+      <template #item.user.email="{ item }">
+        {{ item.user?.email || "—" }}
+      </template>
       <template #item.position="{ item }">
         <v-chip :color="position(item.position).color" size="small" label>
           {{ position(item.position).label }}

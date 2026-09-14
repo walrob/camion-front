@@ -266,7 +266,6 @@ const submit = async () => {
               color="primary"
               density="compact"
               hide-details
-              unset
             />
           </v-col>
           <template v-if="createAccount">

@@ -13,7 +13,6 @@ const { snackbar } = storeToRefs(generalStore);
 
 import { useAuthStore } from "~/stores/auth";
 const authStore = useAuthStore();
-const isDemo = computed(() => authStore.isDemo);
 
 import { usePwa } from "~/composables/usePwa";
 const { canInstall, isOnline, promptInstall } = usePwa();
@@ -99,15 +98,6 @@ onBeforeUnmount(() => observer?.disconnect());
               <LayoutFullLogoHorizontal :height="24" />
             </span>
             <v-spacer />
-            <v-chip
-              v-if="isDemo"
-              color="white"
-              size="small"
-              variant="flat"
-              class="text-primary font-weight-bold"
-            >
-              <v-icon start size="14">mdi-eye-outline</v-icon> Demo
-            </v-chip>
             <v-chip
               v-if="!isOnline"
               color="white"

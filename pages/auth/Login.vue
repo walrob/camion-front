@@ -134,8 +134,7 @@ const reenviando = ref(false);
  */
 const MARCA_SIN_VERIFICAR = "confirmar tu correo";
 
-// Las cuentas demo (solo lectura) entran por acá como cualquier otra: el
-// middleware global encamina según el rol que devuelve el backend.
+// El middleware global encamina según el rol que devuelve el backend.
 const handleLogin = async () => {
   const { valid } = await formRef.value?.validate();
   if (!valid) return;

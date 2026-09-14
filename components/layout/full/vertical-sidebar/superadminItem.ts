@@ -1,6 +1,7 @@
 import {
   LayoutDashboardIcon,
   BuildingIcon,
+  UsersIcon,
   TagsIcon,
   ReceiptIcon,
   CreditCardIcon,
@@ -33,6 +34,8 @@ const superadminItems: menu[] = [
     exact: true,
   },
   { title: "Empresas", icon: BuildingIcon, to: "/superadmin/empresas" },
+  // Soporte: quién es, qué rol tiene y por qué no puede entrar.
+  { title: "Usuarios", icon: UsersIcon, to: "/superadmin/usuarios" },
 
   { header: "Facturación" },
   { title: "Planes", icon: TagsIcon, to: "/superadmin/planes" },

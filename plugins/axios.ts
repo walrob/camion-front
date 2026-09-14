@@ -44,14 +44,6 @@ export default defineNuxtPlugin(() => {
         if (!volverA) await authStore.clearAuth();
         navigateTo(volverA ?? "/auth/login");
       }
-      // Cuenta demo: cualquier escritura la corta el backend con 403. En vez de un
-      // error crudo, se avisa que la demo es de solo lectura.
-      if (error.response?.status === 403 && authStore.isDemo) {
-        generalStore.setSnackbar({
-          color: "info",
-          message: "Modo demo: solo lectura. Esta acción no está disponible.",
-        });
-      }
       // Sesión de soporte (superadmin viendo a un cliente): mismo caso.
       if (
         error.response?.status === 403 &&

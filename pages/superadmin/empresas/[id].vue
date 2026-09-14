@@ -309,6 +309,14 @@ onMounted(() => {
         :breadcrumbs="migas"
       >
         <template #actions>
+          <v-btn
+            size="small"
+            variant="tonal"
+            prepend-icon="mdi-account-group-outline"
+            :to="`/superadmin/usuarios?empresa=${ficha.company.id}`"
+          >
+            Usuarios
+          </v-btn>
           <v-chip variant="tonal" size="small">{{ ficha.company.status }}</v-chip>
         </template>
       </PageHeader>

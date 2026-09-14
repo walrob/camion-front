@@ -20,6 +20,7 @@ useHead(() => ({
 
 <template>
   <div>
+    <!-- No está en el menú: se cuelga de "Mi plan", que es de donde se contrata. -->
     <PageHeader
       :title="info ? info.titulo : 'Funcionalidad no incluida'"
       :subtitle="
@@ -27,6 +28,12 @@ useHead(() => ({
           ? `Tu plan actual es ${plan.name}`
           : 'Esta funcionalidad no está incluida en tu plan'
       "
+      :breadcrumbs="[
+        { title: 'Panel', to: '/admin' },
+        { title: 'Cuenta', disabled: true },
+        { title: 'Mi plan', to: '/estado-plan' },
+        { title: 'Actualizar plan', disabled: true },
+      ]"
     />
 
     <v-row dense>

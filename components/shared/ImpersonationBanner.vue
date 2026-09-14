@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 
 /**
@@ -10,6 +10,12 @@ import { useRouter } from "vue-router";
  * dar por hecho que algo no funciona cuando en realidad no tiene permiso de
  * escritura. El backend además rechaza toda escritura; esto es para que la
  * persona lo sepa antes de intentarlo.
+ *
+ * Es un `v-system-bar`, no un `v-alert` pegado arriba: así entra en el sistema
+ * de layout de Vuetify y el app bar, el drawer y el contenido se corren solos.
+ * Como alerta suelta se dibujaba *encima* del app bar y en el celular, donde
+ * el texto ocupa tres líneas, tapaba la hamburguesa: no había forma de abrir
+ * el menú.
  */
 const auth = useAuthStore();
 const router = useRouter();
@@ -36,6 +42,9 @@ const hora = computed(() =>
     ? datos.value.expira.toLocaleTimeString("es-AR", {
         hour: "2-digit",
         minute: "2-digit",
+        // En 12 h el locale devuelve "06:31 p. m." y el punto final chocaba
+        // con el de la frase.
+        hour12: false,
       })
     : "",
 );
@@ -49,35 +58,69 @@ const salir = async () => {
   const volverA = await auth.salirDeSoporte();
   await router.push(volverA ?? "/auth/login");
 };
+
+/**
+ * Alto real del contenido. El layout de Vuetify necesita un número para
+ * calcular cuánto correr lo demás, y el texto se parte en más líneas cuanto más
+ * angosta es la pantalla: se mide en vez de adivinar.
+ */
+const contenido = ref<HTMLElement | null>(null);
+const alto = ref(40);
+let observer: ResizeObserver | null = null;
+watch(contenido, (el) => {
+  observer?.disconnect();
+  observer = null;
+  if (!el) return;
+  // `offsetHeight` y no `contentRect`: éste descuenta el padding y el bar
+  // quedaría 12px más bajo que su contenido.
+  observer = new ResizeObserver(() => {
+    alto.value = Math.ceil(el.offsetHeight);
+  });
+  observer.observe(el);
+});
+onBeforeUnmount(() => observer?.disconnect());
 </script>
 
 <template>
-  <v-alert
+  <!-- `order="-1"`: va antes que el app bar y el drawer, a todo el ancho. -->
+  <v-system-bar
     v-if="datos"
-    type="warning"
-    variant="flat"
-    density="compact"
-    rounded="0"
+    color="warning"
+    order="-1"
+    :height="alto"
     class="impersonation-banner"
   >
-    <div class="d-flex align-center flex-wrap ga-2">
+    <div ref="contenido" class="impersonation-banner__contenido">
       <v-icon size="18">mdi-eye-outline</v-icon>
-      <span class="text-body-2">
-        Estás viendo la cuenta de <strong>{{ datos.empresa }}</strong> en modo
-        soporte: <strong>solo lectura</strong>.
-        <template v-if="hora">La sesión vence a las {{ hora }}.</template>
+      <!-- Corto a propósito: en el celular cada palabra de más es una línea
+           más de banner que le roba pantalla al contenido. -->
+      <span class="impersonation-banner__texto">
+        Modo soporte en <strong>{{ datos.empresa }}</strong>:
+        <strong>solo lectura</strong><template v-if="hora">, hasta las {{ hora }}</template>.
       </span>
-      <v-spacer />
-      <v-btn size="x-small" variant="tonal" @click="salir">Salir</v-btn>
+      <v-btn size="small" variant="outlined" @click="salir">Salir</v-btn>
     </div>
-  </v-alert>
+  </v-system-bar>
 </template>
 
 <style scoped>
-/* Fijo arriba de todo: no puede quedar tapado ni perderse al hacer scroll. */
+/* El system bar viene pensado para una línea chica alineada a la derecha;
+   acá lleva una frase que puede partirse y un botón. */
 .impersonation-banner {
-  position: sticky;
-  top: 0;
-  z-index: 2000;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-align: start;
+}
+.impersonation-banner__contenido {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+}
+.impersonation-banner__texto {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 </style>

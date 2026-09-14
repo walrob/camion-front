@@ -38,6 +38,7 @@ const headers = [
   { title: "Licencia", value: "licenseNumber" },
   { title: "Vence", value: "licenseExpiry" },
   { title: "Teléfono", value: "employee.phone" },
+  { title: "Email", value: "employee.user.email", sortable: false },
   { title: "Estado", value: "status" },
   { title: "Acciones", value: "actions", sortable: false },
 ];
@@ -138,7 +139,6 @@ onMounted(() => {
         color="primary"
         density="compact"
         hide-details
-        inset
         @update:model-value="driverStore.getDrivers()"
       />
     </div>
@@ -154,6 +154,9 @@ onMounted(() => {
       @sort="driverStore.setSort"
     >
       <template #item.driverName="{ item }">{{ driverName(item) }}</template>
+      <template #item.employee.user.email="{ item }">
+        {{ item.employee?.user?.email || "—" }}
+      </template>
       <template #item.licenseExpiry="{ item }">
         <span
           :class="

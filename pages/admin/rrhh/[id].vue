@@ -10,6 +10,7 @@ import CertificationFormDialog from "~/components/hr/CertificationFormDialog.vue
 import AssignTruckDialog from "~/components/hr/AssignTruckDialog.vue";
 import EmploymentMovementFormDialog from "~/components/hr/EmploymentMovementFormDialog.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
+import PageHeader from "~/components/shared/PageHeader.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type {
@@ -170,20 +171,20 @@ onMounted(() => hrStore.getEmployee(id));
 
 <template>
   <div>
-    <div class="d-flex align-center ga-2 mb-4">
-      <IconBtn tooltip="Volver" icon="mdi-arrow-left" variant="text" to="/admin/rrhh" />
-      <h1 class="text-h5 font-weight-bold">{{ fullName || "Legajo" }}</h1>
-      <v-spacer />
-      <v-btn
-        v-if="employee"
-        color="primary"
-        variant="tonal"
-        prepend-icon="mdi-pencil"
-        @click="editEmployee = true"
-      >
-        Editar
-      </v-btn>
-    </div>
+    <!-- Las migas (Panel → Personal → RRHH → nombre) reemplazan al botón "Volver". -->
+    <PageHeader :title="fullName || 'Legajo'">
+      <template #actions>
+        <v-btn
+          v-if="employee"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-pencil"
+          @click="editEmployee = true"
+        >
+          Editar
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <SharedLoading v-if="loadingDetail && !employee" />
 

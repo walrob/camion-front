@@ -775,13 +775,13 @@ NestJS + TypeORM + MySQL. **No existe ninguna noción de empresa o tenant.**
 | Hecho | Archivo | Implicancia |
 |---|---|---|
 | `synchronize: true` en producción | `src/app.module.ts` | **Bloqueante.** No hay migraciones. No se puede hacer una migración de datos multi-tenant así. |
-| `ActiveUserInterface` = `{ id, role, isDemo? }` | `src/common/interfaces/active-user.interface.ts` | El JWT no transporta tenant. Hay que agregarlo. |
+| `ActiveUserInterface` = `{ id, role }` | `src/common/interfaces/active-user.interface.ts` | El JWT no transporta tenant. Hay que agregarlo. |
 | 27 entidades sin `companyId` | `src/**/entities/*.entity.ts` | Todas necesitan la columna, el índice y la FK. |
 | 13 columnas `unique: true` globales | ver [Anexo A](#anexo-a--las-13-constraints-unique-globales) | 7 rompen el multi-tenant de forma dura (dos empresas no podrían tener la misma patente). |
 | 24 servicios inyectan repositorios directo | `@InjectRepository` en `src/**/*.service.ts` | 24 puntos donde se puede olvidar el filtro de tenant. |
 | `paginateAndSearch(repository, dto)` con `baseWhere` | `src/common/utils/paginate-and-search.util.ts` | Punto de estrangulamiento útil: casi todos los listados pasan por acá. |
 | Códigos generados con `count()` | `TripsService.generateCode()` (`src/trips/trips.service.ts:554`), `IncidentsService.generateCode()` (`src/incidents/incidents.service.ts:246`) | Ya es frágil hoy (los soft-deletes desalinean el contador). Con multi-tenant se rompe seguro. |
-| Guards existentes: `AuthGuard`, `RolesGuard`, `DemoReadOnlyGuard` | `src/auth/guard/` | Buena base: el decorador compuesto `@Auth()` ya encadena guards en orden garantizado. |
+| Guards existentes: `AuthGuard`, `RolesGuard` | `src/auth/guard/` | Buena base: el decorador compuesto `@Auth()` ya encadena guards en orden garantizado. |
 | Ya existen `common/storage` (S3), `common/pdf`, `crypto.util.ts` | `src/common/` | Reutilizables para facturas en S3 y cifrado de tokens de MP. |
 
 ### 1.2 Frontend — `d:\Desarrollo\Archivos\Camiones\front-camion`
@@ -1275,7 +1275,6 @@ export interface ActiveUserInterface {
   role: string;
   /** Estado comercial de la empresa: lo usa AccountStatusGuard. */
   status: CompanyStatus;
-  isDemo?: boolean;
 }
 ```
 
@@ -2120,7 +2119,7 @@ Administrar empresas, planes, suscripciones y cobranzas sin entrar a la base.
 > **La impersonación es la funcionalidad de soporte más útil y la más peligrosa.**
 > Requiere: registro en `audit-log`, token de vida corta, banner permanente en
 > el front indicando que se está impersonando, y prohibición de escrituras
-> (misma mecánica que el `DemoReadOnlyGuard` existente).
+> (guard de solo lectura encadenado en `@Auth()`).
 
 ### 8.2 Auditoría
 

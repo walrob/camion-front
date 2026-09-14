@@ -1,7 +1,10 @@
 import type { Audit, Truck } from "~/types/fleet";
+import type { User } from "~/types/project";
 
 export interface Employee extends Audit {
   userId?: string | null;
+  /** Cuenta de acceso (trae el email); el backend la carga en los listados. */
+  user?: Pick<User, "id" | "email" | "role"> | null;
   firstName: string;
   lastName: string;
   documentId: string;

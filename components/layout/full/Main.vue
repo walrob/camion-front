@@ -135,13 +135,6 @@ const filterSidebarMenu = computed(() => {
     item.to === "/estado-plan" ? { ...item, ...chip } : item,
   );
 });
-
-const props = defineProps({
-  topMargin: {
-    type: String,
-    default: "0px",
-  },
-});
 </script>
 
 <template>
@@ -154,7 +147,6 @@ const props = defineProps({
     app
     class="leftSidebar"
     width="270"
-    :style="{ top: topMargin }"
   >
     <div class="px-5 pt-5 text-center" @click="sDrawer = !sDrawer">
       <LayoutFullLogoHorizontal height="60" />
@@ -192,7 +184,6 @@ const props = defineProps({
   <v-app-bar
     :height="smAndDown ? 60 : 70"
     scroll-behavior="elevate"
-    :style="{ top: topMargin }"
   >
     <div class="d-flex align-center justify-space-between w-100">
       <div class="d-flex align-center">

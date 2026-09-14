@@ -12,7 +12,6 @@ const { snackbar } = storeToRefs(generalStore);
 import { useAuthStore } from "~/stores/auth";
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
-const isDemo = computed(() => authStore.isDemo);
 
 import { useTheme } from "vuetify";
 const theme = useTheme();
@@ -24,17 +23,11 @@ theme.change(newTheme);
 <template>
   <v-locale-provider>
     <v-app>
-      <!-- Cinta de modo demo (solo lectura) -->
-      <div v-if="isDemo" class="demo-ribbon">
-        <v-icon size="16" class="me-1">mdi-eye-outline</v-icon>
-        Modo demo — solo lectura. Podés ver todo y descargar PDFs; no se guardan
-        cambios.
-      </div>
-
+      <!-- Aviso permanente si se está viendo la cuenta de un cliente. Va
+           primero: es un ítem del layout que corre al app bar y al drawer. -->
+      <SharedImpersonationBanner />
       <!-- Layout principal -->
       <LayoutFullMain />
-      <!-- Aviso permanente si se está viendo la cuenta de un cliente. -->
-      <SharedImpersonationBanner />
 
       <v-main>
         <v-container fluid class="page-wrapper">
@@ -59,22 +52,3 @@ theme.change(newTheme);
     </v-app>
   </v-locale-provider>
 </template>
-
-<style scoped lang="scss">
-.demo-ribbon {
-  position: fixed;
-  width: 100%;
-  bottom: 0;
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #fff;
-  background: rgb(var(--v-theme-accent));
-}
-</style>
