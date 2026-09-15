@@ -177,7 +177,7 @@ Sin esto, nada de lo anterior posiciona. En orden de urgencia:
      una imagen tan grande antes de terminar de bajarla. Si se cambia el tamaño,
      actualizar `og:image:width` / `og:image:height` en `nuxt.config.ts`, que
      ahora declaran las medidas reales del archivo.
-   - `public/images/logos/FletLog*.png` — los cinco archivos.
+   - `public/images/logos/logo*.png` e `icon.png` — los cinco archivos.
    - Los favicons y los íconos de `android-chrome-*`.
 
 ---

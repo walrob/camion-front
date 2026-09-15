@@ -16,7 +16,7 @@ export interface ExchangeRate {
   source: string;
 }
 
-const KEY_CACHE = "fleetlog_currencies";
+const KEY_CACHE = "camionex_currencies";
 
 /** Con una sola moneda el sistema se comporta como siempre: sin selectores. */
 const PESO: Currency = { code: "ARS", symbol: "$", decimals: 2, isBase: true };

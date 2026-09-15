@@ -1,6 +1,6 @@
-// Service worker mínimo para PWA instalable (FleetLog).
+// Service worker mínimo para PWA instalable (CamioNex).
 // Estrategia: network-first para navegación, cache del shell como respaldo offline.
-const CACHE = "fleetlog-shell-v1";
+const CACHE = "camionex-shell-v1";
 const SHELL = ["/", "/offline.html"];
 
 self.addEventListener("install", (event) => {

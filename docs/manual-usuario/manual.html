@@ -501,11 +501,11 @@ pre.flujo {
 
 <!-- ======================= PORTADA ======================= -->
 <div class="portada">
-  <div class="marca"><img src="/images/logos/FletLog.png" alt="CamioNex"></div>
+  <div class="marca"><img src="/images/logos/logo.png" alt="CamioNex"></div>
 
   <div>
     <h1>Manual de Usuario</h1>
-    <span class="version">Versión 7.9.2026</span>
+    <span class="version">Versión 15.9.2026</span>
     <p class="bajada">
       CamioNex reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp:
       viajes, gastos, vencimientos y mantenimiento en un solo lugar. Este manual
@@ -629,8 +629,11 @@ pre.flujo {
     <span class="et">Por qué ves módulos con candado</span>
     Los módulos que tu plan no incluye <strong>no se esconden</strong>: siguen en el menú,
     en gris y con un <strong>candado</strong>. Si hacés clic, se abre una pantalla que
-    explica qué incluye ese módulo y con qué plan viene. Nada se rompe y nada se pierde:
-    simplemente todavía no está activado.
+    explica qué incluye ese módulo y con qué plan viene, con el botón
+    <span class="ui">Ver planes y cambiar</span> que te lleva a
+    <span class="ruta">Cuenta → Mi plan</span> para contratarlo, o
+    <span class="ui">Pedirlo a soporte</span> si preferís que lo hagamos nosotros.
+    Nada se rompe y nada se pierde: simplemente todavía no está activado.
   </div>
 
   <h3>Qué trae cada plan</h3>
@@ -949,6 +952,13 @@ pre.flujo {
     módulo, lo vas a ver en gris y con candado.
   </div>
 
+  <p>
+    Debajo del título de cada pantalla hay un <strong>hilo de migas</strong> que muestra
+    dónde estás —<span class="ruta">Panel → Flota → Documentos</span>, por ejemplo— y
+    cada tramo es un enlace para volver un paso atrás. Es la forma de saber de qué sección
+    depende la pantalla que tenés abierta y de regresar sin usar el menú.
+  </p>
+
   <h3>La barra de arriba</h3>
 
   <ul>
@@ -1015,7 +1025,7 @@ pre.flujo {
     <li><strong>Incidentes abiertos</strong> y <strong>alertas activas</strong> sin resolver.</li>
     <li><strong>Viajes demorados</strong> respecto de lo planificado.</li>
     <li><strong>Gasto del día</strong>, según lo que van cargando los choferes.</li>
-    <li><strong>Mantenimientos próximos</strong> y <strong>choferes con novedades</strong> (licencias, vencimientos).</li>
+    <li><strong>Mantenimientos próximos</strong> y <strong>choferes con novedades</strong> (con algún incidente sin resolver).</li>
   </ul>
 
   <p>
@@ -1109,7 +1119,7 @@ pre.flujo {
 
   <h3>Seguir los viajes</h3>
 
-  <p>El listado se filtra por texto (código o destino), <strong>estado</strong>, <strong>chofer</strong> y rango de fechas. En cada fila:</p>
+  <p>El listado se filtra por texto (código o destino), <strong>estado</strong> —incluida la opción <strong>Demorado</strong>, que junta los viajes en curso que ya pasaron su llegada planificada—, <strong>chofer</strong> y rango de fechas. En cada fila:</p>
 
   <ul>
     <li><span class="ui">Hoja de ruta (PDF)</span> — un comprobante imprimible con la unidad, el chofer, la carga y la ruta, para entregarle al conductor.</li>
@@ -1288,7 +1298,8 @@ pre.flujo {
   <p>
     Las alertas llegan también a la <strong>campanita</strong> de la barra superior, en
     tiempo real. En la pantalla <span class="ruta">Alertas</span> se filtran por nivel,
-    estado y fechas.
+    estado y fechas; la opción <strong>Activas (sin resolver)</strong> del estado junta las
+    nuevas, vistas y en atención, que es lo que se mira a diario.
   </p>
 </section>
 
@@ -1353,6 +1364,13 @@ pre.flujo {
     responde. Se le pueden adjuntar archivos, y con el botón
     <span class="ui">Orden de trabajo (PDF)</span> se imprime como comprobante para el
     taller.
+  </p>
+
+  <p>
+    La pestaña lista las órdenes de <strong>todos los camiones</strong>, con la patente en
+    la primera columna. El selector <span class="ui">Camión</span> de arriba es un filtro:
+    con uno elegido ves sólo las suyas y las órdenes nuevas salen para ese camión; sin
+    elegir ninguno, el camión se pide en el mismo formulario de la orden.
   </p>
 
   <p>
@@ -1423,17 +1441,24 @@ pre.flujo {
   <h3>Cargar un documento</h3>
 
   <ol class="pasos">
-    <li>Pestaña <span class="ui">Gestor</span>: elegí la <strong>entidad</strong> (camión, acoplado, chofer o empresa) y cuál en particular.</li>
-    <li>Botón <span class="ui">Nuevo documento</span>.</li>
+    <li>Pestaña <span class="ui">Gestor</span>: elegí la <strong>entidad</strong> (camión, acoplado, chofer o empresa). El listado muestra todos los documentos de esa entidad con una columna <strong>Dueño</strong>; si querés ver los de uno en particular, elegilo en el selector de al lado, que funciona como filtro.</li>
+    <li>Botón <span class="ui">Nuevo documento</span>. Si no habías filtrado por uno en particular, el formulario te pide de <strong>quién</strong> es el documento.</li>
     <li>Elegí la <strong>categoría</strong>, cargá el <strong>número</strong>, la fecha de <strong>emisión</strong> y la de <strong>vencimiento</strong>.</li>
     <li>Adjuntá la <strong>foto o el PDF</strong>. Con eso, el papel deja de vivir en la guantera.</li>
   </ol>
+
+  <p>
+    En cada fila, <span class="ui">Ver archivo</span> abre el adjunto en una pestaña
+    nueva. Si el botón no aparece es porque ese documento se cargó sin archivo: editalo y
+    adjuntáselo.
+  </p>
 
   <h3>La pestaña <span class="ui">Por vencer</span></h3>
 
   <p>
     Es la que evita la multa. Muestra todo lo que está por vencer o vencido, con
-    <strong>buscador y filtros</strong> por estado y por entidad, y un
+    <strong>buscador y filtros</strong> por estado, por entidad y por <strong>plazo</strong>
+    (hasta 7 días, de 8 a 30, de 31 a 90), y un
     <strong>contador</strong> en la pestaña con cuántos documentos están en esa situación.
     El listado se puede bajar a Excel. <span class="plan operacion">Desde Operación</span>
   </p>
@@ -1549,11 +1574,25 @@ pre.flujo {
     y el estado (Activo, En viaje, Inactivo).
   </p>
 
-  <ol class="pasos">
-    <li>Botón <span class="ui">Nuevo chofer</span>.</li>
-    <li>Elegí el <strong>empleado</strong> del legajo. El selector muestra el <strong>DNI junto al nombre</strong> —así no se confunden dos personas que se llaman igual— y también se puede buscar por documento.</li>
-    <li>Cargá la licencia y su vencimiento.</li>
-  </ol>
+  <p>
+    No hace falta darlos de alta: al cargar en RRHH un empleado con puesto
+    <strong>Chofer</strong>, su perfil aparece acá solo. Lo que queda por hacer es
+    <strong>cargarle la licencia</strong> y su vencimiento con el botón de editar de la fila.
+  </p>
+
+  <p>
+    El botón <span class="ui">Nuevo chofer</span> queda para los legajos que todavía no
+    tienen perfil (los cargados antes de esta automatización): elegís el
+    <strong>empleado</strong> —el selector muestra el <strong>DNI junto al nombre</strong>,
+    así no se confunden dos personas que se llaman igual, y también se puede buscar por
+    documento— y cargás la licencia.
+  </p>
+
+  <p>
+    El listado se puede filtrar por <strong>Con novedades</strong>: los choferes que
+    tienen algún <strong>incidente sin resolver</strong>, que es lo que el Panel te
+    muestra como número.
+  </p>
 
   <div class="nota">
     <span class="et">El orden importa</span>
@@ -1954,6 +1993,14 @@ pre.flujo {
     bloque aparecen: inspección física o dispositivos de seguridad.
   </p>
 
+  <p>
+    Un punto propio que todavía no se revisó en ninguna planilla se
+    <strong>elimina</strong> con la <span class="ui">✕</span> de su fila. Cuando ya se
+    usó en alguna, en lugar de la ✕ aparece un <strong>candado</strong>: ese punto
+    sólo se puede <strong>desactivar</strong>, para que las planillas ya firmadas sigan
+    mostrando lo que se revisó.
+  </p>
+
   <h4>Plantillas por tipo de unidad <span class="plan gestion">Desde Gestión</span></h4>
 
   <p>
@@ -2143,6 +2190,7 @@ pre.flujo {
     <li><strong>Comprobantes</strong>: las facturas de cada período, para ver o imprimir.</li>
     <li><span class="ui">Pagar</span> — abre el pago por <strong>Mercado Pago</strong> del período.</li>
     <li><span class="ui">Activar débito automático</span> — para no tener que acordarse todos los meses. Se puede cancelar cuando quieras.</li>
+    <li><span class="ui">Cambiar de plan</span> — subir o bajar de plan sin pasar por soporte.</li>
   </ul>
 
   <h3>Tus datos de facturación</h3>
@@ -2185,6 +2233,26 @@ pre.flujo {
     rojo, o los <strong>días que quedan de prueba</strong> en la última semana. Con la cuenta
     al día no muestra nada.
   </div>
+
+  <h3>Cambiar de plan</h3>
+
+  <p>
+    La tarjeta <span class="ui">Cambiar de plan</span> muestra los planes disponibles con
+    <strong>lo que pagarías por mes con tu flota actual</strong>, y desde ahí el
+    Administrador de la cuenta lo cambia solo:
+  </p>
+
+  <ul>
+    <li><strong>Subir de plan</strong> (<span class="ui">Subir ahora</span>) se aplica <strong>al instante</strong>: las funciones nuevas quedan disponibles al confirmar y se cobra sólo la diferencia por los días que quedan del período.</li>
+    <li><strong>Bajar de plan</strong> (<span class="ui">Agendar la baja</span>) queda <strong>agendado para la próxima renovación</strong>. Hasta entonces seguís con todo lo del plan actual y podés cancelar el cambio desde la misma tarjeta. Lo que exceda los topes del plan nuevo se desactiva, pero nada se borra: si volvés a subir, se reactiva.</li>
+    <li>El plan <strong>Corporate</strong> es a medida: el botón <span class="ui">Consultar</span> abre un WhatsApp con el pedido armado.</li>
+  </ul>
+
+  <p>
+    Si preferís que lo haga soporte, la misma tarjeta tiene los botones de
+    <span class="ui">WhatsApp</span> y <span class="ui">Mail</span> con el mensaje ya
+    escrito. Y si llegaste a un módulo con candado, su pantalla te trae acá.
+  </p>
 
   <h3>Cómo se factura</h3>
 
@@ -2740,7 +2808,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
   </p>
 
   <div class="cierre">
-    <strong>Manual de Usuario · CamioNex</strong> — Versión 7.9.2026<br>
+    <strong>Manual de Usuario · CamioNex</strong> — Versión 15.9.2026<br>
     NorthAr Consulting · info@northar.com.ar · www.northar.com.ar
   </div>
 </section>

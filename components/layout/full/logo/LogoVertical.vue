@@ -12,8 +12,8 @@ const props = defineProps({
 const { mobile } = useDisplay();
 const src = computed(() =>
   mobile.value
-    ? "/images/logos/FletLog%20small.png"
-    : "/images/logos/FletLog.png",
+    ? "/images/logos/logo_small.png"
+    : "/images/logos/logo.png",
 );
 const imgHeight = computed(() => (mobile.value ? "72" : props.height));
 </script>

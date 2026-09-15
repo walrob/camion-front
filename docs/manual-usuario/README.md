@@ -29,7 +29,7 @@ Nitro sirve esta carpeta tal cual bajo `/docs/manual`
 - El **chofer** no llega a `/manual-usuario` (el middleware lo devuelve a
   `/chofer`): su acceso es el link del pie de `pages/chofer/index.vue`, que
   apunta al archivo estático directo.
-- El logo de la portada se toma de `/images/logos/FletLog.png`, el mismo que usa
+- El logo de la portada se toma de `/images/logos/logo.png`, el mismo que usa
   la app: no hay copia que mantener sincronizada.
 
 ## Alcance

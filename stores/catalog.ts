@@ -48,7 +48,7 @@ export const CATALOG = {
 /** Un tipo de gasto con este comportamiento **resta** en la rendición. */
 export const BEHAVIOR_ADVANCE = "advance";
 
-const KEY_CACHE = "fleetlog_catalogs";
+const KEY_CACHE = "camionex_catalogs";
 
 /**
  * Los elementos que trae el producto, espejo de `catalogs.catalog.ts` del

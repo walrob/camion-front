@@ -22,12 +22,12 @@ const { mobile } = useDisplay();
 const src = computed(() => {
   if (props.light) {
     return mobile.value
-      ? "/images/logos/FletLog-small-light.png"
-      : "/images/logos/FletLog-light.png";
+      ? "/images/logos/logo_small-light.png"
+      : "/images/logos/logo-light.png";
   }
   return mobile.value
-    ? "/images/logos/FletLog%20small.png"
-    : "/images/logos/FletLog.png";
+    ? "/images/logos/logo_small.png"
+    : "/images/logos/logo.png";
 });
 </script>
 <template>
