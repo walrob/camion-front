@@ -81,21 +81,6 @@
     line-height: 1.65;
     color: rgb(var(--v-theme-textSecondary));
   }
-
-  // ── Marcador de dato pendiente ──────────────────────────────────────────
-  // Los documentos quedan con datos societarios que sólo la empresa conoce
-  // (CUIT, domicilio, jurisdicción). Se resaltan en amarillo a propósito: es
-  // imposible publicar la página sin verlos.
-  .legal-completar {
-    padding: 0.05em 0.4em;
-    border-radius: 4px;
-    background: rgba(var(--v-theme-warning), 0.22);
-    border: 1px dashed rgba(var(--v-theme-warning), 0.9);
-    font-size: 0.9em;
-    font-weight: 600;
-    // Sin `nowrap`: alguno de estos marcadores es largo y en un teléfono
-    // provocaría desborde horizontal de toda la página.
-  }
 }
 
 // ── Índice lateral ──────────────────────────────────────────────────────────

@@ -161,8 +161,13 @@ Sin esto, nada de lo anterior posiciona. En orden de urgencia:
    redirecciones **301 una a una** hacia la URL equivalente de `camionex.com.ar`.
    Un 302, o un 301 masivo a la home, tira a la basura la autoridad acumulada.
    Mantenerlas al menos un año.
-3. **Google Search Console** — verificar la propiedad, enviar
-   `https://www.camionex.com.ar/sitemap.xml` y pedir la indexación de la portada.
+3. ~~**Google Search Console** — verificar la propiedad, enviar
+   `https://www.camionex.com.ar/sitemap.xml` y pedir la indexación de la portada.~~
+   → hecho el 16/09/2026: propiedad **de dominio** `camionex.com.ar` (verificada
+   con registro TXT en Route 53; no borrar ese registro, Google lo revalida),
+   sitemap enviado e indexación de la portada solicitada. Se eligió propiedad de
+   dominio y no prefijo de URL porque abarca `www`/sin `www` y `http`/`https`
+   en un solo informe, igual que las demás propiedades de la cuenta.
    Si hubo cambio de dominio, usar además la **herramienta de cambio de
    dirección**.
 4. **Bing Webmaster Tools** — misma operación. Alcanza con importar desde Search

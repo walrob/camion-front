@@ -16,8 +16,11 @@
  * `watchPosition`: no hay rastreo continuo, y la política no debe insinuar
  * que lo hay ni reservarse el derecho a hacerlo.
  *
- * Los `[completar: …]` son datos que dependen de la infraestructura y de la
- * sociedad. Requiere revisión profesional antes de publicarse.
+ * Los datos societarios (razón social, CUIT, domicilio legal) y los nombres de
+ * los proveedores de infraestructura, correo y pagos todavía no están
+ * definidos, así que el texto está redactado sin ellos en vez de mostrar
+ * huecos "[completar: …]" al público. Cuando se definan, van en las secciones
+ * 1 y 9. Requiere revisión profesional antes de publicarse.
  */
 definePageMeta({ layout: "public" });
 
@@ -76,11 +79,8 @@ useDatosEstructurados(
     <h2 id="alcance">1. Alcance y nuestros dos roles</h2>
     <p>
       Esta política explica cómo CamioNex, operado por
-      <strong>NorthAr Consulting</strong>,
-      <span class="legal-completar">[completar: razón social]</span>, CUIT
-      <span class="legal-completar">[completar: CUIT]</span>, con domicilio en
-      <span class="legal-completar">[completar: domicilio legal]</span>,
-      República Argentina, trata los datos personales vinculados a la plataforma
+      <strong>NorthAr Consulting</strong>, con domicilio en la República
+      Argentina, trata los datos personales vinculados a la plataforma
       web y a la aplicación móvil del chofer.
     </p>
     <p>
@@ -293,19 +293,11 @@ useDatosEstructurados(
       tratamiento conforme a nuestras instrucciones:
     </p>
     <ul>
+      <li>Proveedores de infraestructura y alojamiento en la nube.</li>
+      <li>Proveedor de envío de correo electrónico transaccional.</li>
       <li>
-        Proveedores de infraestructura y alojamiento en la nube:
-        <span class="legal-completar">[completar: proveedor y país del centro
-        de datos]</span>.
-      </li>
-      <li>
-        Proveedor de envío de correo electrónico transaccional:
-        <span class="legal-completar">[completar: proveedor]</span>.
-      </li>
-      <li>
-        Procesador de pagos y cobranzas:
-        <span class="legal-completar">[completar: proveedor]</span>. No
-        almacenamos números completos de tarjetas.
+        Procesador de pagos y cobranzas. No almacenamos números completos de
+        tarjetas.
       </li>
       <li>
         Servicio de analítica web, en los términos de la sección

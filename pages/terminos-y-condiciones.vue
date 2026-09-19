@@ -8,10 +8,12 @@
  * con las previsiones necesarias para clientes de otros Estados del Mercosur,
  * porque el transporte de carga de la región es transfronterizo por definición.
  *
- * Los `[completar: …]` son datos societarios que sólo la empresa conoce. Se
- * resaltan en amarillo (`.legal-completar`) para que sea imposible publicar la
- * página sin verlos. El texto necesita revisión de un abogado antes de salir a
- * producción: es una base sólida y específica del negocio, no un dictamen.
+ * Los datos societarios (razón social, CUIT, domicilio legal, ciudad de la
+ * jurisdicción y sede arbitral) todavía no están definidos, así que el texto
+ * está redactado sin ellos en vez de mostrar huecos "[completar: …]" al
+ * público. Cuando se definan, van en las secciones 1 y 20. El texto necesita
+ * revisión de un abogado antes de salir a producción: es una base sólida y
+ * específica del negocio, no un dictamen.
  */
 definePageMeta({ layout: "public" });
 
@@ -73,11 +75,8 @@ useDatosEstructurados(
     <p>
       CamioNex (en adelante, «CamioNex», «el Servicio» o «nosotros») es una
       plataforma de gestión de flotas operada por
-      <strong>NorthAr Consulting</strong>,
-      <span class="legal-completar">[completar: razón social]</span>, CUIT
-      <span class="legal-completar">[completar: CUIT]</span>, con domicilio en
-      <span class="legal-completar">[completar: domicilio legal]</span>,
-      República Argentina.
+      <strong>NorthAr Consulting</strong>, con domicilio en la República
+      Argentina.
     </p>
     <p>
       Podés contactarnos por correo electrónico a
@@ -531,9 +530,8 @@ useDatosEstructurados(
     </p>
     <p>
       Para clientes domiciliados en Argentina, las partes se someten a los
-      tribunales ordinarios de
-      <span class="legal-completar">[completar: ciudad de la jurisdicción]</span
-      >, renunciando a cualquier otro fuero.
+      tribunales ordinarios con competencia en el domicilio de NorthAr
+      Consulting, renunciando a cualquier otro fuero.
     </p>
     <p>
       Para clientes domiciliados en otros Estados Parte del Mercosur, la
@@ -542,9 +540,7 @@ useDatosEstructurados(
       Materia Contractual</strong> (Decisión CMC 1/94). Las partes pueden
       acordar por escrito someter la controversia a arbitraje conforme el
       Acuerdo sobre Arbitraje Comercial Internacional del Mercosur (Decisión CMC
-      3/98), con sede en
-      <span class="legal-completar">[completar: sede arbitral]</span> e idioma
-      español.
+      3/98), con sede en la República Argentina e idioma español.
     </p>
 
     <p class="legal-fina">
