@@ -10,7 +10,8 @@ import { CONTACTO } from "~/composables/useContacto";
  * sitemap y las tarjetas para compartir. Si mañana cambia el dominio, no puede
  * quedar una URL vieja escondida en un JSON-LD.
  *
- * ⚠️ `public/robots.txt` y `public/sitemap.xml` son archivos estáticos y NO
+ * ⚠️ `public/robots.txt`, `server/routes/sitemap.xml.ts` y
+ * `server/middleware/url-canonica.ts` corren fuera de Nuxt y NO
  * leen de acá: si cambia `origen`, hay que actualizarlos a mano.
  */
 export const SITIO = {
@@ -42,11 +43,28 @@ export function urlAbsoluta(ruta: string): string {
 }
 
 /**
- * Declara el canonical y el `og:url` de la página actual.
+ * Directiva para el buscador de una página pública.
+ *
+ * `max-image-preview:large` y `max-snippet:-1` son permisos, no restricciones:
+ * sin ellos Google recorta la miniatura a un ícono en Discover y corta el
+ * fragmento del resultado.
+ */
+export const ROBOTS_INDEXABLE =
+  "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+
+/**
+ * Declara que la página actual es pública e indexable: canonical, `og:url` y
+ * `robots`.
  *
  * Google usa el canonical para decidir cuál URL indexa cuando llega por varias
  * (con `utm_`, con barra final, por http). Sin él, cada variante compite contra
  * sí misma.
+ *
+ * El `robots` va acá y no en el `head` global de `nuxt.config.ts`: ese `head`
+ * también arma el shell de las rutas privadas, que se sirven con
+ * `X-Robots-Tag: noindex`, y un `index` en el HTML contradecía la cabecera.
+ * Tener canonical y ser indexable es la misma decisión, así que se declaran
+ * juntos.
  */
 export function useCanonical(ruta?: string) {
   const route = useRoute();
@@ -54,7 +72,10 @@ export function useCanonical(ruta?: string) {
 
   useHead({
     link: [{ rel: "canonical", href: url }],
-    meta: [{ property: "og:url", content: url }],
+    meta: [
+      { property: "og:url", content: url },
+      { name: "robots", content: ROBOTS_INDEXABLE },
+    ],
   });
 
   return url;

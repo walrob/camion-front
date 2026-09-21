@@ -47,7 +47,6 @@ useSeoMeta({
   description:
     "Condiciones de contratación del servicio CamioNex para empresas de " +
     "transporte de carga en Argentina y el Mercosur.",
-  robots: "index, follow",
 });
 
 useCanonical("/terminos-y-condiciones");

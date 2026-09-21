@@ -84,6 +84,13 @@ export default defineNuxtConfig({
         ];
       }),
     ),
+
+    // El manual vive en `/docs/manual/manual.html` (publicAssets, más abajo).
+    // Quien escribe `/docs/manual` a mano caía en el middleware de sesión y
+    // terminaba en el login; ahora llega al manual.
+    "/docs/manual": {
+      redirect: { to: "/docs/manual/manual.html", statusCode: 301 },
+    },
   },
 
   app: {
@@ -132,17 +139,12 @@ export default defineNuxtConfig({
         // Debe seguir a `primary` de FleetLight (theme/LightTheme.ts).
         { name: "theme-color", content: "#2563EB" },
 
-        /**
-         * Permiso explícito para las vistas previas enriquecidas. Sin
-         * `max-image-preview:large` Google recorta la miniatura a un ícono en
-         * Discover y en resultados de imágenes; `max-snippet:-1` lo deja usar
-         * el fragmento completo en vez de cortarlo.
-         */
-        {
-          name: "robots",
-          content:
-            "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-        },
+        // Acá NO va `<meta name="robots">`. Este `head` también arma el shell
+        // de las rutas privadas (`ssr: false`), y un `index, follow` en el
+        // HTML contradecía el `X-Robots-Tag: noindex` de la cabecera. Google
+        // se queda con la más restrictiva, pero las señales cruzadas se
+        // reportan como problema. La directiva `index` la declara cada página
+        // pública con `useCanonical()`, y `error.vue` declara `noindex`.
 
         // ── Previsualización al compartir ──────────────────────────────────
         // Globales, para que cualquier ruta compartida por WhatsApp muestre una

@@ -52,7 +52,6 @@ useSeoMeta({
     "Cómo CamioNex trata los datos personales de sus clientes y de los choferes " +
     "y empleados que ellos registran, conforme la Ley 25.326 y la normativa del " +
     "Mercosur.",
-  robots: "index, follow",
 });
 
 useCanonical("/politica-de-privacidad");

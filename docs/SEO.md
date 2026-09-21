@@ -1,6 +1,6 @@
 # CamioNex — SEO
 
-> Estado al 07/09/2026. Qué se hizo en el código, qué falta hacer **fuera** del
+> Estado al 21/09/2026. Qué se hizo en el código, qué falta hacer **fuera** del
 > código y qué queda pendiente por decisión.
 
 Este documento existe porque buena parte del posicionamiento no se resuelve
@@ -148,6 +148,45 @@ portada no puede decir sin desenfocarse.
 - `plugins/vuetify.ts` con `ssr: true`, para que `useDisplay()` no produzca
   marcado distinto en servidor y cliente.
 
+### Tercera tanda (21/09/2026): el aviso "Excluida por una etiqueta noindex"
+
+Search Console avisó que había páginas **excluidas por `noindex`**. Antes de
+tocar nada, qué significa: las rutas privadas (`/admin`, `/auth/login`…) se
+sirven con `X-Robots-Tag: noindex` **a propósito**, y Google las lista ahí
+cada vez que sigue el botón "Ingresar" de la portada. Esas entradas son
+correctas y van a seguir apareciendo: el informe es informativo, no un error.
+
+Lo que sí estaba mal, y se corrigió:
+
+- **Cualquier URL inexistente respondía `302 → /auth/login`.** El middleware
+  global trataba "no hay página" como "ruta privada sin sesión". Así, cada
+  enlace roto o URL vieja (`/login`, `/home`, `/docs/manual`) que Google
+  encontraba terminaba en ese informe como "noindex" en vez de como un **404**,
+  que es lo único que le dice al buscador que la olvide. Ahora
+  `auth.global.ts` deja pasar las rutas sin página y Nuxt responde 404 con
+  `error.vue` (que ya declaraba `noindex, follow`).
+- **`https://camionex.com.ar/` (sin `www`) respondía 200** con el mismo
+  contenido que la canónica, y lo mismo las variantes con barra final
+  (`/rendicion-de-viajes/`). El `canonical` lo mitigaba, pero es una
+  sugerencia. `server/plugins/url-canonica.ts` responde **301** a `www` y sin
+  barra final, conservando la query. Es un plugin con el hook `request` y no un
+  `server/middleware` porque las páginas públicas están pre-renderizadas y el
+  handler estático de Nitro corre antes que cualquier middleware: con un
+  middleware el 301 nunca se ejecutaba justo para las páginas que importan.
+  Sigue siendo una red de seguridad: la redirección de host corresponde a
+  nginx (§3.1).
+- **El shell de las rutas privadas decía `<meta name="robots" content="index">`**
+  mientras la cabecera decía `noindex`. Google se queda con la más restrictiva,
+  pero son señales cruzadas. El `robots` global salió de `nuxt.config.ts` y
+  ahora lo declara `useCanonical()`: tener canónica y ser indexable es la
+  misma decisión.
+- `/docs/manual` (sin `manual.html`) redirige **301** al manual en vez de caer
+  en el login.
+
+Cómo verificar desde afuera, sin backend (`curl -sI -A Googlebot`):
+`/noexiste` → 404 · `/login` → 404 · `camionex.com.ar/` → 301 a `www` ·
+`/rendicion-de-viajes/` → 301 sin barra · `/admin` → 200 + `X-Robots-Tag`.
+
 ---
 
 ## 3. Lo que hay que hacer fuera del código
@@ -157,6 +196,24 @@ Sin esto, nada de lo anterior posiciona. En orden de urgencia:
 1. **Dominio y DNS.** Registrar `camionex.com.ar` y apuntarlo. Elegir **una**
    variante canónica —se dejó configurado `www`— y redirigir la otra con **301**.
    Servir todo por HTTPS y redirigir `http://` con 301.
+   → Al 21/09/2026: `http://` ya redirige, pero **`https://camionex.com.ar/`
+   sigue respondiendo 200** desde nginx. Nitro lo cubre con un 301 sólo si nginx
+   le reenvía el `Host` original; lo correcto es resolverlo en nginx con un
+   `server` propio para el host sin `www`:
+
+   ```nginx
+   server {
+       listen 443 ssl http2;
+       server_name camionex.com.ar;
+       # mismos ssl_certificate / ssl_certificate_key que el server de www
+       return 301 https://www.camionex.com.ar$request_uri;
+   }
+   ```
+
+   Y en el `location /` que hace `proxy_pass` al 3006, asegurarse de que
+   estén `proxy_set_header Host $host;` y
+   `proxy_set_header X-Forwarded-Proto $scheme;`, que es lo que le permite a
+   Nitro ver el host y el protocolo reales.
 2. **Si `fleetlog.com.ar` llegó a estar publicado e indexado**, montar
    redirecciones **301 una a una** hacia la URL equivalente de `camionex.com.ar`.
    Un 302, o un 301 masivo a la home, tira a la basura la autoridad acumulada.

@@ -7,12 +7,24 @@ import { esRutaPublica } from '@/composables/useRutasPublicas'
  *
  * Orden de decisiones, que importa:
  *
+ *   0. URL sin página → 404, sin redirigir.
  *   1. Chofer autenticado → siempre a `/chofer`, incluso desde la landing.
  *   2. Ruta pública → pasa sin sesión.
  *   3. Sin sesión en ruta privada → login.
  *   4. Encaminamiento por rol, roles de página, onboarding y plan.
  */
 export default defineNuxtRouteMiddleware(async (to) => {
+  // 0) Una URL que no corresponde a ninguna página no es "una ruta privada sin
+  //    sesión": es un 404 y tiene que responder como tal. Antes caía en el
+  //    paso 3 y se redirigía a `/auth/login`, que se sirve con `noindex`, así
+  //    que cada enlace roto o URL vieja que Google encontraba terminaba en
+  //    Search Console como "excluida por noindex" en vez de como un 404, que
+  //    es lo único que le dice al buscador que la olvide. Al no devolver nada,
+  //    Nuxt muestra `error.vue` con código 404.
+  if (to.matched.length === 0) {
+    return
+  }
+
   const authStore = useAuthStore()
   await authStore.loadAuth()
 
