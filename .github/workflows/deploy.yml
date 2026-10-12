@@ -62,16 +62,27 @@ jobs:
       # adentro las dependencias que necesita para correr, así que en el
       # servidor no hace falta ningún `npm install`.
       #
-      # `--delete` sólo dentro de `.output`, que se regenera entero en cada
-      # build: sin eso quedan archivos de versiones viejas conviviendo con los
-      # nuevos. Fuera de `.output` no se borra nada, para no llevarse puesto el
-      # .env ni nada que viva en la carpeta del proyecto.
+      # Cada build va a su propia carpeta `releases/<sha>` y `.output` es un
+      # symlink a la vigente. Antes se pisaba `.output` en el lugar con
+      # `rsync --delete`, y el proceso que seguía corriendo (con el server.mjs
+      # viejo ya cargado en memoria) importaba chunks por nombre —p. ej.
+      # `index.vue.mjs`— que el build nuevo ya había renombrado o borrado:
+      # ERR_MODULE_NOT_FOUND hasta el reload. Node resuelve el symlink al
+      # arrancar, así que el proceso viejo sigue leyendo de su release hasta
+      # que PM2 lo reemplaza.
+      #
+      # `--link-dest` hace hard links contra el release vigente: sólo viaja lo
+      # que cambió, igual que antes.
       - name: Copiar build al EC2
         run: |
+          ssh -i ~/.ssh/id_deploy \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            'mkdir -p /home/ec2-user/camionex-front/releases'
           rsync -az --delete \
+            --link-dest=/home/ec2-user/camionex-front/.output/ \
             -e "ssh -i ~/.ssh/id_deploy" \
             .output/ \
-            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ec2-user/camionex-front/.output/"
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ec2-user/camionex-front/releases/${{ github.sha }}/"
           rsync -az \
             -e "ssh -i ~/.ssh/id_deploy" \
             package.json ecosystem.config.cjs \
@@ -86,7 +97,16 @@ jobs:
             "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
             'set -e
              cd /home/ec2-user/camionex-front
+             # Primera vez: `.output` todavía es una carpeta real.
+             if [ -d .output ] && [ ! -L .output ]; then
+               mv .output releases/legacy
+             fi
+             # Cambio atómico del symlink (ln + mv -T, sin ventana sin .output).
+             ln -sfn "releases/${{ github.sha }}" .output.tmp
+             mv -Tf .output.tmp .output
              pm2 reload camionex-front --update-env || pm2 start ecosystem.config.cjs
+             # Se conservan los 3 releases más recientes (el vigente incluido).
+             ls -1dt releases/*/ | tail -n +4 | xargs -r rm -rf
              pm2 save'
 
       # Mismo criterio que en el backend: se reintenta y, si no levanta, el log
