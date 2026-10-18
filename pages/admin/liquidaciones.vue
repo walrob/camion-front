@@ -191,6 +191,9 @@ const changePage = (page: number) => {
 };
 
 onMounted(() => settlementStore.getSettlements());
+
+// «Generar rendición» desde el buscador (Ctrl+K) o el menú Crear.
+useAccionDeQuery("nuevo", openGenerate);
 </script>
 
 <template>

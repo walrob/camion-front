@@ -207,6 +207,9 @@ onMounted(() => {
   cargarUsuarios();
   cargarInvitaciones();
 });
+
+// «Invitar a alguien» desde el buscador (Ctrl+K) o el menú Crear.
+useAccionDeQuery("nuevo", abrirDialogo);
 </script>
 
 <template>

@@ -18,6 +18,19 @@ definePageMeta({ layout: "admin" });
 useHead({ title: "Manual de usuario" });
 
 const URL_MANUAL = "/docs/manual/manual.html";
+
+/**
+ * Sección pedida desde el buscador (Ctrl+K): `?seccion=<id>` lleva el marco a
+ * esa ancla. Si el manual ya está cargado se scrollea adentro (mismo origen);
+ * cambiar sólo el `#` del `src` no re-scrollea cuando se repite la sección.
+ */
+const marco = ref<HTMLIFrameElement | null>(null);
+const src = ref(URL_MANUAL);
+useAccionDeQuery("seccion", (id) => {
+  const destino = marco.value?.contentDocument?.getElementById(id);
+  if (destino) destino.scrollIntoView();
+  else src.value = `${URL_MANUAL}#${encodeURIComponent(id)}`;
+});
 </script>
 
 <template>
@@ -43,7 +56,8 @@ const URL_MANUAL = "/docs/manual/manual.html";
 
     <v-card border flat rounded="lg" class="pa-2">
       <iframe
-        :src="URL_MANUAL"
+        ref="marco"
+        :src="src"
         title="Manual de usuario de CamioNex"
         class="manual-frame"
       ></iframe>

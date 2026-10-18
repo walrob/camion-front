@@ -63,6 +63,9 @@ const changePage = (page: number) => {
 };
 
 onMounted(() => fleetStore.getTrailers());
+
+// El alta la pide la página (`?nuevo=acoplado`), que es la que cambia de pestaña.
+defineExpose({ openNew });
 </script>
 
 <template>

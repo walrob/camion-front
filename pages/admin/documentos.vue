@@ -226,6 +226,9 @@ onMounted(async () => {
   }
   store.getExpiring(diasVencimientos);
 });
+
+// «Nuevo documento» desde el buscador (Ctrl+K) o el menú Crear.
+useAccionDeQuery("nuevo", () => (dialog.value = true));
 </script>
 
 <template>

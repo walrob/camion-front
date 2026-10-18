@@ -75,6 +75,9 @@ onMounted(() => {
   hrStore.getEmployees();
   hrStore.getActiveMovements();
 });
+
+// «Nuevo empleado» desde el buscador (Ctrl+K) o el menú Crear.
+useAccionDeQuery("nuevo", openNew);
 </script>
 
 <template>

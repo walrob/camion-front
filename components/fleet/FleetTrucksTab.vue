@@ -76,6 +76,16 @@ onMounted(() => {
   if (typeof status === "string") fleetStore.filterTruckStatus = status;
   fleetStore.getTrucks();
 });
+
+// Un camión encontrado en el buscador (Ctrl+K) se abre ya filtrado.
+useAccionDeQuery("buscar", (patente) => {
+  fleetStore.searchTrucks = patente;
+  paginationTrucks.value.currentPage = 1;
+  fleetStore.getTrucks();
+});
+
+// El alta la pide la página (`?nuevo=camion`), que es la que cambia de pestaña.
+defineExpose({ openNew });
 </script>
 
 <template>

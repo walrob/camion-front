@@ -81,6 +81,14 @@ onMounted(() => {
   if (route.query.withNews === "true") driverStore.filterWithNews = true;
   driverStore.getDrivers();
 });
+
+// Desde el buscador (Ctrl+K): «Nuevo chofer» y un chofer encontrado.
+useAccionDeQuery("nuevo", openNew);
+useAccionDeQuery("buscar", (texto) => {
+  driverStore.search = texto;
+  pagination.value.currentPage = 1;
+  driverStore.getDrivers();
+});
 </script>
 
 <template>

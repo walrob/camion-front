@@ -5,7 +5,7 @@
     se reenvían al v-text-field interno via fieldAttrs.
   -->
   <div :class="($attrs as any).class" :style="($attrs as any).style">
-    <v-text-field v-bind="fieldAttrs" v-model="model" autocomplete="new-password">
+    <v-text-field ref="campo" v-bind="fieldAttrs" v-model="model" autocomplete="new-password">
       <!-- ── Slots re-exportados ─────────────────────────────── -->
       <template v-if="$slots.prepend" #prepend="d">
         <slot name="prepend" v-bind="d ?? {}" />
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs } from "vue";
+import { computed, ref, useAttrs } from "vue";
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
@@ -115,6 +115,11 @@ const fieldAttrs = computed(() => {
 });
 
 const isReadonly = computed(() => !!attrs.readonly);
+
+// `autofocus` sólo sirve la primera vez que se monta: quien reutiliza el campo
+// (p. ej. dentro de un diálogo que queda montado) lo enfoca con esto.
+const campo = ref<{ focus: () => void } | null>(null);
+defineExpose({ focus: () => campo.value?.focus() });
 
 // ── Speech ─────────────────────────────────────────────────────────────────────
 

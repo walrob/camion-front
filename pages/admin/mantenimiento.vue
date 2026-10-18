@@ -124,6 +124,18 @@ onMounted(async () => {
     store.getOrders(truckId.value),
   ]);
 });
+
+// Desde el buscador (Ctrl+K) o el menú Crear: `?nuevo=orden` / `?nuevo=plan`,
+// en la pestaña donde después se ve lo que se cargó.
+useAccionDeQuery("nuevo", (que) => {
+  if (que === "plan") {
+    tab.value = "plans";
+    openNewPlan();
+  } else {
+    tab.value = "orders";
+    openNewOrder();
+  }
+});
 </script>
 
 <template>

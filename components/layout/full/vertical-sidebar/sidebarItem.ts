@@ -49,6 +49,11 @@ export interface menu {
    * cliente tiene que ver todos los días lo que le falta.
    */
   feature?: Feature;
+  /**
+   * Otras palabras con las que la gente busca esta pantalla en el buscador
+   * (Ctrl+K). Ayudan a encontrarla; no cambian el menú.
+   */
+  keywords?: string;
 }
 
 // Menú del backoffice de flota, agrupado por dominio de uso diario:
@@ -60,6 +65,7 @@ const sidebarItem: menu[] = [
     title: "Panel",
     icon: LayoutDashboardIcon,
     to: "/admin",
+    keywords: "inicio resumen tablero dashboard",
     external: false,
     // Si no, queda activo en /admin/viajes, /admin/flota y todas las demás.
     exact: true,
@@ -68,6 +74,7 @@ const sidebarItem: menu[] = [
     title: "Indicadores",
     icon: ChartBarIcon,
     to: "/admin/indicadores",
+    keywords: "estadisticas reportes kpi costos",
     feature: Feature.INDICATORS,
     roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
   },
@@ -77,6 +84,7 @@ const sidebarItem: menu[] = [
     title: "Viajes",
     icon: RouteIcon,
     to: "/admin/viajes",
+    keywords: "pedidos fletes asignar",
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.AUDITOR],
   },
   {
@@ -86,6 +94,7 @@ const sidebarItem: menu[] = [
     title: "Validaciones",
     icon: ClipboardCheckIcon,
     to: "/admin/validaciones",
+    keywords: "trafico liberar unidad checklist planilla",
     feature: Feature.CHECKLISTS,
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER],
   },
@@ -99,12 +108,14 @@ const sidebarItem: menu[] = [
     title: "Alertas",
     icon: BellIcon,
     to: "/admin/alertas",
+    keywords: "avisos notificaciones",
     roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.HR],
   },
   {
     title: "Mensajes",
     icon: MessageIcon,
     to: "/admin/mensajes",
+    keywords: "chat choferes",
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER],
   },
 
@@ -113,12 +124,14 @@ const sidebarItem: menu[] = [
     title: "Flota",
     icon: TruckIcon,
     to: "/admin/flota",
+    keywords: "camiones acoplados unidades patentes",
     roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.MAINTENANCE],
   },
   {
     title: "Mantenimiento",
     icon: ToolIcon,
     to: "/admin/mantenimiento",
+    keywords: "service taller ordenes de trabajo ot preventivo",
     feature: Feature.MAINTENANCE,
     roles: [Role.ADMIN, Role.MAINTENANCE, Role.MANAGER],
   },
@@ -126,6 +139,7 @@ const sidebarItem: menu[] = [
     title: "Combustible",
     icon: GasStationIcon,
     to: "/admin/combustible",
+    keywords: "gasoil cargas consumo",
     feature: Feature.FUEL,
     roles: [
       Role.ADMIN,
@@ -139,6 +153,7 @@ const sidebarItem: menu[] = [
     title: "Documentos",
     icon: FileTextIcon,
     to: "/admin/documentos",
+    keywords: "vencimientos seguros vtv papeles",
     roles: [Role.ADMIN, Role.MAINTENANCE, Role.DISPATCHER, Role.MANAGER],
   },
 
@@ -147,6 +162,7 @@ const sidebarItem: menu[] = [
     title: "RRHH",
     icon: IdIcon,
     to: "/admin/rrhh",
+    keywords: "empleados personal legajos licencias",
     feature: Feature.HR_BASIC,
     roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER],
   },
@@ -154,6 +170,7 @@ const sidebarItem: menu[] = [
     title: "Choferes",
     icon: UsersIcon,
     to: "/admin/choferes",
+    keywords: "conductores licencias",
     roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR],
   },
   {
@@ -162,6 +179,7 @@ const sidebarItem: menu[] = [
     title: "Equipo",
     icon: UserPlusIcon,
     to: "/admin/equipo",
+    keywords: "usuarios accesos invitar invitaciones",
     roles: [Role.ADMIN, Role.MANAGER],
   },
 
@@ -170,6 +188,7 @@ const sidebarItem: menu[] = [
     title: "Rendiciones",
     icon: ReceiptIcon,
     to: "/admin/liquidaciones",
+    keywords: "liquidaciones gastos viaticos",
     feature: Feature.SETTLEMENTS,
     roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR],
   },
@@ -177,6 +196,7 @@ const sidebarItem: menu[] = [
     title: "Planillas OEA",
     icon: ClipboardCheckIcon,
     to: "/admin/oea",
+    keywords: "operador economico autorizado planillas",
     feature: Feature.OEA,
     roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.AUDITOR],
   },
@@ -193,6 +213,7 @@ const sidebarItem: menu[] = [
     title: "Mi plan",
     icon: CreditCardIcon,
     to: "/estado-plan",
+    keywords: "suscripcion pagos facturas cuenta",
     roles: [Role.ADMIN, Role.MANAGER],
   },
   {
@@ -207,6 +228,7 @@ const sidebarItem: menu[] = [
     title: "Configuración",
     icon: SettingsIcon,
     to: "/configuracion",
+    keywords: "ajustes preferencias opciones empresa checklist",
     roles: [Role.ADMIN],
   },
 
@@ -218,6 +240,7 @@ const sidebarItem: menu[] = [
     title: "Manual de Usuario",
     icon: HelpIcon,
     to: "/manual-usuario",
+    keywords: "ayuda guia como se usa",
     external: false,
   },
 ];

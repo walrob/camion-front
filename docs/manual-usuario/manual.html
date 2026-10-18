@@ -2871,6 +2871,11 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
 
     toc.appendChild(enlace);
   }
+
+  /* Los id `seccion-N` recién existen ahora: si se abrió con un ancla (el
+     buscador de la app linkea así), se va a esa sección. */
+  var ancla = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (ancla) ancla.scrollIntoView();
 })();
 </script>
 

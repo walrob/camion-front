@@ -1,6 +1,7 @@
 <script setup>
 import Icon from "../Icon.vue";
 import { computed } from "vue";
+import { destinoDelItem, estaBloqueado } from "../visibilidad";
 
 const props = defineProps({ item: Object, level: Number });
 
@@ -13,14 +14,10 @@ const { has } = useFeatures();
  * No se oculta a propósito: la idea comercial es que el cliente vea todos los
  * días lo que le falta (MODELO-COMERCIAL §6.2).
  */
-const bloqueado = computed(
-  () => !!props.item?.feature && !has(props.item.feature),
-);
+const bloqueado = computed(() => !!props.item && estaBloqueado(props.item, has));
 
 /** Destino real: el módulo, o la pantalla de upgrade si está bloqueado. */
-const destino = computed(() =>
-  bloqueado.value ? `/upgrade/${props.item.feature}` : props.item.to,
-);
+const destino = computed(() => props.item && destinoDelItem(props.item, has));
 </script>
 
 <template>

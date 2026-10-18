@@ -107,6 +107,13 @@ onMounted(async () => {
 
   tripStore.getTrips();
 });
+
+// Desde el buscador (Ctrl+K): «Nuevo viaje» y un viaje encontrado por código.
+useAccionDeQuery("nuevo", openNew);
+useAccionDeQuery("buscar", (codigo) => {
+  tripStore.search = codigo;
+  reload();
+});
 </script>
 
 <template>

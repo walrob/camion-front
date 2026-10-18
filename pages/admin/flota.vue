@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import PageHeader from "~/components/shared/PageHeader.vue";
 import FleetTrucksTab from "~/components/fleet/FleetTrucksTab.vue";
 import FleetTrailersTab from "~/components/fleet/FleetTrailersTab.vue";
@@ -14,13 +14,33 @@ useHead({ title: "Flota" });
 
 // Desde el panel se llega directo a la pestaña que corresponde (?tab=trucks);
 // el estado del camión (?status) lo aplica la pestaña al montarse.
-const tabInicial = useRoute().query.tab;
+const route = useRoute();
+const TABS = ["fleets", "trucks", "trailers"];
 const tab = ref(
-  typeof tabInicial === "string" &&
-    ["fleets", "trucks", "trailers"].includes(tabInicial)
-    ? tabInicial
+  typeof route.query.tab === "string" && TABS.includes(route.query.tab)
+    ? route.query.tab
     : "fleets",
 );
+// El buscador (Ctrl+K) puede pedir otra pestaña estando ya en Flota.
+watch(
+  () => route.query.tab,
+  (t) => {
+    if (typeof t === "string" && TABS.includes(t)) tab.value = t;
+  },
+);
+
+// «Nuevo camión» / «Nuevo acoplado» desde el buscador o el menú Crear.
+const trucksTab = ref<InstanceType<typeof FleetTrucksTab> | null>(null);
+const trailersTab = ref<InstanceType<typeof FleetTrailersTab> | null>(null);
+useAccionDeQuery("nuevo", (que) => {
+  if (que === "acoplado") {
+    tab.value = "trailers";
+    trailersTab.value?.openNew();
+  } else {
+    tab.value = "trucks";
+    trucksTab.value?.openNew();
+  }
+});
 </script>
 
 <template>
@@ -38,10 +58,10 @@ const tab = ref(
         <FleetFleetsTab />
       </v-window-item>
       <v-window-item value="trucks" eager>
-        <FleetTrucksTab />
+        <FleetTrucksTab ref="trucksTab" />
       </v-window-item>
       <v-window-item value="trailers" eager>
-        <FleetTrailersTab />
+        <FleetTrailersTab ref="trailersTab" />
       </v-window-item>
     </v-window>
   </div>

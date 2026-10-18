@@ -5,6 +5,8 @@ import sidebarItems, {
 } from "@/components/layout/full/vertical-sidebar/sidebarItem";
 import { useDisplay, useTheme } from "vuetify";
 import { Menu2Icon, MoonIcon, SunIcon } from "vue-tabler-icons";
+import { itemsVisiblesDelMenu } from "@/components/layout/full/vertical-sidebar/visibilidad";
+import { accionesDeAltaVisibles } from "@/components/layout/full/vertical-sidebar/accionesDeAlta";
 
 const { smAndDown, smAndUp, lgAndUp } = useDisplay();
 const sidebarMenu = shallowRef(sidebarItems);
@@ -43,20 +45,11 @@ import { Role } from "~/types/enums";
 import CommandPalette from "~/components/shared/CommandPalette.vue";
 const authStore = useAuthStore();
 const user = useAuth();
+const { has } = useFeatures();
 
-// Accesos rápidos de alta desde el navbar (filtrados por rol). Llevan a la
-// sección, donde la acción primaria queda visible en el PageHeader.
-const quickCreate = [
-  { title: "Nuevo viaje", to: "/admin/viajes", icon: "mdi-map-marker-path", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER] },
-  { title: "Reportar incidente", to: "/admin/incidentes", icon: "mdi-alert-outline", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.MAINTENANCE] },
-  { title: "Nuevo camión", to: "/admin/flota", icon: "mdi-truck-outline", roles: [Role.ADMIN, Role.MANAGER, Role.DISPATCHER, Role.MAINTENANCE] },
-  { title: "Nuevo chofer", to: "/admin/choferes", icon: "mdi-account-plus-outline", roles: [Role.ADMIN, Role.DISPATCHER, Role.MANAGER, Role.HR] },
-  { title: "Nuevo empleado", to: "/admin/rrhh", icon: "mdi-badge-account-outline", roles: [Role.ADMIN, Role.HR, Role.MANAGER, Role.DISPATCHER] },
-  { title: "Generar rendición", to: "/admin/liquidaciones", icon: "mdi-file-document-plus-outline", roles: [Role.ADMIN, Role.MANAGER, Role.AUDITOR] },
-];
-const quickCreateItems = computed(() =>
-  quickCreate.filter((x) => user?.role && x.roles.includes(user.role as Role)),
-);
+// Accesos rápidos de alta desde el navbar: los mismos que ofrece el buscador.
+// Abren el diálogo de alta en su pantalla (`?nuevo=…`).
+const quickCreateItems = computed(() => accionesDeAltaVisibles(user?.role, has));
 
 // El centro de alertas solo para roles operativos/gerenciales con acceso.
 const canSeeAlerts = computed(
@@ -111,21 +104,9 @@ const chipDelPlan = computed<Pick<menu, "chip" | "chipColor"> | null>(() => {
 });
 
 const filterSidebarMenu = computed(() => {
-  if (!user?.role) return [];
-  // Sólo se filtra por ROL. Los ítems que el plan no incluye **no se ocultan**:
-  // los muestra `NavItem` en gris con candado y llevan a la pantalla de upgrade.
-  // Es una decisión comercial explícita (MODELO-COMERCIAL §6.2): el cliente
-  // tiene que ver todos los días lo que le falta.
-  const visible = sidebarMenu.value.filter(
-    (x) => !x.roles || x.roles.includes(user.role!),
-  );
-  // Descarta headers de secciones que quedaron sin ítems visibles para el rol,
-  // para no mostrar títulos de sección huérfanos.
-  const conSeccionesLlenas = visible.filter((item, i) => {
-    if (!item.header) return true;
-    const next = visible[i + 1];
-    return !!next && !next.header;
-  });
+  // La regla (sólo rol; lo que el plan no incluye va con candado) es la misma
+  // que usa el buscador: ver `visibilidad.ts`.
+  const conSeccionesLlenas = itemsVisiblesDelMenu(sidebarMenu.value, user?.role);
 
   // El chip de «Mi plan» depende del estado de la cuenta, que es dinámico: se
   // agrega acá y no en `sidebarItem.ts`, que es una constante.
