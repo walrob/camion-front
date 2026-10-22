@@ -105,7 +105,7 @@ const GRUPOS = [
       },
       {
         key: "oea",
-        titulo: "Planilla OEA — 7 puntos AFIP",
+        titulo: "Planilla OEA — 7 puntos ARCA",
         detalle: "Inspección fotográfica firmada digitalmente",
       },
       {

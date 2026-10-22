@@ -79,7 +79,7 @@ configuración que se escape de ahí es una fuga entre clientes.
 | `CompanySequence` (`trip`, `incident`) | ✅ Numeración correlativa por empresa, con el prefijo configurable (`trip.codePrefix`, §4.1). |
 | `Company`: `cuit`, `phone`, `address`, `city`, `state`, `logoUrl`, `primaryColor` | ✅ Identidad fiscal y visual, ya por empresa. |
 | Multi-moneda: `CompanyCurrency`, `ExchangeRate`, `exchangeRate` + `amountBase` congelados | ✅ **Fase D, construida.** Toda la aritmética de plata pasó a moneda base (§7). |
-| `DEFAULT_OEA_ITEMS` + `OeaTemplateItem` | ✅ Los 7 puntos AFIP son piso normativo; la empresa suma los suyos (§6.2). |
+| `DEFAULT_OEA_ITEMS` + `OeaTemplateItem` | ✅ Los 7 puntos ARCA son piso normativo; la empresa suma los suyos (§6.2). |
 | 26 listas en `front-camion/composables/*.ts` | ✅ Las siete de negocio salen del catálogo de la empresa, con la constante como respaldo offline (§5, §11). El resto son **estados**: no se configuran (§8). |
 | Ventana de «por vencer» de documentos y permisos | ✅ Sale de la regla de alerta de cada empresa; el `days: 30` del front se eliminó. |
 | Formato de importes y números en el front | ✅ `money()` acepta la moneda del importe (PYG/CLP sin decimales) y el `locale` sale del ajuste de la empresa. |
@@ -247,7 +247,7 @@ Tres decisiones que valen para el resto de los niveles:
 
 ### 6.2 Plantilla OEA ✅
 
-Los 7 puntos AFIP y los precintos son un piso normativo: se mantienen como base
+Los 7 puntos ARCA y los precintos son un piso normativo: se mantienen como base
 del sistema y la empresa **agrega** los suyos —una faja propia, el control de
 temperatura de un furgón refrigerado—. Los de norma no se editan ni se
 desactivan: no son una preferencia.

@@ -262,7 +262,7 @@ const CUMPLIMIENTO = [
   { icono: "mdi-shield-check-outline", texto: "CNRT y LiNTI" },
   {
     icono: "mdi-file-document-check-outline",
-    texto: "Planilla OEA — 7 puntos AFIP",
+    texto: "Planilla OEA — 7 puntos ARCA",
   },
   { icono: "mdi-draw-pen", texto: "Firma digital del chofer" },
   { icono: "mdi-wifi-off", texto: "Opera sin señal" },
@@ -283,7 +283,7 @@ const METRICAS = [
   },
   {
     valor: "7 puntos",
-    texto: "de la planilla OEA de AFIP, firmados desde el celular",
+    texto: "de la planilla OEA de ARCA, firmados desde el celular",
   },
   { valor: "Ilimitados", texto: "choferes y usuarios, en todos los planes" },
 ];
@@ -383,7 +383,7 @@ const GUIAS = [
 const DIFERENCIAL = [
   "Rendición de gastos y adelantos del chofer — ningún competidor internacional la resuelve",
   "Legajo con habilitaciones argentinas: LiNTI, CNRT, psicofísico, carga peligrosa",
-  "Planilla OEA de los 7 puntos AFIP, firmada digitalmente",
+  "Planilla OEA de los 7 puntos ARCA, firmada digitalmente",
   "Choferes y usuarios ilimitados en todos los planes",
   "Precios en pesos, soporte en tu huso horario y sin hardware que instalar",
 ];

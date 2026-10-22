@@ -133,7 +133,7 @@ useDatosEstructurados(
           MIC/DTA), ni se conecta con los sistemas de las aduanas.
         </li>
         <li>
-          No reemplaza las obligaciones del Cliente ante la CNRT, AFIP-ARCA, las
+          No reemplaza las obligaciones del Cliente ante la CNRT, ARCA, las
           autoridades de trabajo o cualquier otro organismo: los avisos de
           vencimiento son una ayuda de gestión, no una garantía de cumplimiento.
         </li>
@@ -472,7 +472,7 @@ useDatosEstructurados(
       <li>
         <strong>Funcionalidades de alcance nacional.</strong> Las prestaciones
         diseñadas sobre normativa argentina —planilla de inspección de los siete
-        puntos de AFIP-ARCA y habilitaciones LiNTI/CNRT, entre otras— se
+        puntos de ARCA y habilitaciones LiNTI/CNRT, entre otras— se
         ofrecen como herramientas de registro. Su validez ante autoridades de
         otros países debe ser verificada por el Cliente.
       </li>

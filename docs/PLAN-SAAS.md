@@ -274,7 +274,7 @@ declaradas con su motivo en ese archivo.
   sin ningún error visible**.
 - **Sin emisión fiscal automática**: se registra el pago y **se guarda el
   comprobante que sube la administración** (§ Comprobante del abono), pero la
-  factura la emite una persona en AFIP. No hay integración con el web service de
+  factura la emite una persona en ARCA. No hay integración con el web service de
   facturación electrónica, y mientras el volumen sea de decenas de clientes
   tampoco la necesita.
 - ~~**El superadmin no puede reprocesar un aviso fallido desde el panel**~~
@@ -543,7 +543,7 @@ podría haber quedado fuera del aislamiento sin que nadie lo notara.
 
 - ~~**Sin factura en PDF ni comprobantes en S3**~~ → cerrado: el comprobante se
   **sube**, no se genera (ver [§ Comprobante del abono](#comprobante-del-abono)).
-  Sigue sin emitirse la factura AFIP: el sistema registra el cobro y guarda el
+  Sigue sin emitirse la factura ARCA: el sistema registra el cobro y guarda el
   PDF que emitió la administración.
 - **Sin endpoints de superadmin** para marcar pagado, emitir a mano o listar la
   cobranza de todas las empresas: corresponde a la Fase 8.
@@ -1880,7 +1880,7 @@ de plan Operación y pueda invitar a su equipo.
 después nadie limpia.
 
 Seed inicial por empresa (dentro de la misma transacción): reglas de alerta por
-defecto, ítems de checklist estándar y la plantilla OEA de 7 puntos AFIP.
+defecto, ítems de checklist estándar y la plantilla OEA de 7 puntos ARCA.
 Reutilizar la lógica de `back-camion/src/database/seed.ts`, extraída a un
 `CompanySeedService`.
 
@@ -2250,7 +2250,7 @@ cliente Corporate real.
 la administración la sube al período y él se la baja de su propia pantalla.
 
 La decisión de fondo es que **el sistema no emite la factura**. Integrar el web
-service de AFIP es un proyecto en sí mismo —puntos de venta, tipos de
+service de ARCA es un proyecto en sí mismo —puntos de venta, tipos de
 comprobante, contingencia— y no es lo que hoy duele: lo que duele es que la
 factura exista en el mail de alguien y no en el sistema. Así que se resolvió la
 mitad que sí importa: donde vive el archivo y contra qué datos se emite.

@@ -279,7 +279,7 @@ trabajo de arquitectura sino de escribir:
 
 | Página sugerida | Consulta que ataca |
 |---|---|
-| `/planilla-oea-afip` | "planilla OEA 7 puntos", "OEA AFIP transporte" |
+| `/planilla-oea-arca` | "planilla OEA 7 puntos", "OEA ARCA transporte" |
 | `/app-para-choferes` | "app para choferes de camión", "checklist digital camión" |
 | `/mantenimiento-preventivo-flota` | "plan de mantenimiento preventivo de camiones" |
 | `/blog/...` | normativa, costos, gestión de choferes |

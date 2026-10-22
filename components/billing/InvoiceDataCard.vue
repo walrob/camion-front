@@ -9,7 +9,7 @@ import { useGeneralStore } from "~/stores/general";
  * Datos con los que se emite la factura del abono.
  *
  * El sistema **no factura**: la administración emite el comprobante por fuera
- * (AFIP, el estudio contable) y lo sube al período. Esta pantalla es de dónde
+ * (ARCA, el estudio contable) y lo sube al período. Esta pantalla es de dónde
  * saca los datos, así que lo que se carga acá es lo que va impreso en la
  * factura, y se pide aparte de los datos operativos porque no siempre
  * coinciden: se opera desde un depósito y se factura a la razón social.

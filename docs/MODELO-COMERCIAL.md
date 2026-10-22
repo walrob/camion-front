@@ -261,7 +261,7 @@ Basada en lo efectivamente desarrollado en la plataforma hoy.
 | Una plantilla de checklist por tipo de unidad | — | — | ✅ | ✅ |
 | **Viajes internacionales**: multi-moneda con cotización por día | ✅ | ✅ | ✅ | ✅ |
 | **COMPLIANCE** | | | | |
-| Planillas OEA (7 puntos AFIP + precintos) | — | ✅ | ✅ | ✅ |
+| Planillas OEA (7 puntos ARCA + precintos) | — | ✅ | ✅ | ✅ |
 | Firma digital en planillas e inspecciones | ✅ | ✅ | ✅ | ✅ |
 | Rol Auditor y trazabilidad de cambios | — | — | ✅ | ✅ |
 | **PERSONAL (RRHH)** | | | | |
@@ -500,7 +500,7 @@ al instante; bajar requiere esperar al ciclo.
 >
 > **Autoservicio hasta donde llega el cobro**: el cambio de plan y el alta/baja de
 > add-ons son por API; el pago es por Mercado Pago (link por período o débito
-> automático). **Sin factura AFIP**: el sistema registra el pago, no emite el
+> automático). **Sin factura ARCA**: el sistema registra el pago, no emite el
 > comprobante fiscal.
 
 ### 6.5 El camino de vida del cliente
@@ -762,7 +762,7 @@ Ninguno de los seis referentes resuelve tres cosas que en Argentina son obligato
    se pierde.
 2. **Legajo con habilitaciones argentinas** — LiNTI, CNRT, psicofísico, carga
    peligrosa — con vencimientos y bloqueo de asignación.
-3. **Planilla OEA / 7 puntos AFIP** firmada digitalmente.
+3. **Planilla OEA / 7 puntos ARCA** firmada digitalmente.
 
 Eso justifica que CamioNex cobre **por encima de Fleetio** (que en producto crudo tiene
 más años de desarrollo) y **muy por debajo de Samsara** (que exige hardware y 36 meses).
@@ -1021,7 +1021,7 @@ de lista.
    que queda sin construir.
 2. **Pantalla de upgrade con los datos del propio cliente (§6.2)** — hoy explica en
    vez de demostrar.
-3. **Comprobante fiscal** — se registra el pago; la factura AFIP se emite aparte.
+3. **Comprobante fiscal** — se registra el pago; la factura ARCA se emite aparte.
 4. **Los add-ons con ⏳ del §5.2** — se facturan, no se entregan.
 
 > **Regla de seguridad**: el gating de front es experiencia de usuario; el gating real

@@ -220,7 +220,7 @@ const chipsDe = (item: ChecklistTemplateItem) => {
 };
 
 // ── Planilla OEA ──────────────────────────────────────────────────────────
-// Los 7 puntos AFIP + precintos son piso normativo y no se editan; la empresa
+// Los 7 puntos ARCA + precintos son piso normativo y no se editan; la empresa
 // suma los suyos (docs/CONFIGURACION.md §6.2).
 const SECCIONES_OEA = [
   { value: "physical", label: "Inspección física" },
@@ -774,7 +774,7 @@ onMounted(() => {
 
     <div class="text-subtitle-1 font-weight-bold mb-1">Planilla OEA</div>
     <p class="text-body-2 text-medium-emphasis mb-4">
-      Los <strong>7 puntos AFIP y los precintos</strong> son un piso normativo: no
+      Los <strong>7 puntos ARCA y los precintos</strong> son un piso normativo: no
       se editan ni se desactivan. Lo que sí podés hacer es <strong>agregar</strong>
       los puntos propios de tu operación.
     </p>

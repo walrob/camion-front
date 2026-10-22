@@ -65,7 +65,7 @@ export const PLAN_DESTACADOS: Record<string, string[]> = {
     "Todo lo de Control",
     "Bitácora de gastos y rendiciones",
     "Combustible y mantenimiento preventivo",
-    "Legajos y planilla OEA de AFIP",
+    "Legajos y planilla OEA de ARCA",
   ],
   gestion: [
     "Todo lo de Operación",
@@ -196,7 +196,7 @@ export const FEATURE_INFO: Record<
   [Feature.OEA]: {
     titulo: 'Planillas OEA',
     plan: 'Operación',
-    pitch: 'La inspección de los 7 puntos AFIP firmada y lista para mostrar.',
+    pitch: 'La inspección de los 7 puntos ARCA firmada y lista para mostrar.',
     detalle: ['Fotos por ítem y precintos', 'Firma digital del chofer'],
   },
   [Feature.INCIDENTS_KANBAN]: {
