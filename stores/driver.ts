@@ -94,6 +94,15 @@ export const useDriverStore = defineStore("driver", {
       await this.getDrivers();
     },
 
+    /** Cuenta de acceso (rol Chofer) para un chofer cargado sin ella. */
+    async grantAccess(id: string, payload: Record<string, string>) {
+      const { $api } = useNuxtApp();
+      const general = useGeneralStore();
+      await $api.post(`drivers/${id}/access/`, payload);
+      general.setSuccessSnackbar("Acceso creado");
+      await this.getDrivers();
+    },
+
     async deleteDriver(id: string) {
       const { $api } = useNuxtApp();
       const general = useGeneralStore();

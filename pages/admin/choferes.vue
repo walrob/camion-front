@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PageHeader from "~/components/shared/PageHeader.vue";
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { useDriverStore } from "~/stores/driver";
@@ -11,6 +11,7 @@ import {
 import VoiceTextField from "~/components/form/VoiceTextField.vue";
 import TablePagination from "~/components/shared/TablePagination.vue";
 import DriverFormDialog from "~/components/driver/DriverFormDialog.vue";
+import GrantAccessDialog from "~/components/hr/GrantAccessDialog.vue";
 import ModalConfirm from "~/components/modal/Confirm.vue";
 import TableExcelActions from "~/components/shared/TableExcelActions.vue";
 import type { Driver } from "~/types/fleet";
@@ -58,6 +59,15 @@ const openNew = () => {
 const openEdit = (d: Driver) => {
   selected.value = d;
   dialog.value = true;
+};
+// Mismos roles que `POST drivers/:id/access`.
+const auth = useAuthStore();
+const canGrantAccess = computed(() => auth.isAdmin || auth.isDispatcher);
+const accessDialog = ref(false);
+const accessFor = ref<Driver | null>(null);
+const openAccess = (d: Driver) => {
+  accessFor.value = d;
+  accessDialog.value = true;
 };
 const askDelete = (d: Driver) => {
   toDelete.value = d;
@@ -163,7 +173,23 @@ useAccionDeQuery("buscar", (texto) => {
     >
       <template #item.driverName="{ item }">{{ driverName(item) }}</template>
       <template #item.employee.user.email="{ item }">
-        {{ item.employee?.user?.email || "—" }}
+        <template v-if="item.employee?.user?.email">
+          {{ item.employee.user.email }}
+        </template>
+        <!-- Sin cuenta el chofer no recibe los viajes: la acción va donde se
+             ve que falta, no escondida en un menú. -->
+        <v-btn
+          v-else-if="canGrantAccess && item.employee && !item.employee.userId"
+          size="small"
+          variant="tonal"
+          color="primary"
+          class="text-none"
+          prepend-icon="mdi-cellphone-key"
+          @click="openAccess(item)"
+        >
+          Dar acceso
+        </v-btn>
+        <template v-else>—</template>
       </template>
       <template #item.licenseExpiry="{ item }">
         <span
@@ -210,6 +236,12 @@ useAccionDeQuery("buscar", (texto) => {
       v-model="dialog"
       :driver="selected"
       @saved="driverStore.getDrivers()"
+    />
+    <GrantAccessDialog
+      v-if="accessFor?.employee"
+      v-model="accessDialog"
+      :employee="accessFor.employee"
+      :driver-id="accessFor.id"
     />
     <ModalConfirm
       v-model="confirm"

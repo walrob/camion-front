@@ -505,7 +505,7 @@ pre.flujo {
 
   <div>
     <h1>Manual de Usuario</h1>
-    <span class="version">Versión 15.9.2026</span>
+    <span class="version">Versión 27.10.2026</span>
     <p class="bajada">
       CamioNex reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp:
       viajes, gastos, vencimientos y mantenimiento en un solo lugar. Este manual
@@ -853,36 +853,66 @@ pre.flujo {
     <span class="rol">Administrador</span></p>
 
   <p>
-    Apenas se crea la cuenta, el sistema muestra una guía de <strong>tres pasos</strong>.
-    Se pueden saltear y retomar cuando quieras: están para no dejarte frente a un sistema
-    vacío.
+    Apenas se crea la cuenta, arriba del <span class="ruta">Panel</span> aparece la tarjeta
+    <strong>Primeros pasos</strong>: la lista de lo que falta para tener la operación
+    andando, con una barra de avance. No frena nada —podés usar el sistema entero desde el
+    primer minuto—; está para que no se pase nada importante.
   </p>
 
   <ol class="pasos">
     <li>
-      <strong>Cargá tu flota.</strong> Los camiones y los acoplados, con patente, número
-      interno y kilometraje actual. Es lo primero porque todo lo demás —viajes,
-      documentos, mantenimiento— cuelga de una unidad.
+      <strong>Cargá tus camiones.</strong> Con patente, número interno y kilometraje actual.
+      Es lo primero porque todo lo demás —viajes, documentos, mantenimiento— cuelga de una
+      unidad.
     </li>
     <li>
-      <strong>Sumá a tu equipo.</strong> Los choferes y el personal de taller u oficina.
-      Los choferes son ilimitados en todos los planes.
+      <strong>Cargá a tus choferes.</strong> Con nombre, apellido, DNI y teléfono alcanza
+      (ver <span class="ruta">Choferes</span>). Son ilimitados en todos los planes.
+    </li>
+    <li>
+      <strong>Dale la app a un chofer.</strong> Un email y una contraseña para que reciba
+      los viajes en el celular. Sin esto, el chofer existe en el sistema pero no se entera
+      de nada.
+    </li>
+    <li>
+      <strong>Cargá los vencimientos.</strong> VTV, RUTA, seguros, licencias: con la fecha
+      cargada, el sistema te avisa antes de que algo venza. Es lo que hace que las
+      <strong>alertas</strong> empiecen a trabajar por vos.
     </li>
     <li>
       <strong>Creá tu primer viaje.</strong> Con camión y chofer asignados. La app del
       chofer lo recibe al instante, sin que nadie tenga que avisarle.
     </li>
+    <li>
+      <strong>Cerrá tu primer viaje.</strong> El chofer lo finaliza desde la app y el viaje
+      pasa a los números del Panel. Ahí ya está todo funcionando.
+    </li>
   </ol>
 
   <p>
-    En esa misma pantalla podés subir el <strong>logo de tu empresa</strong>, que después
-    aparece dentro del sistema.
+    Cada paso <strong>se tilda solo</strong> cuando el sistema ve el dato cargado (por
+    ejemplo, apenas hay un camión, el primero queda listo): no hay que marcar nada. Al lado
+    de cada uno hay un botón que te lleva a la pantalla donde se hace.
   </p>
+
+  <p>
+    Al final hay un paso <strong>opcional</strong>: subir el <strong>logo de tu
+    empresa</strong>, que aparece en el panel y en los comprobantes que imprimís. Se sube
+    ahí mismo, sin salir del Panel.
+  </p>
+
+  <div class="nota">
+    <span class="et">Cuándo desaparece</span>
+    La tarjeta se va sola cuando están los seis pasos. Si preferís sacarla antes, tocá
+    <span class="ui">Ocultar</span>: no vuelve a aparecer. La ve sólo el
+    <strong>Administrador</strong>.
+  </div>
 
   <div class="clave">
     <span class="et">Consejo</span>
-    Si tenés muchas unidades para cargar, no las tipees de a una: pedinos la
-    <strong>carga asistida</strong> desde tu planilla y te las subimos nosotros.
+    Si tenés muchas unidades o choferes, no los tipees de a uno: cada listado tiene
+    <strong>importación desde Excel</strong>. Y si preferís no hacerlo vos, pedinos la
+    <strong>carga asistida</strong> desde tu planilla y te los subimos nosotros.
   </div>
 
   <h3>Dos caminos para darle acceso a una persona</h3>
@@ -895,9 +925,14 @@ pre.flujo {
     </thead>
     <tbody>
       <tr>
-        <td><strong>RRHH → Choferes</strong></td>
-        <td>Personal propio, en relación de dependencia. Además del acceso, arma el <strong>legajo</strong> con sus habilitaciones y vencimientos. Si el puesto es <strong>Chofer</strong>, aparece solo en <span class="ruta">Choferes</span>: ahí se le carga la licencia.</td>
-        <td><span class="ruta">RRHH</span> y <span class="ruta">Choferes</span></td>
+        <td><strong>Choferes</strong> <span class="plan todos">Todos los planes</span></td>
+        <td>Los choferes propios. Con nombre, apellido y DNI alcanza; el acceso a la app se le da en el mismo alta o después, con <span class="ui">Dar acceso</span>.</td>
+        <td><span class="ruta">Choferes</span></td>
+      </tr>
+      <tr>
+        <td><strong>RRHH</strong> <span class="plan operacion">Desde Operación</span></td>
+        <td>Todo el personal propio —también taller y oficina—, con el <strong>legajo</strong> completo: habilitaciones, vencimientos e historial. Si el puesto es <strong>Chofer</strong>, aparece solo en <span class="ruta">Choferes</span>.</td>
+        <td><span class="ruta">RRHH</span></td>
       </tr>
       <tr>
         <td><strong>Equipo (invitación por email)</strong></td>
@@ -1033,6 +1068,13 @@ pre.flujo {
     lista de lo pendiente. <strong>Cada tarjeta es un acceso directo:</strong> al hacer clic
     te lleva a la pantalla correspondiente ya filtrada.
   </p>
+
+  <div class="nota">
+    <span class="et">Cuenta nueva</span>
+    Mientras la empresa recién arranca, arriba de todo aparece la tarjeta
+    <strong>Primeros pasos</strong> con lo que falta cargar. Está explicada en
+    <span class="ruta">Puesta en marcha: los primeros pasos</span>.
+  </div>
 </section>
 
 <section class="seccion">
@@ -1500,6 +1542,22 @@ pre.flujo {
     <li>Si esa persona va a usar el sistema, activá <span class="ui">Crear acceso a la app</span> y cargá su email y una contraseña inicial. El <strong>rol se deduce del puesto</strong>, y se puede cambiar.</li>
   </ol>
 
+  <h3>Darle acceso después</h3>
+
+  <p>
+    Si en el alta no se creó el acceso, no hace falta volver a cargar a la persona: en su
+    legajo aparece el botón <span class="ui">Dar acceso a la app</span>. Se cargan el email
+    y una contraseña inicial, y el rol sale del puesto igual que en el alta. En la pestaña
+    <span class="ui">Datos</span>, el renglón <strong>Acceso a la app</strong> muestra con
+    qué email entra (o «Sin acceso»).
+  </p>
+
+  <div class="nota">
+    <span class="et">Los roles dependen del plan</span>
+    Si el rol que corresponde no está incluido en tu plan (por ejemplo, Auditor), el
+    sistema no crea la cuenta y te avisa. Pasa lo mismo en el alta y en las invitaciones.
+  </div>
+
   <h3>Las cuatro pestañas del legajo</h3>
 
   <table>
@@ -1569,23 +1627,41 @@ pre.flujo {
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">RRHH</span></p>
 
   <p>
-    Mientras el legajo de RRHH es la persona, acá está el <strong>perfil operativo</strong>:
-    el número y la clase de <strong>licencia de conducir</strong>, su <strong>vencimiento</strong>
-    y el estado (Activo, En viaje, Inactivo).
+    Acá están los choferes con su <strong>perfil operativo</strong>: el número y la clase de
+    <strong>licencia de conducir</strong>, su <strong>vencimiento</strong> y el estado
+    (Activo, En viaje, Inactivo).
+  </p>
+
+  <h3>Dar de alta un chofer</h3>
+
+  <ol class="pasos">
+    <li>Menú <span class="ruta">Choferes</span> → botón <span class="ui">Nuevo chofer</span>.</li>
+    <li>Cargá <strong>nombre</strong>, <strong>apellido</strong> y <strong>DNI / CUIL</strong> (obligatorios) y, si querés, el teléfono.</li>
+    <li>Si ya va a usar la app, activá <span class="ui">Crear acceso a la app</span> y cargá su email y una contraseña inicial. Se puede dejar para después.</li>
+    <li>Completá la <strong>licencia</strong>: número, clase y vencimiento. Con el vencimiento cargado, el sistema avisa antes de que caduque.</li>
+  </ol>
+
+  <p>
+    Si tu plan incluye <span class="ruta">RRHH</span>, ese alta le arma además un legajo con
+    puesto <strong>Chofer</strong>, que después se completa ahí (domicilio, ingreso,
+    habilitaciones). Y al revés: un empleado cargado en RRHH con puesto Chofer aparece acá
+    solo, y sólo queda cargarle la licencia con el botón de editar de la fila.
   </p>
 
   <p>
-    No hace falta darlos de alta: al cargar en RRHH un empleado con puesto
-    <strong>Chofer</strong>, su perfil aparece acá solo. Lo que queda por hacer es
-    <strong>cargarle la licencia</strong> y su vencimiento con el botón de editar de la fila.
+    Con RRHH, el alta tiene también la opción <span class="ui">Legajo existente</span>, para
+    los empleados que todavía no tienen perfil de chofer: se elige el empleado —el selector
+    muestra el <strong>DNI junto al nombre</strong>, así no se confunden dos personas que se
+    llaman igual— y se carga la licencia.
   </p>
 
+  <h3>Darle la app a un chofer</h3>
+
   <p>
-    El botón <span class="ui">Nuevo chofer</span> queda para los legajos que todavía no
-    tienen perfil (los cargados antes de esta automatización): elegís el
-    <strong>empleado</strong> —el selector muestra el <strong>DNI junto al nombre</strong>,
-    así no se confunden dos personas que se llaman igual, y también se puede buscar por
-    documento— y cargás la licencia.
+    En la columna del usuario, los choferes que todavía no tienen acceso muestran el botón
+    <span class="ui">Dar acceso</span>. Se cargan su email y una contraseña inicial, y
+    desde ese momento entra a la app y recibe los viajes que se le asignan. Lo pueden hacer
+    el <strong>Administrador</strong> y el <strong>Despachante</strong>.
   </p>
 
   <p>
@@ -1595,9 +1671,9 @@ pre.flujo {
   </p>
 
   <div class="nota">
-    <span class="et">El orden importa</span>
-    Primero el <strong>empleado</strong> en RRHH, después el <strong>chofer</strong>. Así una
-    misma persona tiene un solo legajo, aunque cambie de puesto.
+    <span class="et">Una persona, un solo legajo</span>
+    Se cargue desde Choferes o desde RRHH, cada persona tiene un único legajo, identificado
+    por su <strong>DNI</strong>: el sistema no deja cargar dos veces el mismo documento.
   </div>
 </section>
 
@@ -2688,6 +2764,8 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
       <tr><td>Reabrir una <strong>rendición cerrada</strong></td><td>Administrador y Gerente, con motivo escrito.</td></tr>
       <tr><td>Reabrir una <strong>alerta resuelta</strong></td><td>Administrador, Gerente y Despachante, con motivo.</td></tr>
       <tr><td><strong>Invitar</strong> usuarios</td><td>Administrador (la sección la ve también el Gerente).</td></tr>
+      <tr><td><strong>Dar acceso a la app</strong> a un chofer</td><td>Administrador y Despachante, desde Choferes.</td></tr>
+      <tr><td><strong>Dar acceso a la app</strong> desde el legajo</td><td>Administrador y RRHH.</td></tr>
       <tr><td>Ver y pagar el <strong>plan</strong></td><td>Administrador y Gerente.</td></tr>
     </tbody>
   </table>
@@ -2708,6 +2786,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
   <h3>«Un chofer dice que no le llega el viaje»</h3>
   <ul>
     <li>Verificá que el viaje esté asignado <strong>a ese</strong> chofer (ojo con los homónimos: el selector muestra el DNI).</li>
+    <li>Que tenga <strong>acceso a la app</strong>: si en <span class="ruta">Choferes</span> su fila muestra <span class="ui">Dar acceso</span>, todavía no tiene usuario.</li>
     <li>Que haya iniciado sesión en la app con su usuario.</li>
     <li>Que tenga señal. Si estuvo sin datos, el viaje le aparece al reconectar.</li>
   </ul>
@@ -2808,7 +2887,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
   </p>
 
   <div class="cierre">
-    <strong>Manual de Usuario · CamioNex</strong> — Versión 15.9.2026<br>
+    <strong>Manual de Usuario · CamioNex</strong> — Versión 27.10.2026<br>
     NorthAr Consulting · info@northar.com.ar · www.northar.com.ar
   </div>
 </section>

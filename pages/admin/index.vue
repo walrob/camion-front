@@ -6,6 +6,7 @@ import KpiCard from "~/components/dashboard/KpiCard.vue";
 import ChartCard from "~/components/dashboard/ChartCard.vue";
 import StackedStrip from "~/components/dashboard/StackedStrip.vue";
 import EmptyState from "~/components/shared/EmptyState.vue";
+import OnboardingSteps from "~/components/dashboard/OnboardingSteps.vue";
 import {
   useDashboardStore,
   dashboardRangeOptions,
@@ -309,6 +310,10 @@ onBeforeUnmount(() => {
         </v-btn-toggle>
       </template>
     </PageHeader>
+
+    <!-- Arriba de todo: con la empresa recién creada, lo útil es lo que falta
+         cargar, no una fila de KPIs en cero. -->
+    <OnboardingSteps />
 
     <div v-if="loading && !overview" class="d-flex justify-center my-8">
       <v-progress-circular indeterminate color="primary" />

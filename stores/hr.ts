@@ -115,6 +115,18 @@ export const useHrStore = defineStore("hr", {
       );
     },
 
+    /** Cuenta de acceso para un legajo que se dio de alta sin ella. */
+    async grantAccess(id: string, payload: Record<string, string>) {
+      return this.mutate(
+        "post",
+        `hr/employees/${id}/access/`,
+        payload,
+        "Acceso creado",
+        () => this.getEmployee(id),
+        true,
+      );
+    },
+
     async deleteEmployee(id: string) {
       return this.mutate("delete", `hr/employees/${id}/`, null, "Empleado eliminado", () =>
         this.getEmployees(),

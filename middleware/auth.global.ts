@@ -88,14 +88,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // plan se ve sin volver a entrar.
   await authStore.fetchSession()
 
-  // Empresa recién creada: se la lleva por la carga inicial en vez de dejarla
-  // frente a un sistema vacío. No aplica al chofer, que entra por invitación a
-  // una empresa ya configurada.
-  const paso = authStore.company?.onboardingStep ?? 0
-  if (paso > 0 && !isDriver && !to.path.startsWith('/initial')) {
-    return navigateTo('/initial')
-  }
-
   // Funcionalidad exigida por la página. Si el plan no la incluye se va a la
   // pantalla que explica qué incluye y cómo activarla, NO a un 403: el objetivo
   // es vender el upgrade, no dar un error.

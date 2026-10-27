@@ -6,7 +6,7 @@ import { useRouter } from "vue-router";
  * Alta pública de una empresa: el punto de entrada del embudo comercial.
  *
  * Se piden sólo los datos imprescindibles. Todo lo demás —logo, domicilio,
- * flota— se completa en el onboarding guiado: cada campo de más en este
+ * flota— se completa desde los primeros pasos del panel: cada campo de más en este
  * formulario es conversión que se pierde (MODELO-COMERCIAL §1.3, barrera de
  * entrada baja).
  */

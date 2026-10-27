@@ -6,6 +6,7 @@ import { useHrStore } from "~/stores/hr";
 import { useHrStatus } from "~/composables/useHrStatus";
 import { useAuth } from "~/composables/useAuth";
 import EmployeeFormDialog from "~/components/hr/EmployeeFormDialog.vue";
+import GrantAccessDialog from "~/components/hr/GrantAccessDialog.vue";
 import CertificationFormDialog from "~/components/hr/CertificationFormDialog.vue";
 import AssignTruckDialog from "~/components/hr/AssignTruckDialog.vue";
 import EmploymentMovementFormDialog from "~/components/hr/EmploymentMovementFormDialog.vue";
@@ -50,6 +51,7 @@ const tab = ref("data");
 
 // Diálogos
 const editEmployee = ref(false);
+const accessDialog = ref(false);
 const certDialog = ref(false);
 const selectedCert = ref<Certification | null>(null);
 const assignDialog = ref(false);
@@ -116,6 +118,7 @@ const infoItems = computed<InfoItem[]>(() => {
     { icon: "mdi-calendar-check-outline", tone: "success", label: "Ingreso", value: fmtDate(e.hireDate) },
     { icon: "mdi-map-marker-outline", tone: "error", label: "Domicilio", value: e.address || "-" },
     { icon: "mdi-lifebuoy", tone: "warning", label: "Contacto emergencia", value: emergency },
+    { icon: "mdi-cellphone-key", tone: "primary", label: "Acceso a la app", value: e.user?.email || (e.userId ? "Con acceso" : "Sin acceso") },
     { icon: "mdi-note-text-outline", tone: "secondary", label: "Notas", value: e.notes || "-", full: true },
   ];
 });
@@ -174,6 +177,17 @@ onMounted(() => hrStore.getEmployee(id));
     <!-- Las migas (Panel → Personal → RRHH → nombre) reemplazan al botón "Volver". -->
     <PageHeader :title="fullName || 'Legajo'">
       <template #actions>
+        <!-- Sólo sin cuenta: el acceso antes se podía crear únicamente en el
+             alta, y si ahí no se tildaba el legajo quedaba sin forma de entrar. -->
+        <v-btn
+          v-if="employee && canEditHr && !employee.userId"
+          color="primary"
+          variant="flat"
+          prepend-icon="mdi-cellphone-key"
+          @click="accessDialog = true"
+        >
+          Dar acceso a la app
+        </v-btn>
         <v-btn
           v-if="employee"
           color="primary"
@@ -505,6 +519,11 @@ onMounted(() => hrStore.getEmployee(id));
     </template>
 
     <EmployeeFormDialog v-model="editEmployee" :employee="employee" />
+    <GrantAccessDialog
+      v-if="employee"
+      v-model="accessDialog"
+      :employee="employee"
+    />
     <CertificationFormDialog
       v-model="certDialog"
       :employee-id="id"
