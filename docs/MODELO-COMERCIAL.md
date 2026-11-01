@@ -175,14 +175,21 @@ todo el SaaS B2B maduro.
 | **Promesa** | "Dejá el cuaderno" | "Del checklist a la rendición" | "Decidí con números" | "Varias empresas, una operación" |
 | **Cliente típico** | Fletero / familiar | PyME de transporte | Empresa consolidada | Grupo / multi-planta |
 | **Flota** | 3 – 8 unidades | 8 – 25 unidades | 25 – 80 unidades | 60+ unidades |
-| **Abono base / mes** | **$ 59.000** | **$ 129.000** | **$ 249.000** | desde **$ 490.000** |
-| **Por vehículo / mes** | **$ 7.900** | **$ 12.900** | **$ 18.900** | negociado (desde $ 10.900) |
+| **Abono base / mes** | **$ 52.900** | **$ 115.900** | **$ 223.900** | desde **$ 440.000** |
+| **Por vehículo / mes** | **$ 7.100** | **$ 11.600** | **$ 16.900** | negociado (desde $ 9.800) |
 | **Implementación (única)** | $ 290.000 | $ 590.000 | $ 990.000 | desde $ 2.500.000 |
 | **Compromiso** | Mensual o anual | Anual recomendado | Anual | 24 – 36 meses |
 | **Usuarios y choferes** | Ilimitados | Ilimitados | Ilimitados | Ilimitados |
 
 *Precios en ARS + IVA. Acoplados al 50%. **Tarifa plana por vehículo: sin tramos ni
 escalones de volumen** — la compresión la produce el abono base (§7.2).*
+
+> **Precio de lanzamiento (noviembre 2026).** Abono y precio por vehículo están
+> ~10 % por debajo de la lista original ($ 59.000 / 129.000 / 249.000 / 490.000 de
+> abono; $ 7.900 / 12.900 / 18.900 / 10.900 por vehículo), para captar las primeras
+> cuentas. Se recupera en las revisiones trimestrales (§7.5) con ajustes algo por
+> encima del IPC. Los ejemplos y simulaciones del resto del documento siguen con la
+> lista original. Migración `PriceLaunchCut`.
 
 ### 3.3 Sin mínimo de vehículos
 

@@ -41,8 +41,8 @@ const PLANES_FALLBACK = [
     name: "Control",
     description:
       "Dejá el cuaderno. Sabé qué tenés en la calle y qué se te vence.",
-    baseFee: 59000,
-    pricePerVehicle: 7900,
+    baseFee: 52900,
+    pricePerVehicle: 7100,
     isNegotiated: false,
     features: [
       "fleet",
@@ -67,8 +67,8 @@ const PLANES_FALLBACK = [
     name: "Operación",
     description:
       "Todo el viaje bajo control, del checklist hasta la rendición.",
-    baseFee: 129000,
-    pricePerVehicle: 12900,
+    baseFee: 115900,
+    pricePerVehicle: 11600,
     isNegotiated: false,
     features: [
       "fleet",
@@ -104,8 +104,8 @@ const PLANES_FALLBACK = [
     name: "Gestión",
     description:
       "Decidí con números: costo por kilómetro, por camión y por chofer.",
-    baseFee: 249000,
-    pricePerVehicle: 18900,
+    baseFee: 223900,
+    pricePerVehicle: 16900,
     isNegotiated: false,
     features: [
       "fleet",
@@ -155,8 +155,8 @@ const PLANES_FALLBACK = [
     code: "corporate",
     name: "Corporate",
     description: "Varias empresas, una sola operación.",
-    baseFee: 490000,
-    pricePerVehicle: 10900,
+    baseFee: 440000,
+    pricePerVehicle: 9800,
     isNegotiated: true,
     features: [
       "fleet",
