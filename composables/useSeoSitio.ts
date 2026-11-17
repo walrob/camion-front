@@ -26,7 +26,7 @@ export const SITIO = {
    */
   origen: "https://www.camionex.com.ar",
   /** Tarjeta para compartir. Absoluta: WhatsApp y LinkedIn ignoran las relativas. */
-  imagenSocial: "/og-camionex.png",
+  imagenSocial: "/og-camionex.jpg",
   /** Idioma y país al que apunta el producto. */
   locale: "es_AR",
 } as const;
