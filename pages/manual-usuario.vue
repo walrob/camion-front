@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PageHeader from "~/components/shared/PageHeader.vue";
+import CopiarParaIA from "~/components/shared/CopiarParaIA.vue";
 
 /**
  * Manual de usuario.
@@ -54,6 +55,17 @@ useAccionDeQuery("seccion", (id) => {
       </template>
     </PageHeader>
 
+    <!-- El manual entero en Markdown, para la IA del propio usuario (sin costo de IA). -->
+    <v-card border flat rounded="lg" class="pa-4 mb-4">
+      <div class="text-subtitle-1 font-weight-bold mb-1">
+        Preguntale a tu IA
+      </div>
+      <p class="text-body-2 text-medium-emphasis mb-3">
+        Copiá el manual completo y consultalo con tu propio asistente, fuera de CamioNex.
+      </p>
+      <CopiarParaIA />
+    </v-card>
+
     <v-card border flat rounded="lg" class="pa-2">
       <iframe
         ref="marco"
@@ -69,9 +81,10 @@ useAccionDeQuery("seccion", (id) => {
 .manual-frame {
   display: block;
   width: 100%;
-  /* Alto de la ventana menos el header de la app y el de la página: el manual
-     es largo y conviene que scrollee dentro del marco, no la app entera. */
-  height: calc(100vh - 230px);
+  /* Alto de la ventana menos el header de la app, el de la página y la tarjeta
+     de «Copiar manual para IA»: el manual es largo y conviene que scrollee
+     dentro del marco, no la app entera. */
+  height: calc(100vh - 400px);
   min-height: 480px;
   border: 0;
   border-radius: 6px;

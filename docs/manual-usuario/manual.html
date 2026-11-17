@@ -41,6 +41,10 @@
         agregar también la fila ahí.
      4. El índice se arma solo al abrir el archivo: no hay que tocarlo.
      5. Actualizar la versión en la portada y en el cierre.
+     6. Cada h3 nuevo lleva `data-pregunta="¿Cómo …?"`: es el título con el
+        que aparece en la versión para IA (public/manual-camionex-ia.md), que
+        se regenera sola con `npm run manual:ia` (y antes de dev y build).
+        Un h2 puede llevarlo también: titula su párrafo introductorio.
 
    REGLA DE ALCANCE: este manual es para el cliente. El panel de plataforma
    (superadmin) NO se documenta acá ni se menciona.
@@ -423,6 +427,11 @@ pre.flujo {
 .toc a { display: block; color: var(--ink); padding: .17em 0; }
 .toc a .n { display: inline-block; min-width: 2.4em; color: var(--primary); font-weight: 650; }
 
+/* --- Glosario ------------------------------------------------------------ */
+dl.glosario { margin: 0; }
+dl.glosario dt { font-weight: 700; margin-top: .9em; }
+dl.glosario dd { margin: .15em 0 0 0; color: var(--ink-soft); }
+
 /* --- Cierre -------------------------------------------------------------- */
 .cierre {
   margin-top: 2.5em;
@@ -505,7 +514,7 @@ pre.flujo {
 
   <div>
     <h1>Manual de Usuario</h1>
-    <span class="version">Versión 27.10.2026</span>
+    <span class="version">Versión 16.11.2026</span>
     <p class="bajada">
       CamioNex reemplaza el cuaderno del chofer, el Excel y los grupos de WhatsApp:
       viajes, gastos, vencimientos y mantenimiento en un solo lugar. Este manual
@@ -546,7 +555,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 1 · Primeros pasos</p>
-  <h2>Qué es CamioNex</h2>
+  <h2 data-pregunta="¿Qué es CamioNex?">Qué es CamioNex</h2>
 
   <p>
     CamioNex es un sistema para <strong>gestionar una flota de transporte de carga</strong>:
@@ -562,7 +571,7 @@ pre.flujo {
     <li>los <strong>grupos de WhatsApp</strong>, donde la información importante se pierde entre mensajes.</li>
   </ul>
 
-  <h3>Tres puertas, un mismo sistema</h3>
+  <h3 data-pregunta="¿Cómo se ve CamioNex según quién lo usa?">Tres puertas, un mismo sistema</h3>
 
   <p>
     Según quién sea, CamioNex se ve de una manera distinta. No hay que instalar nada
@@ -599,7 +608,7 @@ pre.flujo {
     acordarse de ninguna dirección.
   </div>
 
-  <h3>Cada empresa ve sólo lo suyo</h3>
+  <h3 data-pregunta="¿Otras empresas pueden ver mis datos?">Cada empresa ve sólo lo suyo</h3>
 
   <p>
     CamioNex es un servicio en la nube <strong>multi-empresa</strong>: cada empresa tiene su
@@ -607,7 +616,7 @@ pre.flujo {
     ve tu equipo, nadie más.
   </p>
 
-  <h3>Qué necesito para usarlo</h3>
+  <h3 data-pregunta="¿Qué necesito para usar CamioNex?">Qué necesito para usarlo</h3>
 
   <ul>
     <li><strong>En la oficina:</strong> una computadora con navegador (Chrome, Edge, Firefox) e internet. No se instala nada.</li>
@@ -617,7 +626,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 1 · Primeros pasos</p>
-  <h2>Los planes y qué incluye cada uno</h2>
+  <h2 data-pregunta="¿Qué planes hay y por qué veo módulos con candado?">Los planes y qué incluye cada uno</h2>
 
   <p>
     La empresa contrata un <strong>plan</strong> y eso define qué módulos quedan
@@ -636,7 +645,7 @@ pre.flujo {
     Nada se rompe y nada se pierde: simplemente todavía no está activado.
   </div>
 
-  <h3>Qué trae cada plan</h3>
+  <h3 data-pregunta="¿Qué incluye cada plan?">Qué trae cada plan</h3>
 
   <div class="tabla-scroll">
   <table class="comparativa">
@@ -674,7 +683,7 @@ pre.flujo {
   </table>
   </div>
 
-  <h3>Los límites de la cuenta</h3>
+  <h3 data-pregunta="¿Qué límites tiene cada plan?">Los límites de la cuenta</h3>
 
   <div class="tabla-scroll">
   <table class="comparativa">
@@ -703,7 +712,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 1 · Primeros pasos</p>
-  <h2>Los roles: quién hace qué</h2>
+  <h2 data-pregunta="¿Qué puede hacer cada rol?">Los roles: quién hace qué</h2>
 
   <p>
     Cada persona entra con su propio usuario y <strong>ve solamente lo que su rol
@@ -779,7 +788,7 @@ pre.flujo {
   <p class="parte">Parte 1 · Primeros pasos</p>
   <h2>Crear la cuenta e ingresar</h2>
 
-  <h3>Crear la cuenta de la empresa</h3>
+  <h3 data-pregunta="¿Cómo creo la cuenta de mi empresa?" data-ruta="Sitio público → Crear cuenta">Crear la cuenta de la empresa</h3>
 
   <p>
     Se hace una sola vez, desde el sitio público, con el botón <span class="ui">Crear cuenta</span>.
@@ -800,7 +809,7 @@ pre.flujo {
     la corregimos.
   </div>
 
-  <h3>La prueba gratis</h3>
+  <h3 data-pregunta="¿Cómo funciona la prueba gratis?">La prueba gratis</h3>
 
   <p>
     La cuenta arranca con <strong>30 días de prueba</strong>, <strong>sin tarjeta</strong> y
@@ -816,7 +825,7 @@ pre.flujo {
     y vuelven a estar disponibles apenas se activa un plan.
   </p>
 
-  <h3>Ingresar todos los días</h3>
+  <h3 data-pregunta="¿Cómo ingreso al sistema?" data-ruta="Sitio público → Iniciar sesión">Ingresar todos los días</h3>
 
   <ol class="pasos">
     <li>Entrá a la dirección del sistema y tocá <span class="ui">Iniciar sesión</span>.</li>
@@ -830,7 +839,7 @@ pre.flujo {
     un link y desde ahí se define una nueva.
   </p>
 
-  <h3>Cuando te invitan a una empresa</h3>
+  <h3 data-pregunta="¿Qué hago si me invitaron a una empresa?">Cuando te invitan a una empresa</h3>
 
   <p>
     Si alguien de tu empresa te da acceso, vas a recibir un <strong>mail de invitación</strong>
@@ -847,7 +856,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 1 · Primeros pasos</p>
-  <h2>Puesta en marcha: los primeros pasos</h2>
+  <h2 data-pregunta="¿Cómo pongo en marcha la cuenta?" data-ruta="Inicio → Panel → tarjeta Primeros pasos">Puesta en marcha: los primeros pasos</h2>
 
   <p class="quien"><span class="et">Quién lo hace</span>
     <span class="rol">Administrador</span></p>
@@ -915,7 +924,7 @@ pre.flujo {
     <strong>carga asistida</strong> desde tu planilla y te los subimos nosotros.
   </div>
 
-  <h3>Dos caminos para darle acceso a una persona</h3>
+  <h3 data-pregunta="¿Cómo le doy acceso a una persona de mi empresa?">Dos caminos para darle acceso a una persona</h3>
 
   <p>Según de quién se trate, el camino es distinto:</p>
 
@@ -949,14 +958,14 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Cómo moverse por el sistema</h2>
+  <h2 data-pregunta="¿Cómo me muevo por el sistema?">Cómo moverse por el sistema</h2>
 
   <p>
     Todas las pantallas del backoffice están armadas igual. Con entender una, se entienden
     todas.
   </p>
 
-  <h3>El menú lateral</h3>
+  <h3 data-pregunta="¿Cómo está organizado el menú lateral?">El menú lateral</h3>
 
   <p>A la izquierda está el menú, agrupado por temas:</p>
 
@@ -966,12 +975,12 @@ pre.flujo {
     </thead>
     <tbody>
       <tr><td><strong>Inicio</strong></td><td>Panel gerencial e Indicadores.</td></tr>
-      <tr><td><strong>Operación</strong></td><td>Viajes, Incidentes, Alertas y Mensajes.</td></tr>
+      <tr><td><strong>Operación</strong></td><td>Viajes, Validaciones, Incidentes, Alertas y Mensajes.</td></tr>
       <tr><td><strong>Flota</strong></td><td>Flota, Mantenimiento, Combustible y Documentos.</td></tr>
       <tr><td><strong>Personal</strong></td><td>RRHH, Choferes y Equipo.</td></tr>
       <tr><td><strong>Administración</strong></td><td>Rendiciones y Planillas OEA.</td></tr>
       <tr><td><strong>Cuenta</strong></td><td>Mi plan (qué tenés contratado y qué hay que pagar) y Configuración.</td></tr>
-      <tr><td><strong>Ayuda</strong></td><td>Este manual.</td></tr>
+      <tr><td><strong>Ayuda</strong></td><td>Este manual, con el botón para copiarlo a tu propia IA.</td></tr>
     </tbody>
   </table>
 
@@ -994,17 +1003,17 @@ pre.flujo {
     depende la pantalla que tenés abierta y de regresar sin usar el menú.
   </p>
 
-  <h3>La barra de arriba</h3>
+  <h3 data-pregunta="¿Qué hay en la barra de arriba?">La barra de arriba</h3>
 
   <ul>
-    <li><span class="ui">+ Crear</span> — atajo para dar de alta lo más frecuente (viaje, incidente, camión, chofer, empleado, rendición) desde cualquier pantalla.</li>
-    <li><strong>Buscador</strong> — abre con <span class="ui">Ctrl + K</span>. Escribís el nombre de una sección o de una acción y te lleva ahí. Es la forma más rápida de moverse.</li>
+    <li><span class="ui">+ Crear</span> — atajo para dar de alta lo más frecuente desde cualquier pantalla: viaje, camión, acoplado, chofer, empleado, documento, orden de trabajo, plan de mantenimiento, rendición e invitar a alguien. Sólo muestra lo que tu rol y tu plan permiten crear.</li>
+    <li><strong>Buscador</strong> — abre con <span class="ui">Ctrl + K</span>. Escribís lo que necesitás, como lo dirías («cómo doy de alta un camión», sin preocuparte por las tildes), y te ofrece en grupos: <strong>Acciones</strong> (las mismas altas de <span class="ui">+ Crear</span>), <strong>Ir a</strong> (las pantallas del menú), <strong>Registros</strong> (un viaje por su código, un camión por su patente, un chofer o un empleado por nombre o DNI) y <strong>Manual</strong> (la sección de este manual que habla del tema). Es la forma más rápida de moverse.</li>
     <li><strong>Campanita</strong> — el centro de alertas. Muestra en vivo, con un contador, los avisos que genera el sistema.</li>
     <li><strong>Sol / luna</strong> — cambia entre tema claro y oscuro. Queda guardado en tu usuario.</li>
     <li><strong>Tu foto</strong> — el menú de la cuenta, con <span class="ui">Cerrar sesión</span>.</li>
   </ul>
 
-  <h3>Los filtros y las tablas</h3>
+  <h3 data-pregunta="¿Cómo uso los filtros, las tablas y la exportación a Excel?">Los filtros y las tablas</h3>
 
   <ul>
     <li>Los filtros están en una fila arriba de cada listado y <strong>se aplican solos</strong>: no hay botón «Aplicar».</li>
@@ -1024,7 +1033,7 @@ pre.flujo {
     </li>
   </ul>
 
-  <h3>Los colores de los estados</h3>
+  <h3 data-pregunta="¿Qué significa cada color de estado?">Los colores de los estados</h3>
 
   <p>
     En todo el sistema los estados se muestran como pastillas de color, y el color siempre
@@ -1045,7 +1054,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Panel: cómo viene el día <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué muestra el Panel?" data-ruta="Inicio → Panel">Panel: cómo viene el día <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span></p>
@@ -1079,7 +1088,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Flota: camiones y acoplados <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué hay en la pantalla Flota?" data-ruta="Flota → Flota">Flota: camiones y acoplados <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">Taller</span></p>
@@ -1089,7 +1098,7 @@ pre.flujo {
     <span class="ui">Acoplados</span> y <span class="ui">Flotas</span>.
   </p>
 
-  <h3>Cargar un camión</h3>
+  <h3 data-pregunta="¿Cómo cargo un camión?" data-ruta="Flota → Flota → pestaña Camiones">Cargar un camión</h3>
 
   <ol class="pasos">
     <li>Pestaña <span class="ui">Camiones</span> → botón <span class="ui">Nuevo camión</span>.</li>
@@ -1116,19 +1125,21 @@ pre.flujo {
     demás. Es la forma más rápida de contestar «¿este camión está en regla?».
   </div>
 
-  <h3>Acoplados y flotas</h3>
+  <h3 data-pregunta="¿Cómo cargo acoplados y flotas?" data-ruta="Flota → Flota → pestañas Acoplados y Flotas">Acoplados y flotas</h3>
 
   <p>
-    Los <strong>acoplados</strong> se cargan igual que los camiones y tienen sus propios
-    estados. Las <strong>flotas</strong> son agrupaciones para organizar unidades (por base,
-    por tipo de servicio, por cliente): son opcionales, pero después permiten filtrar los
-    listados y los indicadores por grupo.
+    Los <strong>acoplados</strong> se cargan igual que los camiones, desde la pestaña
+    <span class="ui">Acoplados</span> con el botón <span class="ui">Nuevo acoplado</span>, y
+    tienen sus propios estados. Las <strong>flotas</strong> son agrupaciones para organizar
+    unidades (por base, por tipo de servicio, por cliente): se crean en la pestaña
+    <span class="ui">Flotas</span> con <span class="ui">Nueva flota</span>. Son opcionales,
+    pero después permiten filtrar los listados y los indicadores por grupo.
   </p>
 </section>
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Viajes <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué es un viaje en CamioNex?" data-ruta="Operación → Viajes">Viajes <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">Auditor (sólo consulta)</span></p>
@@ -1138,7 +1149,7 @@ pre.flujo {
     incidentes, combustible— cuelga de él.
   </p>
 
-  <h3>Dar de alta un viaje</h3>
+  <h3 data-pregunta="¿Cómo creo un viaje?">Dar de alta un viaje</h3>
 
   <ol class="pasos">
     <li>Menú <span class="ruta">Operación → Viajes</span> → botón <span class="ui">Nuevo viaje</span>.</li>
@@ -1159,7 +1170,7 @@ pre.flujo {
     </ul>
   </div>
 
-  <h3>Seguir los viajes</h3>
+  <h3 data-pregunta="¿Cómo sigo los viajes?">Seguir los viajes</h3>
 
   <p>El listado se filtra por texto (código o destino), <strong>estado</strong> —incluida la opción <strong>Demorado</strong>, que junta los viajes en curso que ya pasaron su llegada planificada—, <strong>chofer</strong> y rango de fechas. En cada fila:</p>
 
@@ -1171,7 +1182,7 @@ pre.flujo {
 
   <p>Con el botón <span class="ui">Excel</span> bajás el listado tal como lo estás viendo. <span class="plan operacion">Desde Operación</span></p>
 
-  <h3>Los estados del viaje</h3>
+  <h3 data-pregunta="¿Qué estados tiene un viaje?">Los estados del viaje</h3>
 
   <table>
     <thead><tr><th>Estado</th><th>Qué significa</th><th>Quién lo cambia</th></tr></thead>
@@ -1183,7 +1194,7 @@ pre.flujo {
     </tbody>
   </table>
 
-  <h3>Liberar la unidad: validaciones de Tráfico</h3>
+  <h3 data-pregunta="¿Cómo libero una unidad que quedó esperando validación de Tráfico?" data-ruta="Operación → Validaciones">Liberar la unidad: validaciones de Tráfico</h3>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span></p>
@@ -1230,7 +1241,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Incidentes: problemas en la ruta <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿De dónde llegan los incidentes?" data-ruta="Operación → Incidentes">Incidentes: problemas en la ruta <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">Taller</span></p>
@@ -1241,7 +1252,7 @@ pre.flujo {
     acá <strong>en el momento</strong>, con las fotos, el audio y la ubicación.
   </p>
 
-  <h3>El tablero</h3>
+  <h3 data-pregunta="¿Cómo funciona el tablero de incidentes?">El tablero</h3>
 
   <p>
     Los incidentes se ordenan en tres columnas según cómo van:
@@ -1259,7 +1270,7 @@ pre.flujo {
     —con filtros y asignación de responsable— se habilita <strong>desde Operación</strong>.
   </div>
 
-  <h3>Atender un incidente</h3>
+  <h3 data-pregunta="¿Cómo atiendo un incidente?">Atender un incidente</h3>
 
   <p>Al hacer clic en una tarjeta se abre el detalle, y ahí podés:</p>
 
@@ -1279,7 +1290,7 @@ pre.flujo {
     obligatorio y también queda guardado.
   </div>
 
-  <h3>Los tipos de incidente</h3>
+  <h3 data-pregunta="¿Qué tipos de incidente existen?">Los tipos de incidente</h3>
 
   <table>
     <thead><tr><th>Tipo</th><th>Ejemplo</th></tr></thead>
@@ -1297,7 +1308,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Alertas: lo que el sistema te avisa <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué son las alertas y qué niveles tienen?" data-ruta="Operación → Alertas">Alertas: lo que el sistema te avisa <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">RRHH</span></p>
@@ -1318,7 +1329,7 @@ pre.flujo {
     </tbody>
   </table>
 
-  <h3>Cómo se trabaja una alerta</h3>
+  <h3 data-pregunta="¿Cómo trabajo una alerta?">Cómo se trabaja una alerta</h3>
 
   <p>
     Cada alerta se va marcando con botones, así el equipo sabe qué está atendido y qué no:
@@ -1347,7 +1358,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Mensajes con los choferes <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Cómo le escribo a un chofer?" data-ruta="Operación → Mensajes">Mensajes con los choferes <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span></p>
@@ -1367,7 +1378,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Mantenimiento <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Para qué sirve Mantenimiento?" data-ruta="Flota → Mantenimiento">Mantenimiento <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Taller</span><span class="rol">Administrador</span><span class="rol">Gerente</span></p>
@@ -1376,7 +1387,7 @@ pre.flujo {
     Sirve para dos cosas: <strong>que no se pase un service</strong> y <strong>saber cuánto
     cuesta mantener cada camión</strong>. Tiene tres pestañas.</p>
 
-  <h3><span class="ui">Próximos</span> — qué hay que hacer</h3>
+  <h3 data-pregunta="¿Cómo veo qué mantenimientos hay que hacer?" data-ruta="Flota → Mantenimiento → pestaña Próximos"><span class="ui">Próximos</span> — qué hay que hacer</h3>
 
   <p>
     La lista de servicios que están por vencer o ya vencidos, con la patente, el nombre del
@@ -1384,7 +1395,7 @@ pre.flujo {
     vencidos. Es la pestaña que conviene mirar todas las semanas.
   </p>
 
-  <h3><span class="ui">Planes</span> — cada cuánto se hace cada cosa</h3>
+  <h3 data-pregunta="¿Cómo creo un plan de mantenimiento?" data-ruta="Flota → Mantenimiento → pestaña Planes"><span class="ui">Planes</span> — cada cuánto se hace cada cosa</h3>
 
   <p>Un plan es una regla del tipo «a este camión, cambio de aceite cada 15.000 km».</p>
 
@@ -1398,7 +1409,7 @@ pre.flujo {
 
   <p>Un plan se puede <strong>pausar</strong> cuando no se quiere que siga avisando, sin borrarlo.</p>
 
-  <h3><span class="ui">Órdenes</span> — lo que efectivamente se hizo</h3>
+  <h3 data-pregunta="¿Cómo registro una orden de trabajo del taller?" data-ruta="Flota → Mantenimiento → pestaña Órdenes"><span class="ui">Órdenes</span> — lo que efectivamente se hizo</h3>
 
   <p>
     Cada intervención del taller se registra como una <strong>orden de trabajo</strong>: fecha,
@@ -1407,6 +1418,14 @@ pre.flujo {
     <span class="ui">Orden de trabajo (PDF)</span> se imprime como comprobante para el
     taller.
   </p>
+
+  <ol class="pasos">
+    <li>Pestaña <span class="ui">Órdenes</span> → botón <span class="ui">Nueva OT</span>.</li>
+    <li>Elegí el <span class="ui">Camión</span> y la <span class="ui">Fecha</span> (obligatorios).</li>
+    <li>Completá el <span class="ui">Estado</span>, el <span class="ui">Odómetro (km)</span>, el <span class="ui">Costo</span> y la <span class="ui">Descripción del trabajo</span>.</li>
+    <li>Si la orden responde a un plan, elegilo en <span class="ui">Plan asociado (opcional)</span>.</li>
+    <li>Guardá. Después podés adjuntarle archivos e imprimirla.</li>
+  </ol>
 
   <p>
     La pestaña lista las órdenes de <strong>todos los camiones</strong>, con la patente en
@@ -1430,7 +1449,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Combustible <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿De dónde salen los datos de combustible?" data-ruta="Flota → Combustible">Combustible <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">Taller</span><span class="rol">Auditor</span></p>
@@ -1440,7 +1459,7 @@ pre.flujo {
     del ticket) y acá se convierte en un tablero de consumo. La oficina no tipea nada.
   </p>
 
-  <h3>Qué muestra</h3>
+  <h3 data-pregunta="¿Qué muestra el tablero de combustible?">Qué muestra</h3>
 
   <ul>
     <li><strong>Rendimiento (km/l)</strong> y <strong>consumo (l/100 km)</strong> de toda la flota.</li>
@@ -1468,7 +1487,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Centro Documental <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué documentos se pueden guardar?" data-ruta="Flota → Documentos">Centro Documental <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">Taller</span></p>
@@ -1480,7 +1499,7 @@ pre.flujo {
     <strong>chofer</strong> o de la <strong>empresa</strong>.
   </p>
 
-  <h3>Cargar un documento</h3>
+  <h3 data-pregunta="¿Cómo cargo un documento?" data-ruta="Flota → Documentos → pestaña Gestor">Cargar un documento</h3>
 
   <ol class="pasos">
     <li>Pestaña <span class="ui">Gestor</span>: elegí la <strong>entidad</strong> (camión, acoplado, chofer o empresa). El listado muestra todos los documentos de esa entidad con una columna <strong>Dueño</strong>; si querés ver los de uno en particular, elegilo en el selector de al lado, que funciona como filtro.</li>
@@ -1495,7 +1514,7 @@ pre.flujo {
     adjuntáselo.
   </p>
 
-  <h3>La pestaña <span class="ui">Por vencer</span></h3>
+  <h3 data-pregunta="¿Cómo veo los documentos por vencer o vencidos?" data-ruta="Flota → Documentos → pestaña Por vencer">La pestaña <span class="ui">Por vencer</span></h3>
 
   <p>
     Es la que evita la multa. Muestra todo lo que está por vencer o vencido, con
@@ -1523,7 +1542,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>RRHH: el legajo del personal <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Para qué sirve RRHH?" data-ruta="Personal → RRHH">RRHH: el legajo del personal <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">RRHH</span><span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span></p>
@@ -1533,7 +1552,7 @@ pre.flujo {
     Es el módulo que evita que salga a la ruta alguien con el carnet vencido o de licencia.
   </p>
 
-  <h3>Dar de alta a un empleado</h3>
+  <h3 data-pregunta="¿Cómo doy de alta a un empleado?">Dar de alta a un empleado</h3>
 
   <ol class="pasos">
     <li>Menú <span class="ruta">Personal → RRHH</span> → botón <span class="ui">Nuevo empleado</span>.</li>
@@ -1542,7 +1561,7 @@ pre.flujo {
     <li>Si esa persona va a usar el sistema, activá <span class="ui">Crear acceso a la app</span> y cargá su email y una contraseña inicial. El <strong>rol se deduce del puesto</strong>, y se puede cambiar.</li>
   </ol>
 
-  <h3>Darle acceso después</h3>
+  <h3 data-pregunta="¿Cómo le doy acceso a la app a un empleado que ya está cargado?" data-ruta="Personal → RRHH → legajo de la persona">Darle acceso después</h3>
 
   <p>
     Si en el alta no se creó el acceso, no hace falta volver a cargar a la persona: en su
@@ -1558,7 +1577,7 @@ pre.flujo {
     sistema no crea la cuenta y te avisa. Pasa lo mismo en el alta y en las invitaciones.
   </div>
 
-  <h3>Las cuatro pestañas del legajo</h3>
+  <h3 data-pregunta="¿Qué tiene cada pestaña del legajo?" data-ruta="Personal → RRHH → legajo de la persona">Las cuatro pestañas del legajo</h3>
 
   <table>
     <thead><tr><th>Pestaña</th><th>Qué se hace ahí</th></tr></thead>
@@ -1570,7 +1589,7 @@ pre.flujo {
     </tbody>
   </table>
 
-  <h3>Los permisos y habilitaciones</h3>
+  <h3 data-pregunta="¿Cómo cargo los permisos y habilitaciones de una persona?" data-ruta="Personal → RRHH → legajo → pestaña Permisos">Los permisos y habilitaciones</h3>
 
   <p>
     Cada permiso se carga con su <strong>tipo</strong>, número, quién lo emitió, la fecha de
@@ -1579,7 +1598,7 @@ pre.flujo {
     avisa solo antes de que caduque.
   </p>
 
-  <h3>El historial laboral <span class="plan gestion">Desde Gestión</span></h3>
+  <h3 data-pregunta="¿Cómo registro licencias, suspensiones y bajas?" data-ruta="Personal → RRHH → legajo → pestaña Historial laboral">El historial laboral <span class="plan gestion">Desde Gestión</span></h3>
 
   <p>
     Es una línea de tiempo con los movimientos de la persona. Cada uno admite un
@@ -1621,7 +1640,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Choferes <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué datos de los choferes se guardan?" data-ruta="Personal → Choferes">Choferes <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Despachante</span><span class="rol">Gerente</span><span class="rol">RRHH</span></p>
@@ -1632,7 +1651,7 @@ pre.flujo {
     (Activo, En viaje, Inactivo).
   </p>
 
-  <h3>Dar de alta un chofer</h3>
+  <h3 data-pregunta="¿Cómo doy de alta un chofer?">Dar de alta un chofer</h3>
 
   <ol class="pasos">
     <li>Menú <span class="ruta">Choferes</span> → botón <span class="ui">Nuevo chofer</span>.</li>
@@ -1655,7 +1674,7 @@ pre.flujo {
     llaman igual— y se carga la licencia.
   </p>
 
-  <h3>Darle la app a un chofer</h3>
+  <h3 data-pregunta="¿Cómo le doy la app a un chofer?">Darle la app a un chofer</h3>
 
   <p>
     En la columna del usuario, los choferes que todavía no tienen acceso muestran el botón
@@ -1679,7 +1698,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Equipo: quién tiene acceso <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Para qué sirve la pantalla Equipo?" data-ruta="Personal → Equipo">Equipo: quién tiene acceso <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span></p>
@@ -1691,7 +1710,7 @@ pre.flujo {
     auditor externo.
   </p>
 
-  <h3>Invitar a alguien</h3>
+  <h3 data-pregunta="¿Cómo invito a alguien al equipo?">Invitar a alguien</h3>
 
   <ol class="pasos">
     <li>Botón <span class="ui">Invitar</span>.</li>
@@ -1715,7 +1734,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Rendiciones <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Cómo se calcula el neto de una rendición?" data-ruta="Administración → Rendiciones">Rendiciones <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Auditor</span></p>
@@ -1732,7 +1751,7 @@ pre.flujo {
     la empresa le debe al chofer; si es negativo, el chofer tiene que devolver la diferencia.
   </div>
 
-  <h3>Generar una rendición</h3>
+  <h3 data-pregunta="¿Cómo genero una rendición?">Generar una rendición</h3>
 
   <ol class="pasos">
     <li>Menú <span class="ruta">Administración → Rendiciones</span> → botón <span class="ui">Generar rendición</span>.</li>
@@ -1755,7 +1774,7 @@ pre.flujo {
     queda registrado. El Auditor puede ver y cerrar, pero no revertir cierres.
   </div>
 
-  <h3>Qué entra en la rendición</h3>
+  <h3 data-pregunta="¿Qué entra en una rendición?">Qué entra en la rendición</h3>
 
   <p>Todo lo que el chofer cargó en la bitácora, clasificado por tipo:</p>
 
@@ -1778,7 +1797,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Planillas OEA <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Dónde consulto las planillas OEA que firmaron los choferes?" data-ruta="Administración → Planillas OEA">Planillas OEA <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Despachante</span><span class="rol">Auditor</span></p>
@@ -1805,7 +1824,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Indicadores <span class="plan gestion">Desde Gestión</span></h2>
+  <h2 data-pregunta="¿Qué indicadores muestra el sistema?" data-ruta="Inicio → Indicadores">Indicadores <span class="plan gestion">Desde Gestión</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span><span class="rol">Auditor</span></p>
@@ -1842,7 +1861,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Configuración: adaptar el sistema a tu empresa <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Cómo funciona la Configuración?" data-ruta="Cuenta → Configuración">Configuración: adaptar el sistema a tu empresa <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span></p>
@@ -1869,7 +1888,7 @@ pre.flujo {
     describen acá como «viene»—. Lo que suma Operación es poder cambiarlos.
   </div>
 
-  <h3>Viajes</h3>
+  <h3 data-pregunta="¿Qué opciones de viajes puedo configurar?" data-ruta="Cuenta → Configuración → pestaña Ajustes">Viajes</h3>
 
   <table>
     <thead><tr><th>Opción</th><th>Qué cambia</th><th>Viene</th></tr></thead>
@@ -1902,7 +1921,7 @@ pre.flujo {
     </tbody>
   </table>
 
-  <h3>Checklist pre-viaje</h3>
+  <h3 data-pregunta="¿Qué opciones del checklist pre-viaje puedo configurar?" data-ruta="Cuenta → Configuración → pestaña Ajustes">Checklist pre-viaje</h3>
 
   <p>
     Qué le exige la planilla al chofer, y quién libera la unidad después de que la
@@ -1951,7 +1970,7 @@ pre.flujo {
     </tbody>
   </table>
 
-  <h3>Rendiciones</h3>
+  <h3 data-pregunta="¿Puedo impedir que se reabra una rendición cerrada?" data-ruta="Cuenta → Configuración → pestaña Ajustes">Rendiciones</h3>
 
   <p>
     <strong>Permitir reabrir una rendición cerrada.</strong> Desactivado, una rendición
@@ -1959,7 +1978,7 @@ pre.flujo {
     la pueden reabrir Administrador y Gerente, siempre con motivo escrito.
   </p>
 
-  <h3>Combustible</h3>
+  <h3 data-pregunta="¿Cómo obligo a cargar el odómetro en cada carga de combustible?" data-ruta="Cuenta → Configuración → pestaña Ajustes">Combustible</h3>
 
   <p>
     <strong>Exigir odómetro en cada carga.</strong> Recomendado: sin el kilometraje no
@@ -1967,7 +1986,7 @@ pre.flujo {
     chofer pasa a pedir el dato antes de guardar.
   </p>
 
-  <h3>Moneda y formato</h3>
+  <h3 data-pregunta="¿Cómo cambio la moneda base y el formato de números y fechas?" data-ruta="Cuenta → Configuración → pestaña Ajustes">Moneda y formato</h3>
 
   <p>
     <strong>Moneda base:</strong> en la que ves los indicadores y el neto de cada
@@ -1983,7 +2002,7 @@ pre.flujo {
     hasta que guardes.
   </div>
 
-  <h3>Tu propio checklist</h3>
+  <h3 data-pregunta="¿Cómo armo mi propio checklist?" data-ruta="Cuenta → Configuración → pestaña Inspecciones">Tu propio checklist</h3>
 
   <p>
     En la pestaña <span class="ui">Inspecciones</span> armás los puntos que revisa el
@@ -2094,7 +2113,7 @@ pre.flujo {
     así, la firma no probaría nada.
   </div>
 
-  <h3>Tus propias listas <span class="plan operacion">Desde Operación</span></h3>
+  <h3 data-pregunta="¿Cómo edito las listas (catálogos) del sistema?" data-ruta="Cuenta → Configuración → pestaña Catálogos">Tus propias listas <span class="plan operacion">Desde Operación</span></h3>
 
   <p>
     En la pestaña <span class="ui">Catálogos</span> se editan las listas que el
@@ -2139,7 +2158,7 @@ pre.flujo {
     que los viajes del año pasado se sigan leyendo bien.
   </div>
 
-  <h3>El viático</h3>
+  <h3 data-pregunta="¿Cómo configuro la forma de pagar el viático?" data-ruta="Cuenta → Configuración → pestaña Ajustes">El viático</h3>
 
   <p>
     En <span class="ui">Ajustes</span> → <strong>Cómo se paga el viático</strong> se
@@ -2169,7 +2188,7 @@ pre.flujo {
     un viaje a Asunción puede pagarse en dólares aunque factures en pesos.
   </p>
 
-  <h3>Qué te avisa el sistema</h3>
+  <h3 data-pregunta="¿Cómo configuro qué alertas genera el sistema?" data-ruta="Cuenta → Configuración → pestaña Alertas">Qué te avisa el sistema</h3>
 
   <p>
     En la pestaña <span class="ui">Alertas</span> está el motor de avisos: qué
@@ -2198,7 +2217,7 @@ pre.flujo {
     3 en Control, 10 en Operación, sin límite desde Gestión.
   </div>
 
-  <h3>Viajes internacionales: cargar en otra moneda</h3>
+  <h3 data-pregunta="¿Cómo trabajo con viajes internacionales y otras monedas?" data-ruta="Cuenta → Configuración → pestañas Ajustes y Monedas">Viajes internacionales: cargar en otra moneda</h3>
 
   <p>
     Si tu flota cruza la frontera, el chofer va a gastar en guaraníes, reales o
@@ -2248,7 +2267,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 2 · El día a día en la oficina</p>
-  <h2>Mi plan: cuenta y pagos <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Qué encuentro en Mi plan?" data-ruta="Cuenta → Mi plan">Mi plan: cuenta y pagos <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Administrador</span><span class="rol">Gerente</span></p>
@@ -2269,7 +2288,7 @@ pre.flujo {
     <li><span class="ui">Cambiar de plan</span> — subir o bajar de plan sin pasar por soporte.</li>
   </ul>
 
-  <h3>Tus datos de facturación</h3>
+  <h3 data-pregunta="¿Cómo cargo mis datos de facturación?">Tus datos de facturación</h3>
 
   <p>
     En la tarjeta <span class="ui">Datos de facturación</span> cargás
@@ -2287,7 +2306,7 @@ pre.flujo {
     descargar el IVA. La tarjeta te avisa qué falta.
   </div>
 
-  <h3>Tus facturas</h3>
+  <h3 data-pregunta="¿Dónde veo mis facturas?">Tus facturas</h3>
 
   <p>
     Una vez emitida la factura de un período, aparece en la tarjeta
@@ -2310,7 +2329,7 @@ pre.flujo {
     al día no muestra nada.
   </div>
 
-  <h3>Cambiar de plan</h3>
+  <h3 data-pregunta="¿Cómo cambio de plan?">Cambiar de plan</h3>
 
   <p>
     La tarjeta <span class="ui">Cambiar de plan</span> muestra los planes disponibles con
@@ -2330,7 +2349,7 @@ pre.flujo {
     escrito. Y si llegaste a un módulo con candado, su pantalla te trae acá.
   </p>
 
-  <h3>Cómo se factura</h3>
+  <h3 data-pregunta="¿Cómo se calcula lo que pago?">Cómo se factura</h3>
 
   <p>
     Es <strong>abono del plan + un precio por vehículo activo</strong>, con los acoplados al
@@ -2343,7 +2362,7 @@ pre.flujo {
     bajar de plan o quitar unidades se aplica en la <strong>renovación</strong> del período.
   </p>
 
-  <h3>Estados de la cuenta</h3>
+  <h3 data-pregunta="¿Qué estados puede tener la cuenta?">Estados de la cuenta</h3>
 
   <table>
     <thead><tr><th>Estado</th><th>Qué pasa</th></tr></thead>
@@ -2369,7 +2388,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 3 · La app del chofer</p>
-  <h2>Cómo es la app del chofer <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Cómo es la app del chofer?">Cómo es la app del chofer <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién la usa</span>
     <span class="rol">Chofer</span></p>
@@ -2379,7 +2398,7 @@ pre.flujo {
     botones grandes, pocas pantallas y dictado por voz para no tener que tipear.
   </p>
 
-  <h3>Instalarla en el celular</h3>
+  <h3 data-pregunta="¿Cómo instalo la app del chofer en el celular?" data-ruta="Navegador del celular → dirección del sistema">Instalarla en el celular</h3>
 
   <ol class="pasos">
     <li>Abrí la dirección del sistema en el navegador del celular (Chrome en Android, Safari en iPhone).</li>
@@ -2388,7 +2407,7 @@ pre.flujo {
     <li>Listo: queda como una app más, con su ícono. Al abrirla entrás directo a tus viajes.</li>
   </ol>
 
-  <h3>La pantalla</h3>
+  <h3 data-pregunta="¿Cómo es la pantalla de inicio de la app del chofer?" data-ruta="App del chofer → Inicio">La pantalla</h3>
 
   <ul>
     <li>Arriba, tu <strong>nombre</strong> y cuántos viajes tenés en curso.</li>
@@ -2396,7 +2415,7 @@ pre.flujo {
     <li>En Inicio, dos accesos rápidos: <strong>Combustible</strong> y <strong>Planilla OEA</strong>.</li>
   </ul>
 
-  <h3>Sin señal también funciona</h3>
+  <h3 data-pregunta="¿La app funciona sin señal?">Sin señal también funciona</h3>
 
   <div class="clave">
     <span class="et">Esto es importante</span>
@@ -2407,7 +2426,7 @@ pre.flujo {
     <strong>No hace falta repetir la carga</strong>, y no se pierde nada.
   </div>
 
-  <h3>Dictar en vez de escribir</h3>
+  <h3 data-pregunta="¿Cómo dicto por voz en vez de escribir?">Dictar en vez de escribir</h3>
 
   <p>
     En los campos de texto largos hay un <strong>micrófono</strong>: lo tocás, hablás y el
@@ -2418,7 +2437,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 3 · La app del chofer</p>
-  <h2>Mi viaje, paso a paso <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Cómo recibe el chofer un viaje?" data-ruta="App del chofer → Inicio → tu viaje">Mi viaje, paso a paso <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Chofer</span></p>
@@ -2428,7 +2447,7 @@ pre.flujo {
     inicio. No hay que aceptar nada.
   </p>
 
-  <h3>Antes de salir: el checklist</h3>
+  <h3 data-pregunta="¿Cómo completo el checklist antes de salir?" data-ruta="App del chofer → Inicio → tu viaje → Checklist">Antes de salir: el checklist</h3>
 
   <ol class="pasos">
     <li>Abrí el viaje y tocá <span class="ui">Checklist</span>.</li>
@@ -2496,7 +2515,7 @@ pre.flujo {
     orden. La pantalla te lo avisa <strong>antes</strong> de firmar, no después.
   </div>
 
-  <h3>Salir: <span class="ui">Iniciar</span></h3>
+  <h3 data-pregunta="¿Cómo inicio un viaje?" data-ruta="App del chofer → Inicio → tu viaje → Iniciar">Salir: <span class="ui">Iniciar</span></h3>
 
   <p>
     Tocá <span class="ui">Iniciar</span> y cargá el <strong>odómetro de salida</strong> (el
@@ -2505,7 +2524,7 @@ pre.flujo {
     al instante.
   </p>
 
-  <h3>En la ruta: la bitácora <span class="plan operacion">Desde Operación</span></h3>
+  <h3 data-pregunta="¿Cómo cargo gastos y adelantos en la bitácora?" data-ruta="App del chofer → Inicio → tu viaje → +">En la ruta: la bitácora <span class="plan operacion">Desde Operación</span></h3>
 
   <p>
     Cada cosa que pasa o que se gasta se carga con el botón <span class="ui">+</span> de la
@@ -2533,7 +2552,7 @@ pre.flujo {
     último es lo que se te debe (o lo que tenés que devolver) hasta ese momento.
   </p>
 
-  <h3>Llegar: <span class="ui">Finalizar</span></h3>
+  <h3 data-pregunta="¿Cómo finalizo un viaje?" data-ruta="App del chofer → Inicio → tu viaje → Finalizar">Llegar: <span class="ui">Finalizar</span></h3>
 
   <p>
     Al terminar, tocá <span class="ui">Finalizar</span> y cargá el <strong>odómetro de
@@ -2545,7 +2564,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 3 · La app del chofer</p>
-  <h2>Cargar combustible <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Cómo cargo combustible desde la app?" data-ruta="App del chofer → Inicio → Combustible">Cargar combustible <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Chofer</span></p>
@@ -2567,7 +2586,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 3 · La app del chofer</p>
-  <h2>Reportar un incidente <span class="plan todos">Todos los planes</span></h2>
+  <h2 data-pregunta="¿Cómo reporto un incidente desde la app?" data-ruta="App del chofer → Incidentes → Reportar">Reportar un incidente <span class="plan todos">Todos los planes</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Chofer</span></p>
@@ -2579,7 +2598,7 @@ pre.flujo {
   </p>
 
   <ol class="pasos">
-    <li>Barra inferior → <span class="ui">Incidentes</span> → botón para reportar uno nuevo.</li>
+    <li>Barra inferior → <span class="ui">Incidentes</span> → botón <span class="ui">Reportar</span>.</li>
     <li>Elegí el <strong>tipo</strong> (rotura mecánica, accidente, falta de dinero, retraso, problema con carga, problema con cliente, emergencia).</li>
     <li>Contá qué pasó: podés <strong>dictarlo por voz</strong>.</li>
     <li>Sumá evidencia: <strong>foto</strong>, <strong>audio</strong> o <strong>video</strong>.</li>
@@ -2595,7 +2614,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 3 · La app del chofer</p>
-  <h2>Planilla OEA <span class="plan operacion">Desde Operación</span></h2>
+  <h2 data-pregunta="¿Cómo completo la planilla OEA desde la app?" data-ruta="App del chofer → Inicio → Planilla OEA">Planilla OEA <span class="plan operacion">Desde Operación</span></h2>
 
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Chofer</span></p>
@@ -2621,7 +2640,7 @@ pre.flujo {
   <p class="quien"><span class="et">Quién lo usa</span>
     <span class="rol">Chofer</span></p>
 
-  <h3><span class="ui">Docs</span></h3>
+  <h3 data-pregunta="¿Dónde veo mis documentos desde la app?" data-ruta="App del chofer → Docs"><span class="ui">Docs</span></h3>
 
   <p>
     Todos los papeles que podés necesitar en un control, en el celular: los del
@@ -2630,7 +2649,7 @@ pre.flujo {
     copias.
   </p>
 
-  <h3><span class="ui">Mensajes</span></h3>
+  <h3 data-pregunta="¿Cómo hablo con la oficina desde la app?" data-ruta="App del chofer → Mensajes"><span class="ui">Mensajes</span></h3>
 
   <p>
     El chat con la base. Escribís y te contestan desde la oficina. Todo lo operativo conviene
@@ -2644,7 +2663,7 @@ pre.flujo {
 
 <section class="seccion">
   <p class="parte">Parte 4 · Referencia</p>
-  <h2>El viaje de punta a punta</h2>
+  <h2 data-pregunta="¿Cuál es el circuito completo de un viaje?">El viaje de punta a punta</h2>
 
   <p>
     Este es el circuito completo, con quién hace cada cosa. Si entendés este dibujo,
@@ -2677,7 +2696,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
                                                               Borrador → PDF → Cerrada
 </pre>
 
-  <h3>Los tres hábitos que hacen que funcione</h3>
+  <h3 data-pregunta="¿Qué hábitos hacen que el sistema funcione bien?">Los tres hábitos que hacen que funcione</h3>
 
   <ol class="pasos">
     <li><strong>Cargar el viaje antes de que salga el camión.</strong> Todo lo demás cuelga de ahí.</li>
@@ -2688,7 +2707,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
 
 <section class="seccion">
   <p class="parte">Parte 4 · Referencia</p>
-  <h2>Los estados, de un vistazo</h2>
+  <h2 data-pregunta="¿Qué estados tiene cada cosa en el sistema?">Los estados, de un vistazo</h2>
 
   <table>
     <thead><tr><th>Qué</th><th>Recorrido</th></tr></thead>
@@ -2707,7 +2726,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
 
 <section class="seccion">
   <p class="parte">Parte 4 · Referencia</p>
-  <h2>Quién ve qué</h2>
+  <h2 data-pregunta="¿Qué secciones ve cada rol?" data-ruta="Menú lateral del backoffice">Quién ve qué</h2>
 
   <p>
     Qué secciones del menú ve cada rol. El <strong>chofer</strong> no aparece en la tabla
@@ -2756,7 +2775,7 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
     Por eso las filas marcadas llevan su etiqueta de plan.
   </div>
 
-  <h3>Acciones reservadas</h3>
+  <h3 data-pregunta="¿Qué acciones están reservadas a ciertos roles?">Acciones reservadas</h3>
 
   <table>
     <thead><tr><th>Acción</th><th>Quién puede</th></tr></thead>
@@ -2769,6 +2788,40 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
       <tr><td>Ver y pagar el <strong>plan</strong></td><td>Administrador y Gerente.</td></tr>
     </tbody>
   </table>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 4 · Referencia</p>
+  <h2 data-pregunta="¿Cómo le pregunto a ChatGPT, Gemini o Claude sobre CamioNex?" data-ruta="Ayuda → Manual de Usuario">Consultar el manual con tu propia IA <span class="plan todos">Todos los planes</span></h2>
+
+  <p class="quien"><span class="et">Quién lo usa</span>
+    <span class="rol">Todos los roles del backoffice</span></p>
+
+  <p>
+    Si usás <strong>ChatGPT, Gemini o Claude</strong>, podés pasarle este manual completo
+    y hacerle las preguntas a tu asistente, con tus palabras: «¿cómo cargo un adelanto?»,
+    «¿por qué no puedo iniciar el viaje?». Es gratis: no usa ninguna IA de CamioNex,
+    usa la tuya, fuera del sistema.
+  </p>
+
+  <ol class="pasos">
+    <li>Menú <span class="ruta">Ayuda → Manual de Usuario</span>.</li>
+    <li>Tocá <span class="ui">📋 Copiar manual para IA</span>. El botón cambia a <span class="ui">✓ Copiado. Pegalo en tu IA</span>.</li>
+    <li>Abrí tu asistente en una conversación nueva, pegá el texto (<strong>Ctrl + V</strong>) y envialo.</li>
+    <li>Cuando conteste «Listo, ¿qué querés saber de camionex?», preguntale lo que necesites.</li>
+  </ol>
+
+  <p>
+    Si preferís subirlo como archivo, el botón <span class="ui">Descargar .md</span>, al lado,
+    baja el mismo texto como un archivo que se adjunta a la conversación.
+  </p>
+
+  <div class="nota">
+    <span class="et">Qué le estás pasando</span>
+    Sólo el texto de este manual: <strong>ningún dato de tu empresa</strong>. El texto ya le
+    indica a la IA que conteste usando únicamente el manual y que avise si algo no está
+    escrito acá, en vez de inventarlo.
+  </div>
 </section>
 
 <section class="seccion">
@@ -2880,14 +2933,80 @@ Alta del VIAJE   ────────────►  Le aparece el viaje
     <em>Gráficos de fondo</em>.
   </p>
 
+  <h3>«¿Puedo preguntarle a ChatGPT cómo se usa CamioNex?»</h3>
+  <p>
+    Sí. En <span class="ruta">Ayuda → Manual de Usuario</span> tocá
+    <span class="ui">📋 Copiar manual para IA</span> y pegalo en ChatGPT, Gemini o Claude:
+    desde ahí le preguntás lo que necesites. Está explicado en
+    <span class="ruta">Consultar el manual con tu propia IA</span>.
+  </p>
+
   <h3>«Necesito ayuda con algo que no está acá»</h3>
   <p>
     Escribinos a <strong>info@northar.com.ar</strong> o por WhatsApp al
     <strong>+54 362 456-9542</strong>.
   </p>
+</section>
+
+<section class="seccion">
+  <p class="parte">Parte 4 · Referencia</p>
+  <h2>Glosario</h2>
+
+  <dl class="glosario">
+    <dt>Acoplado</dt>
+    <dd>Unidad sin motor que arrastra el camión (semirremolque, batea). Se carga en <span class="ruta">Flota</span> y factura al 50 % de un camión.</dd>
+    <dt>Adelanto</dt>
+    <dd>Plata que se le da al chofer antes o durante el viaje. En la rendición <strong>resta</strong>.</dd>
+    <dt>Alerta</dt>
+    <dd>Aviso que genera el sistema solo (un vencimiento, un gasto raro, un camión detenido). No se asigna a una persona: la gestiona quien la vea primero.</dd>
+    <dt>Bitácora</dt>
+    <dd>El registro de todo lo que el chofer carga durante el viaje: gastos, adelantos, combustible, con foto, fecha, hora y ubicación.</dd>
+    <dt>Candado</dt>
+    <dd>Marca de un módulo que tu plan no incluye. Sigue en el menú, en gris; al tocarlo explica con qué plan viene.</dd>
+    <dt>Catálogos</dt>
+    <dd>Las listas editables del sistema (tipos de gasto, de incidente, puestos…), en <span class="ruta">Configuración → Catálogos</span>.</dd>
+    <dt>Checklist pre-viaje</dt>
+    <dd>La planilla que el chofer completa y firma en el celular antes de salir. Puede quedar Aprobada, Esperando validación o Rechazada.</dd>
+    <dt>Clasificación de viaje</dt>
+    <dd>Categoría propia para agrupar viajes por ruta («Ida Brasil», «Nacional»).</dd>
+    <dt>Cotización</dt>
+    <dd>Cuántos pesos (o tu moneda base) vale una unidad de otra moneda en un día. Se guarda dentro de cada movimiento.</dd>
+    <dt>Crítico (punto)</dt>
+    <dd>Punto del checklist que, si falla, deja la planilla rechazada y el camión no sale.</dd>
+    <dt>Gasto</dt>
+    <dd>Plata que pagó el chofer y la empresa le tiene que devolver. En la rendición <strong>suma</strong>.</dd>
+    <dt>Incidente</dt>
+    <dd>Problema en la ruta que reporta el chofer (rotura, accidente, retraso…). Se asigna a un responsable y pasa por Pendiente, En proceso y Resuelto.</dd>
+    <dt>Legajo</dt>
+    <dd>La ficha de una persona en <span class="ruta">RRHH</span>: datos, historial laboral, permisos y camión asignado. Uno por DNI.</dd>
+    <dt>Moneda base</dt>
+    <dd>La moneda en la que ves los indicadores y el neto de las rendiciones. Por defecto, pesos.</dd>
+    <dt>Neto a rendir</dt>
+    <dd>Gastos rendidos menos adelantos. Positivo: la empresa le debe al chofer; negativo: el chofer devuelve la diferencia.</dd>
+    <dt>OEA (Operador Económico Autorizado)</dt>
+    <dd>Figura aduanera. Su planilla controla los 7 puntos ARCA del vehículo y los precintos, con fotos y firma.</dd>
+    <dt>Odómetro</dt>
+    <dd>Los kilómetros que marca el camión. Se carga al iniciar, al finalizar y en cada carga de combustible.</dd>
+    <dt>Orden de trabajo (OT)</dt>
+    <dd>Registro de una intervención del taller, con costo. Pasa por Abierta, En proceso y Finalizada.</dd>
+    <dt>Permiso / habilitación</dt>
+    <dd>Licencia, LiNTI, psicofísico u otra habilitación de una persona, con vencimiento. Se carga en el legajo.</dd>
+    <dt>Plan (comercial)</dt>
+    <dd>Lo que contrata la empresa: Control, Operación, Gestión o Corporate. Define qué módulos están habilitados.</dd>
+    <dt>Plan de mantenimiento</dt>
+    <dd>Regla del tipo «cambio de aceite cada 15.000 km» para un camión. Genera los avisos de <span class="ui">Próximos</span>.</dd>
+    <dt>Rendición</dt>
+    <dd>El cierre de la plata de un viaje finalizado, armado con la bitácora. Nace en Borrador y se cierra.</dd>
+    <dt>Rol</dt>
+    <dd>El tipo de usuario (Administrador, Gerente, Despachante, Chofer, Taller, RRHH, Auditor). Define qué pantallas ve cada persona.</dd>
+    <dt>Validación de Tráfico</dt>
+    <dd>Revisión que hace la oficina en <span class="ruta">Operación → Validaciones</span> para liberar (o no) una unidad cuya planilla quedó pendiente.</dd>
+    <dt>Viático</dt>
+    <dd>Lo que se le paga al chofer por estar de viaje. Según la configuración, lo carga el chofer, es un monto fijo por viaje o las dos cosas.</dd>
+  </dl>
 
   <div class="cierre">
-    <strong>Manual de Usuario · CamioNex</strong> — Versión 27.10.2026<br>
+    <strong>Manual de Usuario · CamioNex</strong> — Versión 16.11.2026<br>
     NorthAr Consulting · info@northar.com.ar · www.northar.com.ar
   </div>
 </section>

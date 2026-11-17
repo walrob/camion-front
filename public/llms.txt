@@ -1,0 +1,10 @@
+# CamioNex
+
+> CamioNex es un software de gestión de flotas de transporte de carga para empresas argentinas: viajes, rendiciones de gastos del chofer, checklist pre-viaje, vencimientos de documentación (VTV, RUTA, seguros, licencias), combustible, mantenimiento, RRHH, planillas OEA e indicadores de costo por kilómetro. Incluye una app para el chofer que funciona sin señal.
+
+Desarrollado y administrado por NorthAr Consulting.
+
+## Documentación
+
+- [Manual de usuario para IA](https://www.camionex.com.ar/manual-camionex-ia.md): el manual completo en un solo Markdown, organizado por módulo y con cada tarea escrita como pregunta, ruta de menús y pasos numerados.
+- [Manual de usuario (HTML)](https://www.camionex.com.ar/docs/manual/manual.html): la misma información, para leer o imprimir.

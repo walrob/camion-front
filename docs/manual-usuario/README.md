@@ -58,6 +58,39 @@ documenta acá ni se menciona: quien lo opera no lo aprende de un manual públic
    (Parte 4), que espeja los `roles` de
    [`sidebarItem.ts`](../../components/layout/full/vertical-sidebar/sidebarItem.ts).
 5. Actualizar la versión en la portada y en el cierre (`Versión D.M.AAAA`).
+6. Cada `<h3>` nuevo lleva `data-pregunta` y, si su pantalla no es la del
+   módulo, `data-ruta` (ver **Versión para IA**, más abajo). Los títulos de
+   las preguntas frecuentes no lo necesitan: ya son preguntas.
+
+## Versión para IA (`public/manual-camionex-ia.md`)
+
+En **Ayuda → Manual de Usuario** está el botón **📋 Copiar manual para IA**
+([CopiarParaIA.vue](../../components/shared/CopiarParaIA.vue)): copia el manual
+entero en Markdown para que el cliente lo pegue en su propio ChatGPT, Gemini o
+Claude. Al lado, **Descargar .md** baja el mismo archivo. Sin costo de IA para
+nosotros. También lo enlaza [`public/llms.txt`](../../public/llms.txt).
+
+Ese Markdown **no se edita a mano**: lo genera
+[`scripts/manual-ia.mjs`](../../scripts/manual-ia.mjs) a partir de `manual.html`.
+
+| Cuándo se regenera | Cómo |
+|---|---|
+| A mano | `npm run manual:ia` |
+| Antes de `npm run dev`, `dev:host`, `build` y `generate` | scripts `pre*` de `package.json` |
+| Si alguien se olvidó | `npm test` falla (`scripts/manual-ia.spec.mjs`) hasta que se regenere y se commitee |
+| En CI | `npm run manual:ia -- --check` sale con error si quedó viejo |
+
+Lo que el generador necesita del HTML:
+
+- `data-pregunta="¿Cómo …?"` en cada `<h3>`: es el título de la tarea en la
+  versión para IA. En un `<h2>`, titula el párrafo introductorio del módulo.
+- `data-ruta="Flota → Mantenimiento"` en el `<h2>` del módulo: la ruta de menús
+  que se imprime debajo de cada tarea. Un `<h3>` lleva la suya si cambia
+  (otra pestaña, otra pantalla).
+- El resto sale de las clases de siempre: `ui` → "Botón", `ruta` → **Menú > Pantalla**,
+  `pasos` → pasos numerados, recuadros → citas, tablas → tablas.
+
+Si falta un `data-pregunta`, el script avisa por consola y el test falla.
 
 > La fuente de verdad del gating por plan es el enum `Feature` de
 > [`types/plan.ts`](../../types/plan.ts) en el front, y los guards del backend.
