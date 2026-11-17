@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { config as loadEnv } from "dotenv";
 import { resolve } from "path";
+import vuetify from "vite-plugin-vuetify";
 
 import { RUTAS_A_PRERRENDERIZAR } from "./seo/paginas";
 
@@ -164,21 +165,21 @@ export default defineNuxtConfig({
             "Rendiciones que se arman solas, vencimientos bajo control y el " +
             "costo por kilómetro de tu flota. Probalo gratis 30 días, sin tarjeta.",
         },
-        // Absoluta, no `/og-camionex.png`: WhatsApp, LinkedIn y Facebook
+        // Absoluta, no `/og-camionex.jpg`: WhatsApp, LinkedIn y Facebook
         // descartan las rutas relativas y la tarjeta sale sin imagen. Este era
         // el motivo real de que las previsualizaciones salieran en blanco.
-        { property: "og:image", content: `${ORIGEN}/og-camionex.png` },
-        // Las medidas reales del archivo. Estaban declaradas como 1200×630 —el
-        // tamaño canónico de una tarjeta— pero la imagen es de 1730×909, y las
-        // plataformas usan estos valores para reservar el espacio antes de
-        // descargarla: si no coinciden, la vista previa salta o se recorta.
-        { property: "og:image:width", content: "1730" },
-        { property: "og:image:height", content: "909" },
-        { property: "og:image:type", content: "image/png" },
+        { property: "og:image", content: `${ORIGEN}/og-camionex.jpg` },
+        // 1200×630 y JPG de ~70 kB. Las medidas tienen que ser las reales del
+        // archivo: las plataformas las usan para reservar el espacio antes de
+        // descargarla. Y el peso importa: WhatsApp descarta la vista previa si
+        // la imagen pasa de ~300 kB (la anterior pesaba 1,2 MB y no salía).
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:type", content: "image/jpeg" },
         {
           property: "og:image:alt",
           content:
-            "Tablero de CamioNex con el estado de la flota, los vencimientos y el costo por kilómetro",
+            "CamioNex: software de gestión para flotas de camiones. Rendiciones, vencimientos y costo por kilómetro",
         },
         { property: "og:locale", content: "es_AR" },
         { name: "twitter:card", content: "summary_large_image" },
@@ -192,7 +193,7 @@ export default defineNuxtConfig({
             "Rendiciones automáticas, vencimientos bajo control y costo por " +
             "kilómetro. Probalo gratis 30 días.",
         },
-        { name: "twitter:image", content: `${ORIGEN}/og-camionex.png` },
+        { name: "twitter:image", content: `${ORIGEN}/og-camionex.jpg` },
       ],
 
       link: [
@@ -200,12 +201,22 @@ export default defineNuxtConfig({
         // Canonical por defecto: cubre las rutas que no declaran el suyo. Cada
         // página pública lo pisa con `useCanonical()`.
         { rel: "canonical", href: ORIGEN },
-        // La landing pide los precios a la API apenas monta. Abrir la conexión
-        // (DNS + TLS) en paralelo con el HTML adelanta ese primer dato.
+        // La tipografía se pide desde el <head> y no con un `@import` dentro de
+        // `scss/style.scss`: ahí el navegador recién la descubría después de
+        // bajar y parsear la hoja entera, una cadena de tres pedidos en serie
+        // antes de pintar el texto. Los `preconnect` abren DNS + TLS con los
+        // dos hosts de Google Fonts mientras llega el HTML.
+        // (Había un preconnect a la API, pero la API vive en el mismo dominio
+        // que la página: esa conexión ya está abierta y no adelantaba nada.)
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
         {
           rel: "preconnect",
-          href: "https://www.camionex.com.ar",
+          href: "https://fonts.gstatic.com",
           crossorigin: "anonymous",
+        },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
         },
       ],
     },
@@ -251,6 +262,17 @@ export default defineNuxtConfig({
     serveStatic: true,
 
     /**
+     * Versiones `.br` y `.gz` de cada archivo estático, generadas en el build.
+     *
+     * Hasta ahora todo salía sin comprimir —el JS de la portada viajaba con
+     * 4,4 MB— porque ni nginx ni Nitro comprimían. Con esto Nitro entrega la
+     * versión comprimida a todo navegador que la acepta, sin gastar CPU en
+     * cada pedido. El peso de lo que baja el visitante es lo que mueve el LCP,
+     * y el LCP es factor de posicionamiento.
+     */
+    compressPublicAssets: { gzip: true, brotli: true },
+
+    /**
      * El manual de usuario se sirve tal cual desde `docs/manual-usuario`, que
      * sigue siendo su única fuente: se edita ahí y se publica con el deploy.
      */
@@ -284,5 +306,20 @@ export default defineNuxtConfig({
 
   compatibilityDate: "2025-04-15",
 
-  modules: ["@nuxt/eslint", "@pinia/nuxt"],
+  modules: [
+    "@nuxt/eslint",
+    "@pinia/nuxt",
+    /**
+     * Vuetify a demanda: el plugin lee cada plantilla y agrega el import (y el
+     * CSS) de los componentes que encuentra. Va como hook y no en `vite.plugins`
+     * para que corra también en el build del servidor, que renderiza las
+     * páginas públicas. Reemplaza el registro global de `plugins/vuetify.ts`.
+     */
+    (_opciones, nuxt) => {
+      nuxt.hooks.hook("vite:extendConfig", (config) => {
+        config.plugins ||= [];
+        config.plugins.push(vuetify({ autoImport: true }));
+      });
+    },
+  ],
 });

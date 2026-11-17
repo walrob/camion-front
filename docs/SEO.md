@@ -232,13 +232,13 @@ Sin esto, nada de lo anterior posiciona. En orden de urgencia:
 5. **Google Business Profile** — con el teléfono de Chaco (+54 362) hay
    intención local que hoy se está perdiendo entera.
 6. **Rehacer las piezas gráficas**, que siguen con la marca vieja:
-   - `public/og-camionex.png` — el archivo se renombró, **la imagen sigue
-     diciendo FleetLog**. Es lo que se ve al compartir por WhatsApp. Al
-     rehacerla, exportarla en **1200×630** y bajo **300 kB**: hoy mide 1730×909
-     y pesa 1,14 MB, y varios clientes de WhatsApp descartan la vista previa de
-     una imagen tan grande antes de terminar de bajarla. Si se cambia el tamaño,
-     actualizar `og:image:width` / `og:image:height` en `nuxt.config.ts`, que
-     ahora declaran las medidas reales del archivo.
+   - ~~`public/og-camionex.png`~~ → **hecho**: reemplazada por
+     `public/og-camionex.jpg`, con la marca CamioNex, en 1200×630 y ~70 kB (la
+     anterior decía FleetLog y pesaba 1,2 MB, así que WhatsApp no la mostraba).
+     Si se vuelve a cambiar: mantenerla bajo **300 kB**, actualizar
+     `og:image:width` / `height` en `nuxt.config.ts` y, mejor, cambiarle el
+     nombre al archivo para que WhatsApp no siga usando la versión que tiene
+     guardada.
    - `public/images/logos/logo*.png` e `icon.png` — los cinco archivos.
    - Los favicons y los íconos de `android-chrome-*`.
 
@@ -246,42 +246,48 @@ Sin esto, nada de lo anterior posiciona. En orden de urgencia:
 
 ## 4. Lo que queda pendiente y por qué
 
-### Peso de la página — el freno más grande que queda
+### ~~Peso de la página~~ → resuelto el 17/11/2026
 
-Medido sobre el build actual, la portada descarga:
+En producción la portada descargaba **5,2 MB sin comprimir**: 4,4 MB de JS y
+835 kB de CSS, porque ni nginx ni Nitro comprimían. Tres causas, tres arreglos:
 
-```
-JS   /_nuxt/CRovjvHX.js     4.276 kB
-CSS  /_nuxt/entry.css         814 kB
-                            ─────────
-                            ~5.100 kB sin comprimir
-```
+| Causa | Arreglo |
+|---|---|
+| Vuetify registrado entero (`import * as components`) | `vite-plugin-vuetify` con `autoImport` (hook en `modules` de `nuxt.config.ts`) |
+| `app.use(VueTablerIcons)`: los ~4.000 íconos en todas las páginas | Se quitó: cada pantalla ya importaba por nombre los que usa |
+| Sin compresión | `nitro.compressPublicAssets` genera `.br` y `.gz` en el build |
 
-La causa es `plugins/vuetify.ts`, que registra **todos** los componentes de
-Vuetify de forma global (`components: { ...components }`). Un visitante que entra
-a leer los precios se baja la biblioteca entera. En una PyME de transporte, que
-va a abrir esto desde un celular y con datos móviles, eso es abandono antes de
-ver el primer precio — y LCP e INP son factores de posicionamiento declarados.
+Resultado en el JS principal: **4.382 kB → 534 kB, y 158 kB transferidos con
+brotli** (~28 veces menos). El HTML de la portada viaja en 13 kB.
 
-**La solución** es `vite-plugin-vuetify` con `autoImport: true`, que resuelve los
-componentes en tiempo de compilación y deja fuera lo que no se usa. Suele
-recortar el bundle a una fracción.
+Verificación hecha: las 66 etiquetas `v-*` del proyecto se resuelven contra
+el `importMap` de Vuetify; no hay directivas `v-tooltip`/`v-ripple`… usadas
+como directiva ni componentes por nombre en `:is`. La portada y el login se
+revisaron en el navegador sin errores de consola. **Las pantallas con sesión no
+se recorrieron una por una**: si alguna muestra un componente de Vuetify sin
+estilo o vacío, la causa es esta y el arreglo es importarlo en esa pantalla.
 
-**No se aplicó** porque no está instalado y porque cambia cómo se resuelve cada
-componente de Vuetify en las ~50 pantallas de la aplicación: exige QA visual
-completo, no una verificación de build. Es la decisión de mayor impacto que queda
-pendiente y conviene tomarla aparte, con tiempo de prueba.
+Además, la tipografía (Plus Jakarta Sans) pasó de un `@import` en
+`scss/style.scss` a un `<link>` con `preconnect` en el `<head>`.
+
+Lo que sigue pesando es `entry.css` (658 kB, 67 kB con brotli), en buena parte
+la fuente de íconos `@mdi/font` completa. Pasar a SVG por ícono es el siguiente
+paso si hiciera falta, pero ya no es un freno.
 
 ### Más contenido — el trabajo que sigue
 
 Las tres páginas temáticas están (§2). Lo que sigue es cola larga, y ya no es
 trabajo de arquitectura sino de escribir:
 
+Hechas el 17/11/2026: `/app-para-choferes` ("app para choferes de camión",
+"checklist pre-viaje digital") y `/mantenimiento-preventivo-camiones` ("plan de
+mantenimiento preventivo de camiones"), enlazadas desde "Guías del oficio" y
+el pie. Todo lo que afirman del producto sale del manual y del backend.
+
 | Página sugerida | Consulta que ataca |
 |---|---|
 | `/planilla-oea-arca` | "planilla OEA 7 puntos", "OEA ARCA transporte" |
-| `/app-para-choferes` | "app para choferes de camión", "checklist digital camión" |
-| `/mantenimiento-preventivo-flota` | "plan de mantenimiento preventivo de camiones" |
+| `/control-combustible-flota` | "control de combustible de camiones", "rendimiento km/l" |
 | `/blog/...` | normativa, costos, gestión de choferes |
 
 **Para agregar una página nueva**: crearla usando `LandingPaginaTema`, sumarla a

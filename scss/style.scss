@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+// Plus Jakarta Sans se carga desde el <head> (`nuxt.config.ts` → `app.head.link`):
+// un `@import` acá la dejaba esperando a que bajara toda esta hoja.
 @import './variables';
 @import 'vuetify/styles/main.sass';
 @import './override';

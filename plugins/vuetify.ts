@@ -1,10 +1,7 @@
 import { createVuetify } from "vuetify";
 import { es } from "vuetify/locale";
 import "@mdi/font/css/materialdesignicons.css";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
 import PerfectScrollbar from "vue3-perfect-scrollbar";
-import VueTablerIcons from "vue-tabler-icons";
 import "@/scss/style.scss";
 import { FleetLight } from "@/theme/LightTheme";
 import { FleetDark } from "@/theme/DarkTheme";
@@ -18,12 +15,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     // (donde no hay ninguno) y el marcado que llega no coincide con el que
     // arma el navegador: la hidratación falla y Vue vuelve a dibujar la página.
     ssr: true,
+    // Los componentes y directivas de Vuetify los resuelve `vite-plugin-vuetify`
+    // en el build (ver `nuxt.config.ts`): cada pantalla se lleva sólo lo que
+    // usa. Antes se registraba la biblioteca entera (`import * as components`)
+    // y la portada bajaba 4,4 MB de JS para mostrar precios. Los de `labs` se
+    // siguen registrando a mano porque el plugin no los detecta.
     components: {
-      ...components,
       VFileUpload,
       VColorInput,
     },
-    directives,
     locale: {
       locale: "es",
       fallback: "en",
@@ -77,7 +77,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   });
   nuxtApp.vueApp.use(vuetify);
   nuxtApp.vueApp.use(PerfectScrollbar);
-  nuxtApp.vueApp.use(VueTablerIcons);
+  // Los íconos de Tabler NO se registran globales: `app.use(VueTablerIcons)`
+  // metía los ~4.000 íconos en el bundle de todas las páginas, y cada pantalla
+  // ya importa por nombre los pocos que usa.
   // ApexCharts NO se registra global: se importa localmente solo en las páginas
   // que lo usan (dashboard, indicadores) para no cargar la librería en todo el bundle.
 });

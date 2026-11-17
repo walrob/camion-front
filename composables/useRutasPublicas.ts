@@ -27,6 +27,8 @@ export const RUTAS_PUBLICAS_POR_PREFIJO = [
   '/control-vencimientos-cnrt',
   '/rendicion-de-viajes',
   '/costo-por-kilometro',
+  '/mantenimiento-preventivo-camiones',
+  '/app-para-choferes',
   '/politica-de-privacidad',
   '/terminos-y-condiciones',
   '/auth/login',

@@ -378,6 +378,20 @@ const GUIAS = [
       "La fórmula, el desglose de fijos y variables, un ejemplo con números y los cinco errores típicos.",
     ruta: "/costo-por-kilometro",
   },
+  {
+    icono: "mdi-wrench-clock",
+    titulo: "Plan de mantenimiento preventivo de camiones",
+    texto:
+      "Services por kilómetros, horas o fecha, qué registrar en cada orden de trabajo y cómo evitar que se pase uno.",
+    ruta: "/mantenimiento-preventivo-camiones",
+  },
+  {
+    icono: "mdi-cellphone-check",
+    titulo: "App para choferes de camión",
+    texto:
+      "Por qué fallan casi todas, qué tiene que tener una que funcione sin señal y cómo es el checklist pre-viaje digital.",
+    ruta: "/app-para-choferes",
+  },
 ];
 
 const DIFERENCIAL = [
@@ -1127,8 +1141,8 @@ useDatosEstructurados(datosEstructurados);
             v-reveal="80"
             class="lp-lead text-medium-emphasis lp-medida-centro mb-0"
           >
-            Cómo se resuelven, con o sin nosotros, los tres problemas que más
-            plata cuestan en una flota.
+            Cómo se resuelven, con o sin nosotros, los problemas que más plata
+            cuestan en una flota.
           </p>
         </div>
 

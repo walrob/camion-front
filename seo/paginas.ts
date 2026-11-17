@@ -68,6 +68,20 @@ export const PAGINAS_PUBLICAS: PaginaPublica[] = [
     priority: 0.9,
     enlacePie: "Costo por kilómetro",
   },
+  {
+    ruta: "/mantenimiento-preventivo-camiones",
+    lastmod: "2026-11-17",
+    changefreq: "monthly",
+    priority: 0.9,
+    enlacePie: "Mantenimiento preventivo",
+  },
+  {
+    ruta: "/app-para-choferes",
+    lastmod: "2026-11-17",
+    changefreq: "monthly",
+    priority: 0.9,
+    enlacePie: "App para choferes",
+  },
 
   // ── Legales ───────────────────────────────────────────────────────────────
   // Prioridad baja a propósito: se indexan porque dan señales de confianza
