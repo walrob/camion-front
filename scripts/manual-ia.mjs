@@ -32,7 +32,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 /** Encabezado textual que va arriba de todo: le dice a la IA cómo comportarse. */
-export const ENCABEZADO = `Sos un asistente de soporte de camionex (sistema de gestión de turnos).
+export const ENCABEZADO = `Sos un asistente de soporte de camionex (sistema de gestión de flotas de transporte).
 Respondé mis preguntas usando SOLO el manual que sigue.
 - Indicá la ruta de menús y los pasos numerados.
 - Usá los nombres exactos de botones y pantallas.
