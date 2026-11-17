@@ -23,6 +23,8 @@ Disallow: /initial
 Disallow: /estado-plan
 Disallow: /upgrade
 Disallow: /configuracion
+# Baja de los emails: pública, pero con un token personal en la URL.
+Disallow: /emails
 # `/manual-usuario` es el visor dentro del backoffice y exige sesión. El manual
 # en sí se sirve suelto en `/docs/manual/manual.html` y **sí** se indexa: es el
 # texto más extenso y específico del sitio, y responde consultas de cola larga

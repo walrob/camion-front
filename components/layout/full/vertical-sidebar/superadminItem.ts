@@ -6,6 +6,7 @@ import {
   ReceiptIcon,
   CreditCardIcon,
   ClipboardTextIcon,
+  MailIcon,
 } from "vue-tabler-icons";
 import type { menu } from "./sidebarItem";
 
@@ -36,6 +37,8 @@ const superadminItems: menu[] = [
   { title: "Empresas", icon: BuildingIcon, to: "/superadmin/empresas" },
   // Soporte: quién es, qué rol tiene y por qué no puede entrar.
   { title: "Usuarios", icon: UsersIcon, to: "/superadmin/usuarios" },
+  // Activación y re-enganche: qué emails salieron y qué hicieron después.
+  { title: "Emails de activación", icon: MailIcon, to: "/superadmin/emails" },
 
   { header: "Facturación" },
   { title: "Planes", icon: TagsIcon, to: "/superadmin/planes" },

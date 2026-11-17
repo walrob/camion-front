@@ -39,6 +39,9 @@ export const RUTAS_PUBLICAS_POR_PREFIJO = [
   // tiene cuenta, así que por definición no pueden exigir sesión.
   '/auth/registro-empresa',
   '/invite',
+  // Baja de los emails de activación desde el link al pie de cada uno: la abre
+  // gente que no tiene la sesión iniciada. La identifica el token del link.
+  '/emails',
 ] as const
 
 /** ¿Esta ruta se puede ver sin haber iniciado sesión? */

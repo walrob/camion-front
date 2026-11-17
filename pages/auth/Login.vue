@@ -110,8 +110,10 @@ useHead({ title: "Iniciar sesión" });
 import { useValidations } from "~/composables/useValidations";
 import { useAuthStore } from "~/stores/auth";
 import { useGeneralStore } from "~/stores/general";
+import { destinoTrasLogin } from "~/composables/useDestinoTrasLogin";
 
 const r = useValidations();
+const route = useRoute();
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
 const { $api } = useNuxtApp();
@@ -148,9 +150,14 @@ const handleLogin = async () => {
     });
     const { token, expiresAt, user } = res.data;
     await authStore.setAuth(token, expiresAt, user);
-    // Al panel que corresponde al rol, no a la landing: el middleware sólo
-    // saca de `/` al chofer, así que un admin se quedaría en la página pública.
-    await navigateTo(authStore.paginaDeInicio);
+    // A donde iba antes de que le pidieran la sesión (un link de un email,
+    // por ejemplo) y, si no venía de ningún lado, al panel que corresponde al
+    // rol, no a la landing: el middleware sólo saca de `/` al chofer, así que
+    // un admin se quedaría en la página pública. Si el destino no es para su
+    // rol, el middleware lo vuelve a encaminar.
+    await navigateTo(
+      destinoTrasLogin(route.query.redirect, authStore.paginaDeInicio),
+    );
   } catch (error: any) {
     const mensaje = String(error?.response?.data?.message ?? "");
     if (mensaje.includes(MARCA_SIN_VERIFICAR)) {

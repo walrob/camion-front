@@ -29,6 +29,9 @@ const RUTAS_PRIVADAS = [
   "/upgrade",
   "/configuracion",
   "/manual-usuario",
+  // Pública (no exige sesión) pero sin valor de búsqueda: es la baja de los
+  // emails, con un token personal en la URL que no tiene que indexarse.
+  "/emails",
 ];
 
 export default defineNuxtConfig({

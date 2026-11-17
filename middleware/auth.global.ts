@@ -57,9 +57,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  // 3) Ruta privada sin sesión.
+  // 3) Ruta privada sin sesión. Se guarda a dónde iba para volver después del
+  //    login: los links de los emails llevan a pantallas concretas ("Cargar mi
+  //    primer camión") y no tienen que terminar en el panel. `/` no se guarda:
+  //    ahí no hay nada a qué volver.
   if (!autenticado) {
-    return navigateTo('/auth/login')
+    return navigateTo(
+      to.fullPath === '/'
+        ? '/auth/login'
+        : { path: '/auth/login', query: { redirect: to.fullPath } },
+    )
   }
 
   // 4) Encaminamiento por rol.
